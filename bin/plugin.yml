@@ -1,0 +1,15 @@
+name: BellaAddon
+version: 0.1.2
+author: Woolf
+main: net.woolf.bella.Main
+description: Plugin pomocniczy Dla BelorisRP
+
+commands:
+   otp:
+      description: Komenda do teleportacji!
+   atp:
+      description: Komenda tp dla administracji.
+   o:
+      description: Komenda ooc
+   globalnar:
+      description: Globalna narracja
