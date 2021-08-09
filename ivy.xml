@@ -1,0 +1,7 @@
+<ivy-module version="2.0" >
+	<info organisation="net.woolf.bella" module="bellaAddon" revision="1.0" />
+	
+	<dependencies>
+		<dependency org="org.javacord" name="javacord-api" rev="3.3.2"/>
+	</dependencies>
+</ivy-module>

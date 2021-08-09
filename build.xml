@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="BellaAddon" default="makejar" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
+	
+    <property name="projectName" value="BellaAddon" />
+    <property name="src.dir" location="src" />
+    <property name="build.dir" location="bin" />
+    <property name="dist.dir" location="dist" />
+    <property name="dist.lib.dir" location="dist/lib" />
+    <property name="lib.dir" value="lib" />
+    <property name="main-class" value="net.woolf.bella.Main" />
+	
+	<target name="resolve" description="retrive dependencies with ivy">
+		<!-- <ivy:retrieve pattern="Libraries/[artifact]-[revision]-[type].[ext]" /> -->
+		<ivy:retrieve />
+	</target>
+	
+	
+    <target name="makejar" description="Create a jar for the project">
+        <mkdir dir="target"></mkdir>
+    	<property name="dest.dir" value="dist" />
+    	<path id="compile.classpath">
+    		<fileset dir="lib" includes="**/*.jar" />
+    	</path>
+        <jar destfile="target/${ant.project.name}.jar">
+            <fileset dir="bin"></fileset>
+            <fileset file="plugin.yml"></fileset>
+        </jar>
+    </target>
+	
+	<!-- 
+	<target name="init.build" depends="init.properties.resolve" >
+		<tstamp />
+		<property name="dest.dir" value="dist" />
+	</target>
+	-->
+</project>
