@@ -13,7 +13,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import net.woolf.bella.commands.atpCommand;
-import net.woolf.bella.commands.globalNarCommand;
 import net.woolf.bella.commands.oocCommand;
 import net.woolf.bella.commands.otpCommand;
 
@@ -40,7 +39,6 @@ public class Main extends JavaPlugin {
 		new otpCommand(this);
 		new atpCommand(this);
 		new oocCommand(this);
-		new globalNarCommand(this);
 		
 		// otp conf
 		config.addDefault("OTP-command-delay", true);
@@ -51,10 +49,10 @@ public class Main extends JavaPlugin {
 		config.addDefault("setOTP-message", "&7Teleportowano na miejsce!");
 		// atp conf
 		for( int i=0; i <= 5; i++ ) {
-			config.addDefault("tp-level-"+i+"-cld", String.valueOf( (int) (30/(i+1)) ) );
-			config.addDefault("tp-level-"+i+"-radius", String.valueOf( (int)  ( i*400 )  ));
-			config.addDefault("tp-level-"+i+"-maxp", String.valueOf( (int) ( i*1 )  ));
-			config.addDefault("tp-level-"+i+"-maxpoints", String.valueOf( (int) (0 + Math.floor( (3*i)/(i*0.5) )) ));
+			config.addDefault("tp-level-"+i+"-cld", 		String.valueOf( (int)  ( 30/(i+1) ) 						));
+			config.addDefault("tp-level-"+i+"-radius", 		String.valueOf( (int)  ( i*400 )  							));
+			config.addDefault("tp-level-"+i+"-maxp",   		String.valueOf( (int)  ( i*1 )  							));
+			config.addDefault("tp-level-"+i+"-maxpoints", 	String.valueOf( (int)  ( 0 + Math.floor( (3*i) / (i*0.5) ))	));
 		}
 		
 		saveDefaultConfig();

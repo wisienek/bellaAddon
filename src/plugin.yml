@@ -7,9 +7,14 @@ description: Plugin pomocniczy Dla BelorisRP
 commands:
    otp:
       description: Komenda do teleportacji!
+      permission: otp.use
+      usage: /otp
+      permission-message: Nie masz permissi otp.use!
    atp:
       description: Komenda tp dla administracji.
+      permission: atp.admin
+      usage: /atp
+      permission-message: Nie masz permissi atp.admin!
    o:
       description: Komenda ooc
-   globalnar:
-      description: Globalna narracja
+      usage: /o wiadomość ooc
