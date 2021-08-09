@@ -23,6 +23,8 @@ public class oocCommand implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if( sender instanceof Player ) {
+			if( args.length == 0 ) return true;
+			
 			Player player = (Player) sender;
 			
 			List<Player> nearbyPlayers = plugin.utils.getNearbyPlayers( player, 15 ).collect( Collectors.toList() );
