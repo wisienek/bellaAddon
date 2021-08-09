@@ -8,13 +8,19 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Effect;
+import org.bukkit.EntityEffect;
 import org.bukkit.Location;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import net.woolf.bella.Main;
@@ -145,6 +151,11 @@ public class otpCommand implements CommandExecutor {
 					
 					return true;
 				}
+				case "effect": {
+					tpEffect(player);
+					
+					return true;
+				}
 				case "tp": {
 					if( otp == null || otp.isEmpty() ) {
 						player.sendMessage( Main.prefixError + "Niepoprawny TP: " + ChatColor.YELLOW + otp);
@@ -164,16 +175,25 @@ public class otpCommand implements CommandExecutor {
 							return true;
 						}
 						
+						List<Player> sendTo = plugin.utils.getNearbyPlayers(player, 20).collect( Collectors.toList() );
+						for( Player sending : sendTo ) {
+							sending.sendMessage( ChatColor.WHITE + "[L] " + ChatColor.YELLOW +"[Niedaleko słychać trzask teleportacji]" );
+						}
+						
 						
 						if ( plugin.config.getBoolean("OTP-command-delay") ) {
 							if ( cooldownTimeOTP.containsKey(player) ) {
 								player.sendMessage( Main.prefixError + "Musisz odpocząć " + ChatColor.RED + cooldownTimeOTP.get(player) + ChatColor.GRAY + " sekund.");
 							} else {
+								tpEffect(player);
+								
 								plugin.utils.sendOTP(player, otp);
 								setCoolDownTimeOTP(player, cld);
 								player.sendMessage( Main.prefixInfo + "Teleportowano do punktu " + ChatColor.YELLOW + otp );
 							}
 	                    } else {
+	                    	tpEffect(player);
+	                    	
 	                    	plugin.utils.sendOTP(player, otp);
 							player.sendMessage( Main.prefixInfo + "Teleportowano do punktu " + ChatColor.YELLOW + otp );
 	                    }
@@ -189,11 +209,13 @@ public class otpCommand implements CommandExecutor {
 			    		player.sendMessage( Main.prefixInfo + "Nie posiadasz żadnych tp. Wolne: " + String.valueOf( maxpts ) );
 			    		return true;
 			    	}
+			    	Location playerLoc = player.getLocation();
 			    	
 			    	StringBuilder os = new StringBuilder();
 			    	os.append( Main.prefixInfo + "Twoja lista TP ( "+ len +" / "+ maxpts +" ) : " );
 			    	for ( String key : list.keySet() ) {
-			    		os.append("\n- "+key);
+			    		Location loc = plugin.utils.getOTPLocation(player, key);
+			    		os.append("\n- "+ key +" (" + (int) playerLoc.distance(loc) +"m)");
 			    		// plugin.logger.info("OTP: " + key);
 			    	}
 			    	
@@ -209,7 +231,7 @@ public class otpCommand implements CommandExecutor {
 					List<Player> nearbyPlayers = plugin.utils.getNearbyPlayers( player, 2 ).collect( Collectors.toList() );
 					
 					if( nearbyPlayers.size() > maxp ) {
-						player.sendMessage( Main.prefixError + "Za dużo osób do teleportacji! ( " + String.valueOf( nearbyPlayers.size() ) + " / " + String.valueOf( maxp ) );
+						player.sendMessage( Main.prefixError + "Za dużo osób do teleportacji! ( " + String.valueOf( nearbyPlayers.size() ) + " / " + String.valueOf( maxp ) +" )" );
 						return true;
 					}
 					
@@ -230,15 +252,24 @@ public class otpCommand implements CommandExecutor {
 							return true;
 						}
 						
-						StringBuilder os = new StringBuilder();
 						
+						List<Player> sendTo = plugin.utils.getNearbyPlayers(player, 20).collect( Collectors.toList() );
+						for( Player sending : sendTo ) {
+							sending.sendMessage( ChatColor.WHITE + "[L] " + ChatColor.YELLOW +"[Niedaleko słychać trzask teleportacji łącznej]" );
+						}
+						
+						
+						StringBuilder os = new StringBuilder();
 						if ( plugin.config.getBoolean("OTP-command-delay") ) {
 							if ( cooldownTimeOTP.containsKey(player) ) {
 								player.sendMessage( Main.prefixError + "Musisz odpocząć " + ChatColor.RED + cooldownTimeOTP.get(player) + ChatColor.GRAY + " sekund.");
 							} else {
 								for( Player target : nearbyPlayers ) {
-									os.append( target.getName() + " " );
+									tpEffect(target);
+									
 									plugin.utils.sendOTP( player, otp, target );
+									
+									os.append( target.getName() + " " );
 									target.sendMessage( Main.prefixInfo + player.getDisplayName()+" Teleportował się z tobą do punktu: " + ChatColor.YELLOW + otp );
 								}
 								plugin.utils.sendOTP(player, otp);
@@ -248,8 +279,10 @@ public class otpCommand implements CommandExecutor {
 							}
 	                    } else {
 							for( Player target : nearbyPlayers ) {
-								os.append( target.getName() + " " );
+								tpEffect(target);
 								plugin.utils.sendOTP(player, otp, target);
+								
+								os.append( target.getName() + " " );
 								target.sendMessage( Main.prefixInfo + player.getDisplayName()+" Teleportował się z tobą do punktu: " + ChatColor.YELLOW + otp );
 							}
 							plugin.utils.sendOTP(player, otp);
@@ -266,6 +299,39 @@ public class otpCommand implements CommandExecutor {
 		} else {
 			sender.sendMessage( Main.prefixError + "Potrzebujesz permissi otp.use aby użyć tej komendy!" );
 			return true;
+		}
+	}
+	
+	void tpEffect(Player player) {
+		player.playEffect(player.getLocation(), Effect.ENDER_SIGNAL, null);
+        player.playSound(player.getLocation(), Sound.BLOCK_PORTAL_TRAVEL, (float) 0.08 , (float) 1);
+	
+        new BukkitRunnable() {
+            double phi = 0.0;
+            
+            public void run() {
+                this.phi += 0.39269908169872414;
+                final Location location1 = player.getLocation();
+                final World world = player.getWorld();
+                for (double t = 0.0; t <= 5.283185307179586; t += 0.19634954084936207) {
+                    for (double i = 0.0; i <= 1.0; ++i) {
+                        final double x = 0.4 * (6.283185307179586 - t) * 0.5 * Math.cos(t + this.phi + i * 3.141592653589793);
+                        final double y = 0.5 * t;
+                        final double z = 0.4 * (6.283185307179586 - t) * 0.5 * Math.sin(t + this.phi + i * 3.141592653589793);
+                        location1.add(x, y, z);
+                        world.spawnParticle(Particle.CRIT_MAGIC, location1, 1);
+                        location1.subtract(x, y, z);
+                    }
+                }
+                if (this.phi > 2 * 3.141592653589793) {
+                    this.cancel();
+                }
+            }
+        }.runTaskTimer( (Plugin) plugin, 0L, 3L );
+        try {
+			Thread.sleep(10L);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 	}
 
