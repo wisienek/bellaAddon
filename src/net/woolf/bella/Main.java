@@ -5,21 +5,26 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Server;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import net.woolf.bella.commands.atpCommand;
 import net.woolf.bella.commands.oocCommand;
 import net.woolf.bella.commands.otpCommand;
+import net.woolf.bella.events.BellaEvents;
 
 @SuppressWarnings("unused")
 public class Main extends JavaPlugin {
 	
 	public final Logger logger = this.getLogger();
+	public final Server server = getServer();
 	
 	public File file = new File(getDataFolder(), "tpInfo.yml");
 	public File filelvl = new File(getDataFolder(), "tpLevels.yml");
@@ -31,11 +36,14 @@ public class Main extends JavaPlugin {
     public static final String prefixError = ChatColor.DARK_RED + "[" + ChatColor.RED + "ERROR" + ChatColor.DARK_RED + "] " + ChatColor.GRAY;
     public static final String prefixInfo  = ChatColor.GRAY + "[" + ChatColor.YELLOW + "INFO" + ChatColor.GRAY + "] " + ChatColor.WHITE;
     
-    
     public Utils utils = new Utils(this);
+    public Bot bot = new Bot(this);
 
 	@Override
 	public void onEnable() {
+	    PluginManager pm = Bukkit.getServer().getPluginManager();
+	    pm.registerEvents(new BellaEvents(this), this);
+		
 		new otpCommand(this);
 		new atpCommand(this);
 		new oocCommand(this);
@@ -75,9 +83,6 @@ public class Main extends JavaPlugin {
         if(!filelvl.exists()) {
         	saveTPLFile();
         }
-        
-        // EventListener
-        // getServer().getPluginManager().registerEvents(this, this);
 	}
 	
     public void saveOTPFile() {

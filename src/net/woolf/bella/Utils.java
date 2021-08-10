@@ -2,6 +2,7 @@ package net.woolf.bella;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -85,6 +86,10 @@ public class Utils {
 
     public boolean tpsIsNull(Player player, String name) {
         return plugin.tps.getString( "tps." + player.getUniqueId() + "." + name ) == null;
+    }
+    
+    public List<Player> getPlayers() {
+    	return plugin.server.getWorlds().get(0).getPlayers();
     }
 	
 }
