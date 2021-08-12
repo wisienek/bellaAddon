@@ -1,4 +1,4 @@
-package net.woolf.bella;
+package net.woolf.bella.bot;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -8,8 +8,11 @@ import java.util.Scanner;
 import org.bukkit.entity.Player;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
+import org.javacord.api.entity.message.MessageAuthor;
 import org.javacord.api.interaction.SlashCommand;
 import org.javacord.api.interaction.SlashCommandInteraction;
+
+import net.woolf.bella.Main;
 
 public class Bot {
 	
@@ -26,7 +29,7 @@ public class Bot {
 				String pwd = myReader.nextLine();
 				myReader.close();
 				
-				if( pwd.isBlank() || pwd.isEmpty() )
+				if( pwd == null || pwd.isEmpty() || pwd.length() == 0 )
 					throw new FileNotFoundException("pwd isblank");
 				
 				api = new DiscordApiBuilder()
@@ -34,6 +37,8 @@ public class Bot {
 				        .login().join();
 				plugin.logger.info( "Zalogowano bota!" );
 				updatePresence("Online!");
+				
+				
 				
 				SlashCommand.with("who", "Pokazuje listę graczy").createGlobal(api).join();
 		        api.addSlashCommandCreateListener(event -> {
@@ -51,6 +56,9 @@ public class Bot {
 		                    .respond();
 		            }
 		        });
+		        
+		        api.addListener( new MessageListener( plugin ) );
+		        
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
