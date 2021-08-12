@@ -1,27 +1,20 @@
 package net.woolf.bella.commands;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.bukkit.ChatColor;
-import org.bukkit.Effect;
-import org.bukkit.EntityEffect;
 import org.bukkit.Location;
-import org.bukkit.Particle;
 import org.bukkit.Sound;
-import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import de.slikey.effectlib.effect.TornadoEffect;
 
 import net.woolf.bella.Main;
 
@@ -152,7 +145,7 @@ public class otpCommand implements CommandExecutor {
 					return true;
 				}
 				case "effect": {
-					tpEffect(player);
+					tpEffect(player, null, null);
 					
 					return true;
 				}
@@ -185,16 +178,14 @@ public class otpCommand implements CommandExecutor {
 							if ( cooldownTimeOTP.containsKey(player) ) {
 								player.sendMessage( Main.prefixError + "Musisz odpocząć " + ChatColor.RED + cooldownTimeOTP.get(player) + ChatColor.GRAY + " sekund.");
 							} else {
-								tpEffect(player);
+								tpEffect(player, otp, null);
 								
-								plugin.utils.sendOTP(player, otp);
 								setCoolDownTimeOTP(player, cld);
 								player.sendMessage( Main.prefixInfo + "Teleportowano do punktu " + ChatColor.YELLOW + otp );
 							}
 	                    } else {
-	                    	tpEffect(player);
+	                    	tpEffect(player, otp, null);
 	                    	
-	                    	plugin.utils.sendOTP(player, otp);
 							player.sendMessage( Main.prefixInfo + "Teleportowano do punktu " + ChatColor.YELLOW + otp );
 	                    }
 					}
@@ -265,27 +256,24 @@ public class otpCommand implements CommandExecutor {
 								player.sendMessage( Main.prefixError + "Musisz odpocząć " + ChatColor.RED + cooldownTimeOTP.get(player) + ChatColor.GRAY + " sekund.");
 							} else {
 								for( Player target : nearbyPlayers ) {
-									tpEffect(target);
-									
-									plugin.utils.sendOTP( player, otp, target );
+									tpEffect(player, otp, target);
 									
 									os.append( target.getName() + " " );
 									target.sendMessage( Main.prefixInfo + player.getDisplayName()+" Teleportował się z tobą do punktu: " + ChatColor.YELLOW + otp );
 								}
-								plugin.utils.sendOTP(player, otp);
+								tpEffect(player, otp, null);
 								
 								setCoolDownTimeOTP(player, cld);
 								player.sendMessage( Main.prefixInfo + "Teleportowano wspólnie z ( "+ os.toString() +" ) do punktu " + ChatColor.YELLOW + otp );
 							}
 	                    } else {
 							for( Player target : nearbyPlayers ) {
-								tpEffect(target);
-								plugin.utils.sendOTP(player, otp, target);
+								tpEffect(player, otp, target);
 								
 								os.append( target.getName() + " " );
 								target.sendMessage( Main.prefixInfo + player.getDisplayName()+" Teleportował się z tobą do punktu: " + ChatColor.YELLOW + otp );
 							}
-							plugin.utils.sendOTP(player, otp);
+							tpEffect(player, otp, null);
 	                    	
 							player.sendMessage( Main.prefixInfo + "Teleportowano wspólnie z ( "+ os.toString() +" ) do punktu " + ChatColor.YELLOW + otp );
 	                    }
@@ -302,37 +290,33 @@ public class otpCommand implements CommandExecutor {
 		}
 	}
 	
-	void tpEffect(Player player) {
-		player.playEffect(player.getLocation(), Effect.ENDER_SIGNAL, null);
-        player.playSound(player.getLocation(), Sound.BLOCK_PORTAL_TRAVEL, (float) 0.08 , (float) 1);
-	
-        new BukkitRunnable() {
-            double phi = 0.0;
-            
+	void tpEffect( Player player, String locName, Player target ) {
+		
+		Player tpd = target != null? target : player;
+		
+		TornadoEffect helix = new TornadoEffect(plugin.effectManager);
+		helix.setEntity(tpd);
+		helix.duration = 4 * 20;
+		helix.tornadoHeight = (float) 2.4;
+		helix.maxTornadoRadius = (float) 1.5;
+		helix.yOffset = -2;
+		helix.showCloud = false;
+		helix.callback = new Runnable() {
+            @Override
             public void run() {
-                this.phi += 0.39269908169872414;
-                final Location location1 = player.getLocation();
-                final World world = player.getWorld();
-                for (double t = 0.0; t <= 5.283185307179586; t += 0.19634954084936207) {
-                    for (double i = 0.0; i <= 1.0; ++i) {
-                        final double x = 0.4 * (6.283185307179586 - t) * 0.5 * Math.cos(t + this.phi + i * 3.141592653589793);
-                        final double y = 0.5 * t;
-                        final double z = 0.4 * (6.283185307179586 - t) * 0.5 * Math.sin(t + this.phi + i * 3.141592653589793);
-                        location1.add(x, y, z);
-                        world.spawnParticle(Particle.CRIT_MAGIC, location1, 1);
-                        location1.subtract(x, y, z);
-                    }
-                }
-                if (this.phi > 2 * 3.141592653589793) {
-                    this.cancel();
-                }
+            	if( locName != null && !locName.isEmpty() ) {
+                	if( target != null ) {
+                		plugin.utils.sendOTP( player, locName, target );
+                	}
+                	else {
+                		plugin.utils.sendOTP( player, locName );
+                	}
+            	}
             }
-        }.runTaskTimer( (Plugin) plugin, 0L, 3L );
-        try {
-			Thread.sleep(10L);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		};
+		player.getWorld().playSound( tpd.getLocation(), Sound.ENTITY_ENDERMEN_TELEPORT, 1, 1 );
+		
+		helix.start();
 	}
 
 	void setCoolDownTimeOTP(Player player, int coolDown) {

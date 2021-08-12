@@ -8,6 +8,8 @@ import java.util.stream.Stream;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
@@ -60,11 +62,19 @@ public class Utils {
     	return list;
     }
 	
-    public void sendOTP(Player player, String name) {
-        player.teleport(getOTPLocation(player, name));
+    public Boolean sendOTP(Player player, String name) {
+    	World world = player.getWorld();
+    	Location tpLoc = getOTPLocation( player, name );
+        
+        world.playSound( tpLoc, Sound.ENTITY_ENDERMEN_TELEPORT, 1, 1 );
+        return player.teleport( tpLoc );
     }
-    public void sendOTP(Player player, String name, Player target) {
-        target.teleport(getOTPLocation(player, name));
+    public Boolean sendOTP(Player player, String name, Player target) {
+    	World world = player.getWorld();
+    	Location tpLoc = getOTPLocation( player, name );
+    	
+    	world.playSound( tpLoc, Sound.ENTITY_ENDERMEN_TELEPORT, 1, 1 );
+        return target.teleport( tpLoc );
     }
 	
     public Location getOTPLocation(Player player, String name) {
