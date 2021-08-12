@@ -15,6 +15,8 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import de.slikey.effectlib.EffectManager;
+import net.woolf.bella.bot.Bot;
 import net.woolf.bella.commands.atpCommand;
 import net.woolf.bella.commands.oocCommand;
 import net.woolf.bella.commands.otpCommand;
@@ -25,7 +27,15 @@ public class Main extends JavaPlugin {
 	
 	public final Logger logger = this.getLogger();
 	public final Server server = getServer();
-	
+	public final EffectManager effectManager = new EffectManager(this);
+    public final Utils utils = new Utils(this);
+    public final Bot bot = new Bot(this);
+
+
+    public static final String prefixError = ChatColor.DARK_RED + "[" + ChatColor.RED + "ERROR" + ChatColor.DARK_RED + "] " + ChatColor.GRAY;
+    public static final String prefixInfo  = ChatColor.GRAY + "[" + ChatColor.YELLOW + "INFO" + ChatColor.GRAY + "] " + ChatColor.WHITE;
+    
+
 	public File file = new File(getDataFolder(), "tpInfo.yml");
 	public File filelvl = new File(getDataFolder(), "tpLevels.yml");
 	
@@ -33,12 +43,7 @@ public class Main extends JavaPlugin {
 	public YamlConfiguration tpl = YamlConfiguration.loadConfiguration(filelvl);
     public FileConfiguration config = getConfig();
     
-    public static final String prefixError = ChatColor.DARK_RED + "[" + ChatColor.RED + "ERROR" + ChatColor.DARK_RED + "] " + ChatColor.GRAY;
-    public static final String prefixInfo  = ChatColor.GRAY + "[" + ChatColor.YELLOW + "INFO" + ChatColor.GRAY + "] " + ChatColor.WHITE;
     
-    public Utils utils = new Utils(this);
-    public Bot bot = new Bot(this);
-
 	@Override
 	public void onEnable() {
 	    PluginManager pm = Bukkit.getServer().getPluginManager();
@@ -84,6 +89,12 @@ public class Main extends JavaPlugin {
         	saveTPLFile();
         }
 	}
+	
+    @Override
+    public void onDisable() {
+        effectManager.dispose();
+        bot.api.disconnect();
+    }
 	
     public void saveOTPFile() {
         try {
