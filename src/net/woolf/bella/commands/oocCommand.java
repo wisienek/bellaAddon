@@ -1,7 +1,6 @@
 package net.woolf.bella.commands;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -27,17 +26,18 @@ public class oocCommand implements CommandExecutor {
 			
 			Player player = (Player) sender;
 			
-			List<Player> nearbyPlayers = plugin.utils.getNearbyPlayers( player, 15 ).collect( Collectors.toList() );
+			List<Player> nearbyPlayers = plugin.utils.getNearbyPlayers( player, 15 );
 			String msg = ChatColor.WHITE +"["+ ChatColor.RED +"OOC"+ ChatColor.WHITE +"] "+ player.getName() + ChatColor.GRAY + ": ("+String.join(" ", args) +")";
 			
 			player.sendMessage(msg);
 			for( Player target : nearbyPlayers ) {
 				target.sendMessage(msg);
 			}
+			return true;
 		} else {
-			sender.sendMessage( " Komenda tylko dla graczy!" );
+			sender.sendMessage( "Komenda tylko dla graczy!" );
+			return true;
 		}
-		return false;
 	}
 
 }
