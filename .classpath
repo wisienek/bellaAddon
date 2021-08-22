@@ -10,5 +10,6 @@
 	<classpathentry exported="true" kind="lib" path="E:/toshiba copy/mc scripts/server/plugins/javacord-api-3.3.2.jar"/>
 	<classpathentry kind="con" path="org.apache.ivyde.eclipse.cpcontainer.IVYDE_CONTAINER/?project=Wplug&amp;ivyXmlPath=ivy.xml&amp;confs=*"/>
 	<classpathentry kind="lib" path="E:/toshiba copy/mc scripts/server/magma/plugins/EffectLib-9.0.jar"/>
+	<classpathentry kind="lib" path="E:/toshiba copy/mc scripts/server/magma/plugins/item-nbt-api-plugin-2.8.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
