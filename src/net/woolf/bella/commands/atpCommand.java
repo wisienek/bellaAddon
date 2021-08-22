@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.ChatColor;
 
 import net.woolf.bella.Main;
+import net.woolf.bella.Utils;
 
 public class atpCommand implements CommandExecutor {
 
@@ -21,7 +22,15 @@ public class atpCommand implements CommandExecutor {
 	}
 
 	public String getUsage() {
-		return Main.prefixInfo + "Użycie komendy: /atp\n/atp edit < level [1-5] > < cld / radius / maxp / maxpts > < int >  (cld - czas odczekiwania, radius - średnica koła tp, maxpts - ile max punktów tp, maxp - ile ludzi na wspólną)\n/atp edit 1 cld 15\n/atp edit 3 radius 5000\n/atp set <lvl> <gracz> - ustawia level dla gracza\n/atp info <lvl> - wyświetla info o levelu\n/atp player <nick> - wyświetla info o graczu";
+		return Main.prefixInfo + "Użycie komendy: /atp"+
+					"\n/atp edit < level [1-5] > < cld / radius / maxp / maxpts / maxuse > < int >  (cld - czas odczekiwania, radius - średnica koła tp, maxpts - ile max punktów tp, maxp - ile ludzi na wspólną)"+
+					"\n/atp edit 1 cld 15"+
+					"\n/atp edit 3 radius 5000"+
+					"\n/atp set <lvl> <gracz> - ustawia level dla gracza"+
+					"\n/atp info <lvl> - wyświetla info o levelu"+
+					"\n/atp player <nick> - wyświetla info o graczu"+
+					"\n/atp seteffect <player> <effect> - ustawia efekt dla gracza online"+
+					"\n/atp edit <level> maxuse <0 - infinity> - ustawia max użyć do enchantera na item (infinity słownie)";
 	}
 	
 	@Override
@@ -38,8 +47,11 @@ public class atpCommand implements CommandExecutor {
 			if( args[0].equals("edit") ) {
 				String opt = args[2];
 				String val = args[3];
+				
+				if( val.equals("infinity") )
+					val = String.valueOf( Integer.MAX_VALUE );
 					
-				switch(opt) {
+				switch( opt ) {
 					case "cld": {
 						plugin.config.set( "tp-level-"+level+"-cld", val );
 						break;
@@ -54,6 +66,9 @@ public class atpCommand implements CommandExecutor {
 					}
 					case "maxpts": {
 						plugin.config.set( "tp-level-"+level+"-maxpoints", val);
+					}
+					case "maxuse": {
+						plugin.config.set( "tp-level-"+level+"-setmaxuse", val);
 					}
 				}
 	
@@ -105,6 +120,25 @@ public class atpCommand implements CommandExecutor {
 					String lvl = plugin.utils.getLevel(target);
 					
 					sender.sendMessage( Main.prefixInfo + "Level gracza " + pname +" to: " + lvl );
+				}
+			} else if ( args[0].equals("seteffect") ) {
+				if( args.length < 3 )
+					sender.sendMessage( getUsage() );
+				
+				String pname = args[1];
+				String effect = args[2];
+				Player target = sender.getServer().getPlayer(pname);
+				
+				if( effect == null || effect.isEmpty() || Utils.types.contains(effect) == false ) {
+					sender.sendMessage( Main.prefixError + "Efekt nie znajduje się na liście: " + ChatColor.YELLOW + String.join(", ", Utils.types) );
+					return true;
+				}
+				
+				if( target != null ) {
+					plugin.utils.setType(target, effect);
+					
+					sender.sendMessage( Main.prefixInfo + "Ustawiono efekt gracza " + ChatColor.GREEN + pname + ChatColor.WHITE +" na: " + ChatColor.AQUA + effect );
+					return true;
 				}
 			} else {
 				sender.sendMessage( getUsage() );
