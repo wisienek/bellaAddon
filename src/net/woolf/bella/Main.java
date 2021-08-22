@@ -66,6 +66,7 @@ public class Main extends JavaPlugin {
 			config.addDefault("tp-level-"+i+"-radius", 		String.valueOf( (int)  ( i*400 )  							));
 			config.addDefault("tp-level-"+i+"-maxp",   		String.valueOf( (int)  ( i*1 )  							));
 			config.addDefault("tp-level-"+i+"-maxpoints", 	String.valueOf( (int)  ( 0 + Math.floor( (3*i) / (i*0.5) ))	));
+			config.addDefault("tp-level-"+i+"-setmaxuse", 	String.valueOf( (int)  ( i * 15 )							));
 		}
 		
 		saveDefaultConfig();
