@@ -1,5 +1,5 @@
 name: BellaAddon
-version: 0.1.2
+version: 0.1.3
 author: Woolf
 main: net.woolf.bella.Main
 description: Plugin pomocniczy Dla BelorisRP
@@ -18,3 +18,9 @@ commands:
    o:
       description: Komenda ooc
       usage: /o wiadomość ooc
+   date:
+      description: Wyświetla obecną datę
+      usage: /date
+   portfel:
+      description: zarządzanie kasą
+      usage: /portfel [zapłać/wymień] <ilość>
