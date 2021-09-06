@@ -18,6 +18,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 import de.slikey.effectlib.EffectManager;
 import net.woolf.bella.bot.Bot;
 import net.woolf.bella.commands.atpCommand;
+import net.woolf.bella.commands.dateCommand;
+import net.woolf.bella.commands.moneyCommand;
 import net.woolf.bella.commands.oocCommand;
 import net.woolf.bella.commands.otpCommand;
 import net.woolf.bella.events.BellaEvents;
@@ -52,6 +54,8 @@ public class Main extends JavaPlugin {
 		new otpCommand(this);
 		new atpCommand(this);
 		new oocCommand(this);
+		new dateCommand(this);
+		new moneyCommand(this);
 		
 		// otp conf
 		config.addDefault("OTP-command-delay", true);
