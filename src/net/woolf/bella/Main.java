@@ -3,6 +3,7 @@ package net.woolf.bella;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
@@ -14,10 +15,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Scoreboard;
 
 import de.slikey.effectlib.EffectManager;
 import net.woolf.bella.bot.Bot;
 import net.woolf.bella.commands.atpCommand;
+import net.woolf.bella.commands.bankCommand;
 import net.woolf.bella.commands.dateCommand;
 import net.woolf.bella.commands.moneyCommand;
 import net.woolf.bella.commands.oocCommand;
@@ -38,11 +42,13 @@ public class Main extends JavaPlugin {
     public static final String prefixInfo  = ChatColor.GRAY + "[" + ChatColor.YELLOW + "INFO" + ChatColor.GRAY + "] " + ChatColor.WHITE;
     
 
-	public File file = new File(getDataFolder(), "tpInfo.yml");
-	public File filelvl = new File(getDataFolder(), "tpLevels.yml");
+	private File file = new File(getDataFolder(), "tpInfo.yml");
+	private File filelvl = new File(getDataFolder(), "tpLevels.yml");
+	private File fileMoney = new File(getDataFolder(), "money.yml");
 	
 	public YamlConfiguration tps = YamlConfiguration.loadConfiguration(file);
 	public YamlConfiguration tpl = YamlConfiguration.loadConfiguration(filelvl);
+	public YamlConfiguration moneyConfig = YamlConfiguration.loadConfiguration(fileMoney);
     public FileConfiguration config = getConfig();
     
     
@@ -56,6 +62,16 @@ public class Main extends JavaPlugin {
 		new oocCommand(this);
 		new dateCommand(this);
 		new moneyCommand(this);
+		new bankCommand(this);
+		
+//		Scoreboard sc = this.server.getScoreboardManager().getMainScoreboard();
+//		Set<Objective> obj = sc.getObjectives();
+//		if( obj.size() == 0 ) {
+//			sc.registerNewObjective( "Portfel", ChatColor.GOLD + "Portfel" );
+//		}
+		
+		
+		
 		
 		// otp conf
 		config.addDefault("OTP-command-delay", true);
@@ -114,6 +130,14 @@ public class Main extends JavaPlugin {
     		tpl.save(filelvl);
     	} catch (IOException e) {
             getLogger().info("Could not save tpl file.\nHere is the stack trace:");
+            e.printStackTrace();
+        }
+    }
+    public void saveMoneyConfig() {
+    	try {
+    		moneyConfig.save(fileMoney);
+    	} catch (IOException e) {
+            getLogger().info("Could not save moeny file.\nHere is the stack trace:");
             e.printStackTrace();
         }
     }
