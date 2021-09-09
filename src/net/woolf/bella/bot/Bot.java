@@ -8,7 +8,9 @@ import java.util.Scanner;
 import org.bukkit.entity.Player;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
-import org.javacord.api.entity.message.MessageAuthor;
+import org.javacord.api.entity.channel.ServerChannel;
+import org.javacord.api.entity.channel.TextChannel;
+import org.javacord.api.entity.server.Server;
 import org.javacord.api.interaction.SlashCommand;
 import org.javacord.api.interaction.SlashCommandInteraction;
 
@@ -68,4 +70,21 @@ public class Bot {
 	public void updatePresence( String msg ) {
 		api.updateActivity( msg );
 	}
+	
+	public void moneyLog( String msg ) {
+		String serverID = "809181125640454194";
+		String logsID = "885517500261998633";
+		
+		Server bella = api.getServerById( serverID ).get();
+		TextChannel chanel = bella.getChannelById( logsID ).get().asTextChannel().get();
+		
+		chanel.sendMessage( msg );
+	}
+	
+	
+	
+	
+	
+	
+	
 }
