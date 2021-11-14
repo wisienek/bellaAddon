@@ -6,10 +6,10 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="E:/toshiba copy/mc scripts/server/magma/spigot-1.12.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="E:/toshiba copy/mc scripts/server/plugins/javacord-api-3.3.2.jar"/>
+	<classpathentry kind="lib" path="D:/toshiba copy/mc scripts/server/plugins/Wplug/referencess/spigot-1.12.2.jar"/>
 	<classpathentry kind="con" path="org.apache.ivyde.eclipse.cpcontainer.IVYDE_CONTAINER/?project=Wplug&amp;ivyXmlPath=ivy.xml&amp;confs=*"/>
-	<classpathentry kind="lib" path="E:/toshiba copy/mc scripts/server/magma/plugins/EffectLib-9.0.jar"/>
-	<classpathentry kind="lib" path="E:/toshiba copy/mc scripts/server/magma/plugins/item-nbt-api-plugin-2.8.0.jar"/>
+	<classpathentry kind="lib" path="D:/toshiba copy/mc scripts/server/plugins/Wplug/referencess/EffectLib-9.0.jar"/>
+	<classpathentry kind="lib" path="D:/toshiba copy/mc scripts/server/plugins/Wplug/referencess/item-nbt-api-plugin-2.8.0.jar"/>
+	<classpathentry kind="lib" path="lib/JDA-4.3.0_277-withDependencies.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

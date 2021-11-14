@@ -1,18 +1,24 @@
 name: BellaAddon
-version: 0.1.4
+version: 0.1.5
 author: Woolf
 main: net.woolf.bella.Main
 description: Plugin pomocniczy Dla BelorisRP
+api-version: 1.12.2
+load: STARTUP
+website: https://github.com/wisienek/bellaAddon
 
 commands:
+   jazda:
+      description: komenda do togglowania jazdy
+      usage: /jazda <on/off>
    otp:
       description: Komenda do teleportacji!
-      permission: otp.use
+      permission: bella.otp.use
       usage: /otp
       permission-message: Nie masz permissi otp.use!
    atp:
       description: Komenda tp dla administracji.
-      permission: atp.admin
+      permission: bella.atp.admin
       usage: /atp
       permission-message: Nie masz permissi atp.admin!
    o:
@@ -27,3 +33,22 @@ commands:
    bank:
       description: Zarządzanie bankiem
       usage: /bank [ wpłać/wypłać/przelej <typ> <ilosć> <gracz> ]
+
+
+permissions: 
+   bella.otp.use:
+      description: daje dostęp do używania teleportacji
+      default: op
+   bella.otp.ws:
+      description: Umożliwia teleportację łączną
+      default: op
+   bella.otp.test:
+      description: Daje dostęp do testowych komend teleportacji
+      default: op
+   bella.otp.enchant:
+      description: Umożliwia enchantowanie przedmiotów do teleportacji
+      default: op
+   bella.atp.admin:
+      description: Adminowe komendy Teleportacji
+      default: op
+   
