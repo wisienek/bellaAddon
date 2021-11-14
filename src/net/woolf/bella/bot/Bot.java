@@ -2,24 +2,30 @@ package net.woolf.bella.bot;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.List;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Scanner;
+import java.util.Set;
 
-import org.bukkit.entity.Player;
-import org.javacord.api.DiscordApi;
-import org.javacord.api.DiscordApiBuilder;
-import org.javacord.api.entity.channel.ServerChannel;
-import org.javacord.api.entity.channel.TextChannel;
-import org.javacord.api.entity.server.Server;
-import org.javacord.api.interaction.SlashCommand;
-import org.javacord.api.interaction.SlashCommandInteraction;
+import javax.security.auth.login.LoginException;
 
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.woolf.bella.Main;
 
 public class Bot {
 	
-	public DiscordApi api;
-	private Main plugin;
+	public Main plugin;
+	
+	public JDA api;
+	public CommandListUpdateAction commands;
 	
 	public Bot(Main main) {
 		this.plugin = main;
@@ -34,57 +40,64 @@ public class Bot {
 				if( pwd == null || pwd.isEmpty() || pwd.length() == 0 )
 					throw new FileNotFoundException("pwd isblank");
 				
-				api = new DiscordApiBuilder()
-				        .setToken( pwd )
-				        .login().join();
+				final Set<GatewayIntent> intents = new HashSet<GatewayIntent>( 
+						Arrays.asList(
+								GatewayIntent.GUILD_MEMBERS, 
+								GatewayIntent.GUILD_MESSAGE_REACTIONS, 
+								GatewayIntent.GUILD_MESSAGES
+							) 
+						);
+				
+				JDABuilder builder = JDABuilder
+						.createDefault(pwd)
+						.enableIntents( intents )
+						.setActivity( Activity.watching("Online!") );
+				
+				MessageListener listener = new MessageListener(this);
+				builder.addEventListeners( listener );
+					
+				api = builder.build().awaitReady();
+				
 				plugin.logger.info( "Zalogowano bota!" );
-				updatePresence("Online!");
 				
-				
-				
-				SlashCommand.with("who", "Pokazuje listę graczy").createGlobal(api).join();
-		        api.addSlashCommandCreateListener(event -> {
-		            SlashCommandInteraction slashCommandInteraction = event.getSlashCommandInteraction();
-		            if (slashCommandInteraction.getCommandName().equals("who")) {
-		            	
-		            	List<Player> online = plugin.utils.getPlayers();
-		            	StringBuilder os = new StringBuilder();
-		            	os.append("Gracze online ("+ online.size() +" / "+ plugin.server.getMaxPlayers() +"):");
-		            	for( Player player : online )
-		            		os.append( "\n- " + player.getName() );
-		            	
-		                slashCommandInteraction.createImmediateResponder()
-		                    .setContent( os.toString() )
-		                    .respond();
-		            }
-		        });
-		        
-		        api.addListener( new MessageListener( plugin ) );
-		        
-			} catch (FileNotFoundException e) {
+				setupCommands();
+			} catch (FileNotFoundException | LoginException | InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
 	}
 	
+	private void setupCommands() {
+		CommandListUpdateAction commands = api.updateCommands();
+		
+        commands.addCommands(
+                new CommandData("who", "Listuje wszystkich aktywnych użytkowników")
+                    .addOptions(
+                    		new OptionData(OptionType.BOOLEAN, "ekipa", "czy wyświetlić też ekipę").setRequired(true)
+                    )
+            );
+		
+        commands.queue();
+        
+        plugin.logger.info( "Zarejestrowano komendy!" );
+	}
+
 	public void updatePresence( String msg ) {
-		api.updateActivity( msg );
+		api.getPresence().setActivity( Activity.watching(msg) );
 	}
 	
 	public void moneyLog( String msg ) {
-		String serverID = "809181125640454194";
 		String logsID = "885517500261998633";
 		
-		Server bella = api.getServerById( serverID ).get();
-		TextChannel chanel = bella.getChannelById( logsID ).get().asTextChannel().get();
+		TextChannel channel = api.getTextChannelById(logsID);
+		if( channel == null ) {
+			plugin.logger.info( "Nie można było rozwiązać kanału moneylog: " + logsID );
+			return;
+		}
 		
-		chanel.sendMessage( msg );
+		channel.sendMessage( msg );
 	}
 	
-	
-	
-	
-	
-	
+		
 	
 }

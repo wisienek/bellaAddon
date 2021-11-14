@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
@@ -23,34 +25,44 @@ import net.woolf.bella.bot.Bot;
 import net.woolf.bella.commands.atpCommand;
 import net.woolf.bella.commands.bankCommand;
 import net.woolf.bella.commands.dateCommand;
+import net.woolf.bella.commands.jazdaCommand;
 import net.woolf.bella.commands.moneyCommand;
 import net.woolf.bella.commands.oocCommand;
 import net.woolf.bella.commands.otpCommand;
 import net.woolf.bella.events.BellaEvents;
+import net.woolf.bella.utils.ChatUtils;
+import net.woolf.bella.utils.MoneyUtils;
+import net.woolf.bella.utils.PlayerUtils;
 
 @SuppressWarnings("unused")
 public class Main extends JavaPlugin {
 	
+    public static final String prefixError = ChatColor.DARK_RED + "[" + ChatColor.RED + "ERROR" + ChatColor.DARK_RED + "] " + ChatColor.GRAY;
+    public static final String prefixInfo  = ChatColor.GRAY + "[" + ChatColor.YELLOW + "INFO" + ChatColor.GRAY + "] " + ChatColor.WHITE;
+	
 	public final Logger logger = this.getLogger();
 	public final Server server = getServer();
 	public final EffectManager effectManager = new EffectManager(this);
+	
     public final Utils utils = new Utils(this);
+    public final PlayerUtils putils = new PlayerUtils(this);
+    public final MoneyUtils mutils = new MoneyUtils(this);
+    
     public final Bot bot = new Bot(this);
-
-
-    public static final String prefixError = ChatColor.DARK_RED + "[" + ChatColor.RED + "ERROR" + ChatColor.DARK_RED + "] " + ChatColor.GRAY;
-    public static final String prefixInfo  = ChatColor.GRAY + "[" + ChatColor.YELLOW + "INFO" + ChatColor.GRAY + "] " + ChatColor.WHITE;
     
 
 	private File file = new File(getDataFolder(), "tpInfo.yml");
 	private File filelvl = new File(getDataFolder(), "tpLevels.yml");
 	private File fileMoney = new File(getDataFolder(), "money.yml");
+	private File fileEmoji = new File(getDataFolder(), "emoji.yml");
+	private File filePlayerConfig = new File(getDataFolder(), "playerConfig.yml");
 	
 	public YamlConfiguration tps = YamlConfiguration.loadConfiguration(file);
 	public YamlConfiguration tpl = YamlConfiguration.loadConfiguration(filelvl);
 	public YamlConfiguration moneyConfig = YamlConfiguration.loadConfiguration(fileMoney);
+	public YamlConfiguration emojiConfig = YamlConfiguration.loadConfiguration(fileEmoji);
     public FileConfiguration config = getConfig();
-    
+    public YamlConfiguration playerConfig = YamlConfiguration.loadConfiguration(filePlayerConfig);
     
 	@Override
 	public void onEnable() {
@@ -63,15 +75,8 @@ public class Main extends JavaPlugin {
 		new dateCommand(this);
 		new moneyCommand(this);
 		new bankCommand(this);
-		
-//		Scoreboard sc = this.server.getScoreboardManager().getMainScoreboard();
-//		Set<Objective> obj = sc.getObjectives();
-//		if( obj.size() == 0 ) {
-//			sc.registerNewObjective( "Portfel", ChatColor.GOLD + "Portfel" );
-//		}
-		
-		
-		
+		new ChatUtils(this);
+		new jazdaCommand(this);
 		
 		// otp conf
 		config.addDefault("OTP-command-delay", true);
@@ -91,7 +96,6 @@ public class Main extends JavaPlugin {
 		
 		saveDefaultConfig();
         config.options().copyDefaults(true);
-        
 
         try {
         	File cfile = new File( getDataFolder() + File.separator + "config.yml" );
@@ -103,20 +107,30 @@ public class Main extends JavaPlugin {
             e.printStackTrace();
         }
 
-        if (!file.exists()) {
-            saveOTPFile();
-        }
-        if(!filelvl.exists()) {
-        	saveTPLFile();
-        }
+        
+        if(!file.exists()) saveOTPFile();
+        if(!filelvl.exists()) saveTPLFile();
+        if(!fileEmoji.exists()) saveEmojiFile();
+        if(!filePlayerConfig.exists()) savePlayerConfig();
+        
 	}
-	
-    @Override
+
+	@Override
     public void onDisable() {
         effectManager.dispose();
-        bot.api.disconnect();
+        
+        // handle disconect on bot
     }
 	
+    private void saveEmojiFile() {
+		try {
+			emojiConfig.save(fileEmoji);
+		} catch (IOException e) {
+            getLogger().info("Could not save emoji file.\nHere is the stack trace:");
+            e.printStackTrace();
+        }
+	}
+    
     public void saveOTPFile() {
         try {
             tps.save(file);
@@ -141,6 +155,13 @@ public class Main extends JavaPlugin {
             e.printStackTrace();
         }
     }
-	
+	public void savePlayerConfig() {
+		try {
+			playerConfig.save(filePlayerConfig);
+		} catch (IOException e) {
+            getLogger().info("Could not save playerConfig file.\nHere is the stack trace:");
+            e.printStackTrace();
+        }
+	}
 
 }
