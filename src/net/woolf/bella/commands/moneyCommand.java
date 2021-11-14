@@ -24,7 +24,8 @@ public class moneyCommand implements CommandExecutor {
 		String add = (player.hasPermission("portfel.admin") == true) ? 
 				"\n/portfel ustaw <komu> <typ> <ile> - ustawia graczu ileś kasy"+
 				"\n/portfel dodaj <komu> <typ> <ile> - dodaje komuś ileś kasy"+
-				"\n/portfel zabierz <gracz> <typ> <ile> - zabiera komuś ileś kasy" 
+				"\n/portfel zabierz <gracz> <typ> <ile> - zabiera komuś ileś kasy"+
+				"\n/portfel sprawdz <gracz> - sprawdza stan portfela gracza"
 			: "";
 		
 		return Main.prefixInfo + "Użycie komendy: /porfel"+
@@ -38,7 +39,7 @@ public class moneyCommand implements CommandExecutor {
 		if( sender instanceof Player ) {
 			Player player = (Player) sender;	
 			
-			Map<String, Long> money = plugin.utils.getMoney( player );
+			Map<String, Long> money = plugin.mutils.getMoney( player );
 			
 			if( args.length == 0 ) {
 				player.sendMessage( 
@@ -54,7 +55,7 @@ public class moneyCommand implements CommandExecutor {
 			
 			String make = args[0];
 			String to = args[1];
-			String type = args.length >= 3 ? args[2] : "null";
+			String type = args.length >= 3 ? args[2] : null;
 			int ammount = args.length > 3 ? Integer.valueOf(args[3]) : 0;
 			
 			if( to.equals(player.getName()) && player.getName().equals("Przesladowca") == false ) {
@@ -69,27 +70,49 @@ public class moneyCommand implements CommandExecutor {
 				if( p.getName().equals(to) )
 					target = p;
 			
-			if( target == null && player.hasPermission("portfel.admin") == false ) {
-				player.sendMessage( Main.prefixError + "Nie znaleziono gracza " + ChatColor.RED + to + ChatColor.GRAY + " obok ciebie!");
-				return true;
+			if( target == null ) {
+				if( player.hasPermission("portfel.admin") == false ) {
+					player.sendMessage( Main.prefixError + "Nie znaleziono gracza " + ChatColor.RED + to + ChatColor.GRAY + " obok ciebie!");
+					return true;
+				}
+				
+				target = plugin.server.getPlayer(to);
+				if( target == null || target instanceof Player == false ) {
+					player.sendMessage( Main.prefixError + "Nie znaleziono gracza " + ChatColor.RED + to + ChatColor.GRAY + ", aby pokazać mu portfel!" );
+					return true;
+				}
 			}
 			
-			switch (make) {
+			switch ( make ) {
+				case "sprawdz": {
+					if( player.hasPermission("portfel.admin") == false ) return true;
+					
+					String uuid = plugin.putils.resolveUUID( to );
+					Map<String, Long> targetMoney = plugin.mutils.getMoney( uuid );
+						
+					player.sendMessage( 
+							Main.prefixInfo + "Pieniążki gracza" + to + ": \n" 
+							+ ChatColor.RED + "Miedziaki : " + String.valueOf(targetMoney.get("miedziak")) + "\n" 
+							+ ChatColor.GRAY + "Srebrniki : " + String.valueOf(targetMoney.get("srebrnik")) + "\n" 
+							+ ChatColor.YELLOW + "Złotniki : " + String.valueOf(targetMoney.get("złotnik")) 
+						);
+					return true;
+				}
 				case "pokaż": {
 					target.sendMessage( 
-							Main.prefixInfo + "Pieniążki " + player.getName() + " : \n" 
+							Main.prefixInfo + "Pieniążki " + ChatColor.GREEN + player.getName() + " : \n" 
 							+ ChatColor.WHITE + "Miedziaki : " + String.valueOf(money.get("miedziak")) + "\n" 
 							+ ChatColor.GRAY + "Srebrniki : " + String.valueOf(money.get("srebrnik")) + "\n" 
 							+ ChatColor.YELLOW + "Złotniki : " + String.valueOf(money.get("złotnik")) 
 						);
 					
 					player.sendMessage( Main.prefixInfo + "Pokazano portfel dla gracza " + ChatColor.GREEN + target.getName() );
-					player.performCommand( "/me Pokazał zawartość portfela [" + target.getName() + "]" );
+					player.performCommand( "me Pokazał zawartość portfela [" + target.getName() + "]" );
 					
 					return true;
 				}
 				case "daj" : {
-					boolean transfered = plugin.utils.transferMoney( player, target, type, Long.valueOf(ammount) );
+					boolean transfered = plugin.mutils.transferMoney( player, target, type, Long.valueOf(ammount) );
 					
 					if( transfered == false ) {
 						player.sendMessage( Main.prefixError + "Nie udało się wykonać przelewu! (sprawdz komendę i czy jest gracz obok ciebie)");
@@ -98,7 +121,7 @@ public class moneyCommand implements CommandExecutor {
 					}
 					
 					target.sendMessage( Main.prefixInfo + "Otrzymałeś " + ChatColor.YELLOW + ammount + " " + type + "ów" + ChatColor.GRAY + " od " + player.getName() );
-					player.performCommand( "/me Przekazał parę pieniążków [" + target.getName() + "]" );
+					player.performCommand( "me Przekazał parę pieniążków [" + target.getName() + "]" );
 					plugin.bot.moneyLog( "**" + player.getName() + "** przekazał *" + ammount + " " + type + "ów* dla gracza **" + to + "**" );
 					
 					return true;
@@ -106,9 +129,9 @@ public class moneyCommand implements CommandExecutor {
 				case "ustaw" : {
 					if( player.hasPermission("portfel.admin") == false ) { player.sendMessage( getUsage(player) ); return true; }
 					
-					String uuid = plugin.utils.resolveUUID( to );
+					String uuid = plugin.putils.resolveUUID( to );
 					
-					Boolean done = plugin.utils.setMoney( uuid, type, Long.valueOf(ammount) );
+					Boolean done = plugin.mutils.setMoney( uuid, type, Long.valueOf(ammount) );
 					if( done == false ) {
 						player.sendMessage( Main.prefixError + "Błąd podczas setowania, sprawdz pisownie i czy gracz jest online." );
 						return true;
@@ -122,10 +145,10 @@ public class moneyCommand implements CommandExecutor {
 				case "dodaj" : {
 					if( player.hasPermission("portfel.admin") == false ) { player.sendMessage( getUsage(player) ); return true; }
 					
-					String uuid = plugin.utils.resolveUUID( to );
-					Map<String, Long> pm = plugin.utils.getMoney(uuid);
+					String uuid = plugin.putils.resolveUUID( to );
+					Map<String, Long> pm = plugin.mutils.getMoney(uuid);
 					
-					Boolean done = plugin.utils.setMoney( uuid, type, Long.valueOf(ammount) + pm.get(type) );
+					Boolean done = plugin.mutils.setMoney( uuid, type, Long.valueOf(ammount) + pm.get(type) );
 					if( done == false ) {
 						player.sendMessage( Main.prefixError + "Błąd podczas dodawania, sprawdz pisownie i czy gracz jest online." );
 						return true;
@@ -139,15 +162,15 @@ public class moneyCommand implements CommandExecutor {
 				case "zabierz" : {
 					if( player.hasPermission("portfel.admin") == false ) { player.sendMessage( getUsage(player) ); return true; }
 					
-					String uuid = plugin.utils.resolveUUID( to );
-					Map<String, Long> pm = plugin.utils.getMoney(uuid);
+					String uuid = plugin.putils.resolveUUID( to );
+					Map<String, Long> pm = plugin.mutils.getMoney(uuid);
 					
 					if( pm.get(type) - ammount < 0 ) {
 						player.sendMessage( Main.prefixError + "Nie można zabrać tyle kasy, gracz będzie na minusie! " + ChatColor.RED + pm.get(type) + " -> " + (pm.get(type) - ammount) );
 						return true;
 					}
 					
-					Boolean done = plugin.utils.setMoney( uuid, type, pm.get(type) - Long.valueOf(ammount) );
+					Boolean done = plugin.mutils.setMoney( uuid, type, pm.get(type) - Long.valueOf(ammount) );
 					if( done == false ) {
 						player.sendMessage( Main.prefixError + "Błąd podczas zabierania, sprawdz pisownie i czy gracz jest online." );
 						return true;

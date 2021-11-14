@@ -54,15 +54,14 @@ public class otpCommand implements CommandExecutor {
 	
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-
 		if( !(sender instanceof Player) ) {
 			sender.sendMessage("Tylko dla graczy!");
 			return true;
 		}
 		
 		Player player = (Player) sender;
-		
-		if( player.hasPermission("otp.use") ) {
+				
+		if( player.hasPermission("bella.otp.use") ) {
 			
 			if( args.length < 1  ) {
 				player.sendMessage( getUsage() );
@@ -86,8 +85,6 @@ public class otpCommand implements CommandExecutor {
 			int maxp   = Integer.valueOf( (String) plugin.config.get("tp-level-"+ levelS +"-maxp") );
 			int maxpts = Integer.valueOf( (String) plugin.config.get("tp-level-"+ levelS +"-maxpoints") );
 			int setmaxuse = Integer.valueOf( (String) plugin.config.get("tp-level-"+ levelS +"-setmaxuse") );
-			
-			// plugin.logger.info( "level: " + levelS + ", cld: "+ cld + ", rad: " + radius +", maxp: "+ maxp + ", maxpts: " + maxpts );
 			
 			switch( args[0] ) {
 				case "info": {
@@ -256,8 +253,8 @@ public class otpCommand implements CommandExecutor {
 					return true;
 				}
 				case "enchant": {
-					if( !player.hasPermission("otp.enchant") ) {
-						player.sendMessage( Main.prefixError + "Musisz posiadać umiejętność enchatnowania aby tego użyć! (otp.enchant)");
+					if( !player.hasPermission("bella.otp.enchant") ) {
+						player.sendMessage( Main.prefixError + "Musisz posiadać umiejętność enchatnowania aby tego użyć! (bella.otp.enchant)");
 						return true;
 					}
 					
@@ -310,8 +307,8 @@ public class otpCommand implements CommandExecutor {
 					return true;
 				}
 				case "inspect": {
-					if( !player.hasPermission("otp.enchant") ) {
-						player.sendMessage( Main.prefixError + "Musisz posiadać umiejętność enchatnowania aby tego użyć! (otp.enchant)");
+					if( !player.hasPermission("bella.otp.enchant") ) {
+						player.sendMessage( Main.prefixError + "Musisz posiadać umiejętność enchatnowania aby tego użyć! (bella.otp.enchant)");
 						return true;
 					}
 					ItemStack item = player.getInventory().getItemInMainHand();
@@ -368,7 +365,7 @@ public class otpCommand implements CommandExecutor {
 						if ( p.getName().equals(pname) )
 							target = p;
 					
-					if( target == null ) {
+					if( target == null || target.getName().equals(player.getName()) ) {
 						player.sendMessage( Main.prefixError + "Nie znaleziono gracza: " + ChatColor.YELLOW + pname );
 						return true;
 					}
@@ -378,14 +375,27 @@ public class otpCommand implements CommandExecutor {
 						return true;
 					}
 					
-					plugin.utils.tpEffect(player, otp, target);
-					target.sendMessage( Main.prefixInfo + "Zostałeś teleportowany przez " + player.getName() + " do punktu " + otp );
-					player.sendMessage( Main.prefixInfo + "Teleportowałeś " + pname + "do punktu " + otp );
+					
+					if ( plugin.config.getBoolean("OTP-command-delay") ) {
+						if ( plugin.utils.cooldownTimeOTP.containsKey(player) ) {
+							player.sendMessage( Main.prefixError + "Musisz odpocząć " + ChatColor.RED + plugin.utils.cooldownTimeOTP.get(player) + ChatColor.GRAY + " sekund.");
+						} else {
+							plugin.utils.tpEffect(player, otp, target);
+							target.sendMessage( Main.prefixInfo + "Zostałeś teleportowany przez " + player.getName() + " do punktu " + otp );
+							player.sendMessage( Main.prefixInfo + "Teleportowałeś " + pname + "do punktu " + otp );
+							
+							plugin.utils.setCoolDownTimeOTP(player, cld);
+						}
+                    } else {
+    					plugin.utils.tpEffect(player, otp, target);
+    					target.sendMessage( Main.prefixInfo + "Zostałeś teleportowany przez " + player.getName() + " do punktu " + otp );
+    					player.sendMessage( Main.prefixInfo + "Teleportowałeś " + pname + "do punktu " + otp );
+                    }
 					
 					return true;
 				}
 				case "ws": {
-					if( !player.hasPermission("otp.ws") ) {
+					if( !player.hasPermission("bella.otp.ws") ) {
 						player.sendMessage( Main.prefixError + "Nie potrafisz jeszcze wspólnej teleportacji!" );
 						return true;
 					}
@@ -456,7 +466,7 @@ public class otpCommand implements CommandExecutor {
 			
 			return true;
 		} else {
-			sender.sendMessage( Main.prefixError + "Potrzebujesz permissi otp.use aby użyć tej komendy!" );
+			sender.sendMessage( Main.prefixError + "Potrzebujesz permissi bella.otp.use aby użyć tej komendy!" );
 			return true;
 		}
 	}

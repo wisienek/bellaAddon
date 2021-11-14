@@ -35,7 +35,7 @@ public class atpCommand implements CommandExecutor {
 	
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		if( !(sender instanceof Player) || sender.hasPermission("atp.admin") ) {
+		if( !(sender instanceof Player) || sender.hasPermission("bella.atp.admin") ) {
 			
 			if( args.length < 2 ) {
 				sender.sendMessage( getUsage() );

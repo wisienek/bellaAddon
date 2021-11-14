@@ -30,7 +30,8 @@ public class bankCommand implements CommandExecutor {
 				"\n/bank zabierz <typ> <ile> <komu> - zabiera komuś ileś kasy"+
 				"\n/bank stwórz miejsce - tworzy bank w miejscu gdzie stoisz"+
 				"\n/bank usuń - usuwa bank obok którego stoisz"+
-				"\n/bank konwersje <z czego> <na co> <kwota> - ile potrzebujesz 1 waluty aby zrobić konwersję na drugą"
+				"\n/bank konwersje <z czego> <na co> <kwota> - ile potrzebujesz 1 waluty aby zrobić konwersję na drugą"+
+				"\n/bank sprawdz <gracz> - sprawdza stan banku gracza"
 			: "";
 		
 		return Main.prefixInfo + "Użycie komendy: /bank"+
@@ -47,10 +48,10 @@ public class bankCommand implements CommandExecutor {
 		if( sender instanceof Player ) {
 			Player player = (Player) sender;	
 			
-			Map<String, Long> money = plugin.utils.getMoney( player );
-			Map<String, Long> bankMoney = plugin.utils.getBankMoney( player );
+			Map<String, Long> money = plugin.mutils.getMoney( player );
+			Map<String, Long> bankMoney = plugin.mutils.getBankMoney( player );
 			
-			if( player.hasPermission("bank.admin") == false && plugin.utils.isNearBank( player.getLocation() ) == false ) {
+			if( player.hasPermission("bank.admin") == false && plugin.mutils.isNearBank( player.getLocation() ) == false ) {
 				player.sendMessage( Main.prefixError + "Musisz być w pewnej lokacji aby używać banku!" );
 				return true;
 			}
@@ -68,9 +69,23 @@ public class bankCommand implements CommandExecutor {
 			if( args.length == 0 ) { player.sendMessage( getUsage(player) ); return true; };
 			
 			String make = args[0];
-			String type = args.length > 1 ? args[1] : "null";
+			String type = args.length > 1 ? args[1] : null;
 			
 			switch (make) {
+				case "sprawdz": {
+					if( player.hasPermission( "" ) == false ) return true;
+					
+					String uuid = plugin.putils.resolveUUID( type );
+					
+					Map<String, Long> targetBankMoney = plugin.mutils.getBankMoney( uuid );
+					player.sendMessage( 
+							Main.prefixInfo + "Twoje pieniążki w banku: \n" 
+							+ ChatColor.WHITE + "Miedziaki : " + String.valueOf(targetBankMoney.get("miedziak")) + "\n" 
+							+ ChatColor.GRAY + "Srebrniki : " + String.valueOf(targetBankMoney.get("srebrnik")) + "\n" 
+							+ ChatColor.YELLOW + "Złotniki : " + String.valueOf(targetBankMoney.get("złotnik")) 
+						);
+					return true;
+				}
 				case "wpłać": {
 					Long ammount = args.length >= 3 ? Long.valueOf(args[2]) : 0l;
 					
@@ -80,7 +95,7 @@ public class bankCommand implements CommandExecutor {
 						return true;
 					}
 					
-					Boolean check = plugin.utils.transferToBank(player, type, ammount, money, bankMoney);
+					Boolean check = plugin.mutils.transferToBank(player, type, ammount, money, bankMoney);
 					if( check == false ) {
 						player.sendMessage( Main.prefixError + "Nie udało się wpłacić kasy!" );
 						player.sendMessage( getUsage(player) ); 
@@ -103,7 +118,7 @@ public class bankCommand implements CommandExecutor {
 						return true;
 					}
 					
-					Boolean check = plugin.utils.transferFromBank(player, type, ammount, money, bankMoney);
+					Boolean check = plugin.mutils.transferFromBank(player, type, ammount, money, bankMoney);
 					if( check == false ) {
 						player.sendMessage( Main.prefixError + "Nie udało się wypłacić kasy!" );
 						player.sendMessage( getUsage(player) ); 
@@ -122,9 +137,9 @@ public class bankCommand implements CommandExecutor {
 
 					Long ammount = args.length >= 3 ? Long.valueOf(args[2]) : 0l;
 					
-					String uuid = plugin.utils.resolveUUID( args[3] );
+					String uuid = plugin.putils.resolveUUID( args[3] );
 					
-					Boolean done = plugin.utils.transferBankMoney( player.getUniqueId().toString(), uuid, type, ammount);
+					Boolean done = plugin.mutils.transferBankMoney( player.getUniqueId().toString(), uuid, type, ammount);
 					if( done == false ) {
 						player.sendMessage( Main.prefixError + "Błąd podczas dodawania, sprawdz pisownie i czy gracz jest online." );
 						return true;
@@ -142,7 +157,7 @@ public class bankCommand implements CommandExecutor {
 					String to = args[2];
 					Long ammount = Long.valueOf(args[3]);
 					
-					Double conversion = plugin.utils.getConversion( from, to );
+					Double conversion = plugin.mutils.getConversion( from, to );
 					if( conversion == null ) {
 						player.sendMessage( Main.prefixError + "Brak konwersji!" );
 						return true;
@@ -170,7 +185,7 @@ public class bankCommand implements CommandExecutor {
 					
 					Boolean taken = false;
 					if( bfrom >= take ) {
-						Boolean check = plugin.utils.setBankMoney(player.getUniqueId().toString(), from, bfrom - take);
+						Boolean check = plugin.mutils.setBankMoney(player.getUniqueId().toString(), from, bfrom - take);
 						if( check == false ) {
 							player.sendMessage( Main.prefixError + "Nie udało się pobrać kasy z banku!" );
 							return true;
@@ -179,7 +194,7 @@ public class bankCommand implements CommandExecutor {
 						taken = true;
 					}
 					if( taken == false && mfrom >= take ) {
-						Boolean check = plugin.utils.setMoney( player.getUniqueId().toString(), from, mfrom - take );
+						Boolean check = plugin.mutils.setMoney( player.getUniqueId().toString(), from, mfrom - take );
 						if( check == false ) {
 							player.sendMessage( Main.prefixError + "Nie udało się pobrać kasy z banku!" );
 							return true;
@@ -192,7 +207,7 @@ public class bankCommand implements CommandExecutor {
 						player.sendMessage( Main.prefixError + "Nie udało się sfinalizować transakcji!" );
 						return true;
 					} else {
-						Boolean check = plugin.utils.setBankMoney( player.getUniqueId().toString(), to, bankMoney.get(to) + get );
+						Boolean check = plugin.mutils.setBankMoney( player.getUniqueId().toString(), to, bankMoney.get(to) + get );
 						if( check == false ) {
 							player.sendMessage( Main.prefixError + "Nie udało się dodać kasy do banku!" );
 							return true;
@@ -210,9 +225,9 @@ public class bankCommand implements CommandExecutor {
 					if( args.length < 4 ) { player.sendMessage( getUsage(player) ); return true; };
 					Long ammount = args.length >= 3 ? Long.valueOf(args[2]) : 0l;
 					
-					String uuid = plugin.utils.resolveUUID( args[3] );
+					String uuid = plugin.putils.resolveUUID( args[3] );
 					
-					Boolean done = plugin.utils.setBankMoney( uuid, type, Long.valueOf(ammount) );
+					Boolean done = plugin.mutils.setBankMoney( uuid, type, Long.valueOf(ammount) );
 					if( done == false ) {
 						player.sendMessage( Main.prefixError + "Błąd podczas setowania, sprawdz pisownie i czy gracz jest online." );
 						return true;
@@ -228,11 +243,11 @@ public class bankCommand implements CommandExecutor {
 					if( args.length < 4 ) { player.sendMessage( getUsage(player) ); return true; };
 					Long ammount = args.length >= 3 ? Long.valueOf(args[2]) : 0l;
 					
-					String uuid = plugin.utils.resolveUUID( args[3] );
+					String uuid = plugin.putils.resolveUUID( args[3] );
 					
-					Map<String, Long> bm = plugin.utils.getBankMoney(uuid);
+					Map<String, Long> bm = plugin.mutils.getBankMoney(uuid);
 					
-					Boolean done = plugin.utils.setBankMoney( uuid, type, bm.get(type) + ammount );
+					Boolean done = plugin.mutils.setBankMoney( uuid, type, bm.get(type) + ammount );
 					if( done == false ) {
 						player.sendMessage( Main.prefixError + "Błąd podczas dodawania, sprawdz pisownie i czy gracz jest online." );
 						return true;
@@ -248,15 +263,15 @@ public class bankCommand implements CommandExecutor {
 					if( args.length < 4 ) { player.sendMessage( getUsage(player) ); return true; };
 					Long ammount = args.length >= 3 ? Long.valueOf(args[2]) : 0l;
 					
-					String uuid = plugin.utils.resolveUUID( args[3] );
-					Map<String, Long> bm = plugin.utils.getBankMoney(uuid);
+					String uuid = plugin.putils.resolveUUID( args[3] );
+					Map<String, Long> bm = plugin.mutils.getBankMoney(uuid);
 					
 					if( bm.get(type) - ammount < 0 ) {
 						player.sendMessage( Main.prefixError + "Nie można zabrać tyle kasy, gracz będzie na minusie! " + ChatColor.RED + bm.get(type) + " -> " + (bm.get(type) - ammount) );
 						return true;
 					}
 					
-					Boolean done = plugin.utils.setBankMoney( uuid, type, bm.get(type) - ammount );
+					Boolean done = plugin.mutils.setBankMoney( uuid, type, bm.get(type) - ammount );
 					if( done == false ) {
 						player.sendMessage( Main.prefixError + "Błąd podczas zabierania, sprawdz pisownie i czy gracz jest online." );
 						return true;
@@ -272,7 +287,7 @@ public class bankCommand implements CommandExecutor {
 					Location loc = player.getLocation();
 					
 					if( type.equals("miejsce") ) {
-						Boolean check = plugin.utils.createBank( loc );
+						Boolean check = plugin.mutils.createBank( loc );
 						if( check == false ) {
 							player.sendMessage( Main.prefixError + "Coś poszło nie tak! Banki można ustawiać co 50m.");
 							return true;
@@ -288,7 +303,7 @@ public class bankCommand implements CommandExecutor {
 					if( player.hasPermission("bank.admin") == false ) { player.sendMessage( getUsage(player) ); return true; };
 					Location loc = player.getLocation();
 					
-					Boolean check = plugin.utils.deleteBank(player);
+					Boolean check = plugin.mutils.deleteBank(player);
 					if( check == false ) {
 						player.sendMessage( Main.prefixError + "Coś poszło nie tak przy usuwaniu banku! Upewnij się, że jesteś w obszarze 20m od centrum." );
 						return true;
@@ -307,7 +322,7 @@ public class bankCommand implements CommandExecutor {
 					String to = args[2];
 					Long conv = Long.valueOf(args[3]);
 					
-					Boolean check = plugin.utils.setConversion(from, to, conv);
+					Boolean check = plugin.mutils.setConversion(from, to, conv);
 					if( check == false ) {
 						player.sendMessage( Main.prefixError + "Nie udało się ustawić konwersji: " + from +" * " + conv + " = 1 * " + to );
 						return true;
@@ -320,7 +335,7 @@ public class bankCommand implements CommandExecutor {
 				}
 				case "list" : {
 					if( player.hasPermission("bank.admin") == false ) { player.sendMessage( getUsage(player) ); return true; };
-					List<Location> banks = plugin.utils.getBanks();
+					List<Location> banks = plugin.mutils.getBanks();
 					
 					StringBuilder os = new StringBuilder( Main.prefixInfo + "Banki: " );
 					for( Location bank : banks ) 
