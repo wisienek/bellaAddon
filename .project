@@ -22,6 +22,12 @@
 	</buildSpec>
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
-		<nature>org.apache.ivyde.eclipse.ivynature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>java</name>
+			<type>2</type>
+			<location>D:/toshiba copy/mc scripts/server/plugins/Wplug/src/main/java</location>
+		</link>
+	</linkedResources>
 </projectDescription>

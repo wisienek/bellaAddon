@@ -1,5 +1,5 @@
 name: BellaAddon
-version: 0.1.5
+version: 1.2.8
 author: Woolf
 main: net.woolf.bella.Main
 description: Plugin pomocniczy Dla BelorisRP
@@ -8,6 +8,9 @@ load: STARTUP
 website: https://github.com/wisienek/bellaAddon
 
 commands:
+   link:
+      description: Komenda do linkowania konta z discordem
+      usage: /link
    jazda:
       description: komenda do togglowania jazdy
       usage: /jazda <on/off>
