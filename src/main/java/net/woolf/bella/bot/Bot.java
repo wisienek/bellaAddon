@@ -95,13 +95,25 @@ public class Bot {
 	    		)
     	);
     	
-    	List<OptionData> moneyAndUsers = Stream.concat(userCollection.stream(), moneyInfo.stream())
+    	OptionData narrText = new OptionData(OptionType.STRING, "text", "Text narracji", true);
+    	
+    	ArrayList<OptionData> narrCollection = new ArrayList<OptionData>();
+    	narrCollection.add(narrText);
+    	narrCollection.add(new OptionData(OptionType.STRING, "warp", "Na jakiego warpa wysłać narrację (lokalna)", false));
+    	narrCollection.add(new OptionData(OptionType.STRING, "user", "Nick gracza wokół którego chcesz wysłać narrację", false));
+    	narrCollection.add(new OptionData(OptionType.INTEGER, "range", "Jaki ma być range narracji (default 20m.)", false));
+    	
+    	List<OptionData> moneyAndUsers = Stream.concat(moneyInfo.stream(), userCollection.stream())
                 .distinct()
                 .collect(Collectors.toList());
 
 		SubcommandData sprawdz = new SubcommandData("sprawdz", "Sprawdza stan gotówki").addOptions(userCollection);
 		SubcommandData dodaj = new SubcommandData("dodaj", "Dodaje kasę dla gracza").addOptions(moneyAndUsers);
 		SubcommandData zabierz = new SubcommandData("zabierz", "Zabiera kasę od gracza").addOptions(moneyAndUsers);
+		
+		SubcommandData globalNar = new SubcommandData("globalna", "Globalna narrracja").addOptions(narrText);
+		SubcommandData lokalNar = new SubcommandData("lokalna", "Lokalna narrracja - podaj warpa lub koordy").addOptions(narrCollection);
+		SubcommandData privNar = new SubcommandData("prywatna", "Prywatna narrracja").addOptions(narrCollection);
 		
 		
         commands.addCommands(
@@ -125,7 +137,14 @@ public class Bot {
 	        		sprawdz,
 	        		dodaj,
 	        		zabierz
-	        	)
+	        	),
+        		
+        	new CommandData("narracja", "Wysyła narrację na serwer")
+        		.addSubcommands(
+        			globalNar,
+        			lokalNar,
+        			privNar
+        		)
         );
 		
         commands.queue();
@@ -145,12 +164,19 @@ public class Bot {
 			plugin.logger.info( "Nie można było rozwiązać kanału moneylog: " + logsID );
 			return;
 		}
+
+		channel.sendMessage( msg ).complete();
+	}
+	
+	public void chatLog( String msg ) {
+		String logsID = "960200738468925480";
 		
-		
-//		plugin.logger.info( "Wysyłam moneyLog: " + msg );
-		channel.sendMessage( msg ).complete(); //Message returnedMessage =
-//		
-////		if(returnedMessage != null)
-////			plugin.logger.info( "Msg id: " + returnedMessage.getId() );
+		TextChannel channel = api.getTextChannelById(logsID);
+		if( channel == null ) {
+			plugin.logger.info( "Nie można było rozwiązać kanału chatLog: " + logsID );
+			return;
+		}
+	
+		channel.sendMessage( msg ).complete(); 
 	}
 }

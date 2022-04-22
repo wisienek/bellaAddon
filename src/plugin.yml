@@ -27,6 +27,9 @@ commands:
    o:
       description: Komenda ooc
       usage: /o wiadomość ooc
+   rnar:
+      description: Narracja na dany zasięg
+      usage: /rnar <zasięg> [...text]
    date:
       description: Wyświetla obecną datę
       usage: /date
