@@ -35,7 +35,11 @@ public class dateCommand implements CommandExecutor {
 			ChatColor day_color = colors[ day % size ];
 			ChatColor month_color = colors[ month % size ];
 			
-			player.sendMessage( Main.prefixInfo + "Dzisiejsza data to: " + day_color + (day<10? "0" : "") + String.valueOf(day) + ChatColor.GRAY + "/" + month_color + (month<10? "0" : "") + String.valueOf(month)  );
+			player.sendMessage( 
+				Main.prefixInfo + "Dzisiejsza data to: " + 
+				day_color + ( day < 10 ? "0" : "") + String.valueOf(day) + ChatColor.GRAY + 
+				"/" + month_color + ( month < 10 ? "0" : "") + String.valueOf(month)  
+			);
 
 			return true;
 		} else {

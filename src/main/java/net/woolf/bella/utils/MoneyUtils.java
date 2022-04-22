@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -130,8 +132,14 @@ public class MoneyUtils {
 		return banks;
 	}
 	
-	public Map<String, Long> getMoney( Object player ) {
+	public Map<String, Long> getMoney( @Nonnull Object player ) {
 		String uuid = (player instanceof String) ? (String) player: ((Player)player).getUniqueId().toString();
+		
+		if( uuid == null ) {
+			this.plugin.logger.warning( "UUID resolved to null! Player: " + (player instanceof String ? player : ((Player)player).getName()) );
+			return null;
+		}
+		
 		Map<String, Long> money = new HashMap<String, Long>();
 		
 		Long miedziak = plugin.moneyConfig.getLong( "personal." + uuid + ".miedziak" );

@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 
 import net.md_5.bungee.api.ChatColor;
 import net.woolf.bella.Main;
+import net.woolf.bella.utils.ChatUtils;
 
 public class oocCommand implements CommandExecutor {
 	
@@ -27,12 +28,18 @@ public class oocCommand implements CommandExecutor {
 			Player player = (Player) sender;
 			
 			List<Player> nearbyPlayers = plugin.utils.getNearbyPlayers( player, 15 );
-			String msg = ChatColor.WHITE +"["+ ChatColor.RED +"OOC"+ ChatColor.WHITE +"] "+ ChatColor.GRAY + player.getName() + ": ("+String.join(" ", args) +")";
+			String msg = 
+				ChatColor.WHITE + "[" + ChatColor.RED + "OOC" + ChatColor.WHITE + "] " + 
+				ChatColor.GRAY + player.getName() + 
+				": (" + String.join( " ", args ) + ")";
+			
+			String logMsg = "[OOC] " + player.getName() + ": `(" + String.join(" ", args).replaceAll("`", "") + ")`";
 			
 			player.sendMessage(msg);
-			for( Player target : nearbyPlayers ) {
+			for( Player target : nearbyPlayers ) 
 				target.sendMessage(msg);
-			}
+			
+			ChatUtils.cacheMessageForChatLog( logMsg );
 			return true;
 		} else {
 			sender.sendMessage( "Komenda tylko dla graczy!" );

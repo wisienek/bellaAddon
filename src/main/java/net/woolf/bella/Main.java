@@ -23,17 +23,11 @@ import org.bukkit.scoreboard.Scoreboard;
 import de.slikey.effectlib.EffectManager;
 import net.woolf.bella.Utils;
 import net.woolf.bella.bot.Bot;
-import net.woolf.bella.commands.atpCommand;
-import net.woolf.bella.commands.bankCommand;
-import net.woolf.bella.commands.dateCommand;
-import net.woolf.bella.commands.jazdaCommand;
-import net.woolf.bella.commands.moneyCommand;
-import net.woolf.bella.commands.oocCommand;
-import net.woolf.bella.commands.otpCommand;
+import net.woolf.bella.commands.CommandManager;
 import net.woolf.bella.events.BellaEvents;
-import net.woolf.bella.utils.ChatUtils;
 import net.woolf.bella.utils.MoneyUtils;
 import net.woolf.bella.utils.PlayerUtils;
+
 
 @SuppressWarnings("unused")
 public class Main extends JavaPlugin {
@@ -50,7 +44,6 @@ public class Main extends JavaPlugin {
     public final MoneyUtils mutils = new MoneyUtils(this);
     
     public final Bot bot = new Bot(this);
-    
 
 	private File file = new File(getDataFolder(), "tpInfo.yml");
 	private File filelvl = new File(getDataFolder(), "tpLevels.yml");
@@ -69,16 +62,9 @@ public class Main extends JavaPlugin {
 	public void onEnable() {
 	    PluginManager pm = Bukkit.getServer().getPluginManager();
 	    pm.registerEvents(new BellaEvents(this), this);
-		
-		new otpCommand(this);
-		new atpCommand(this);
-		new oocCommand(this);
-		new dateCommand(this);
-		new moneyCommand(this);
-		new bankCommand(this);
-		new ChatUtils(this);
-		new jazdaCommand(this);
-		
+	    
+	    CommandManager.getInstance().initCommands(this);
+
 		// otp conf
 		config.addDefault("OTP-command-delay", true);
 		config.addDefault("setOTP-command-delay", true);
@@ -163,5 +149,8 @@ public class Main extends JavaPlugin {
             e.printStackTrace();
         }
 	}
-
+	
+	public static Main getInstance() {
+		return (Main) Bukkit.getPluginManager().getPlugin("BellaAddon");
+	}
 }
