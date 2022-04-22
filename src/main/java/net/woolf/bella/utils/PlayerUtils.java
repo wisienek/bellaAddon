@@ -1,7 +1,11 @@
 package net.woolf.bella.utils;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.annotation.Nonnull;
 
+import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
@@ -42,4 +46,14 @@ public class PlayerUtils {
 		
 	}
 	
+	public static List<Player> getPlayers() {
+		return Main.getInstance().server.getOnlinePlayers().stream().collect(Collectors.toList());
+	}
+	
+	public static List<Player> getPlayersWithinRange( @Nonnull Location location, @Nonnull Long range) {
+		List<Player> players = PlayerUtils.getPlayers();
+		
+		return players.stream().filter(player -> player.getLocation().distance(location) >= range).collect(Collectors.toList());
+		
+	}
 }
