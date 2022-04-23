@@ -14,17 +14,18 @@ import net.woolf.bella.commands.otpCommand;
 public final class CommandManager {
 
 	private static CommandManager INSTANCE;
-	
-	private CommandManager() {}
-	
+
+	private CommandManager() {
+	}
+
 	public static CommandManager getInstance() {
-		if ( INSTANCE == null ) {
+		if (INSTANCE == null) {
 			INSTANCE = new CommandManager();
 		}
-		
+
 		return INSTANCE;
 	}
-	
+
 	public void initCommands(Main instance) {
 		// teleportacja
 		new otpCommand(instance);

@@ -12,37 +12,36 @@ import net.woolf.bella.Main;
 import net.woolf.bella.utils.ChatUtils;
 
 public class oocCommand implements CommandExecutor {
-	
+
 	private Main plugin;
 
 	public oocCommand(Main main) {
 		this.plugin = main;
 		plugin.getCommand("o").setExecutor(this);
 	}
-	
+
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		if( sender instanceof Player ) {
-			if( args.length == 0 ) return true;
-			
+		if (sender instanceof Player) {
+			if (args.length == 0)
+				return true;
+
 			Player player = (Player) sender;
-			
-			List<Player> nearbyPlayers = plugin.utils.getNearbyPlayers( player, 15 );
-			String msg = 
-				ChatColor.WHITE + "[" + ChatColor.RED + "OOC" + ChatColor.WHITE + "] " + 
-				ChatColor.GRAY + player.getName() + 
-				": (" + String.join( " ", args ) + ")";
-			
+
+			List<Player> nearbyPlayers = plugin.utils.getNearbyPlayers(player, 15);
+			String msg = ChatColor.WHITE + "[" + ChatColor.RED + "OOC" + ChatColor.WHITE + "] " + ChatColor.GRAY
+					+ player.getName() + ": (" + String.join(" ", args) + ")";
+
 			String logMsg = "[OOC] " + player.getName() + ": `(" + String.join(" ", args).replaceAll("`", "") + ")`";
-			
+
 			player.sendMessage(msg);
-			for( Player target : nearbyPlayers ) 
+			for (Player target : nearbyPlayers)
 				target.sendMessage(msg);
-			
-			ChatUtils.cacheMessageForChatLog( logMsg );
+
+			ChatUtils.cacheMessageForChatLog(logMsg);
 			return true;
 		} else {
-			sender.sendMessage( "Komenda tylko dla graczy!" );
+			sender.sendMessage("Komenda tylko dla graczy!");
 			return true;
 		}
 	}

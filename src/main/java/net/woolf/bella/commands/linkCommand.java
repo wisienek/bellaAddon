@@ -10,7 +10,7 @@ import net.woolf.bella.Main;
 public class linkCommand implements CommandExecutor {
 
 	private Main plugin;
-	
+
 	public linkCommand(Main main) {
 		this.plugin = main;
 		plugin.getCommand("jazda").setExecutor(this);
@@ -18,22 +18,18 @@ public class linkCommand implements CommandExecutor {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		if( sender instanceof Player ) {
-		
-			
-			
-			sender.sendMessage( Main.prefixInfo + "Tutaj będzie link do skopiowania!" );
+		if (sender instanceof Player) {
+
+			sender.sendMessage(Main.prefixInfo + "Tutaj będzie link do skopiowania!");
 			return true;
 		}
-		
-		sender.sendMessage( Main.prefixInfo + this.getUsage() );
-		return true; 
+
+		sender.sendMessage(Main.prefixInfo + this.getUsage());
+		return true;
 	}
-	
-	
-	
+
 	private String getUsage() {
 		return "/link";
 	}
-	
+
 }
