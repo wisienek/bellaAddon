@@ -11,20 +11,24 @@ public class linkCommand implements CommandExecutor {
 
 	private Main plugin;
 
-	public linkCommand(Main main) {
+	public linkCommand(
+			Main main
+	) {
 		this.plugin = main;
-		plugin.getCommand("jazda").setExecutor(this);
+		plugin.getCommand( "jazda" ).setExecutor( this );
 	}
 
 	@Override
-	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		if (sender instanceof Player) {
+	public boolean onCommand(
+			CommandSender sender, Command cmd, String label, String[] args
+	) {
+		if ( sender instanceof Player ) {
 
-			sender.sendMessage(Main.prefixInfo + "Tutaj będzie link do skopiowania!");
+			sender.sendMessage( Main.prefixInfo + "Tutaj będzie link do skopiowania!" );
 			return true;
 		}
 
-		sender.sendMessage(Main.prefixInfo + this.getUsage());
+		sender.sendMessage( Main.prefixInfo + this.getUsage() );
 		return true;
 	}
 

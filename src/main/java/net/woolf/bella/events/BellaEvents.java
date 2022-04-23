@@ -30,145 +30,173 @@ public class BellaEvents implements Listener {
 
 	private Main plugin;
 
-	public BellaEvents(Main main) {
+	public BellaEvents(
+			Main main
+	) {
 		this.plugin = main;
 	}
 
 	@EventHandler(priority = EventPriority.HIGH)
-	public void onPlayerChat(AsyncPlayerChatEvent event) {
+	public void onPlayerChat(
+			AsyncPlayerChatEvent event
+	) {
 		String msg = event.getMessage();
 		// add more
 
-//		String newMsg = ChatUtils.formatDOaction(msg);
-//		newMsg = ChatUtils.formatMEaction(newMsg);
-//		String newMsg = ChatUtils.formatOOC(msg);
-		String newMsg = ChatUtils.formatEmojis(msg);
+		// String newMsg = ChatUtils.formatDOaction(msg);
+		// newMsg = ChatUtils.formatMEaction(newMsg);
+		// String newMsg = ChatUtils.formatOOC(msg);
+		String newMsg = ChatUtils.formatEmojis( msg );
 
 		// Send chat
-		event.setMessage(newMsg);
+		event.setMessage( newMsg );
 
-		ChatUtils.cacheMessageForChatLog(ChatUtils.LocalPrefix + " [" + event.getPlayer().getDisplayName() + "] "
-				+ event.getPlayer().getName() + ": `" + newMsg.replaceAll("(§.)|(`)", "") + "`");
+		ChatUtils.cacheMessageForChatLog( ChatUtils.LocalPrefix + " ["
+				+ event.getPlayer().getDisplayName() + "] " + event.getPlayer().getName() + ": `"
+				+ newMsg.replaceAll( "(§.)|(`)", "" ) + "`" );
 	}
 
 	@EventHandler
-	public void onPlayerJoin(PlayerJoinEvent event) {
+	public void onPlayerJoin(
+			PlayerJoinEvent event
+	) {
 		List<Player> online = plugin.utils.getPlayers();
-		plugin.bot.updatePresence("Graczy online: " + (online.size() + 1));
+		plugin.bot.updatePresence( "Graczy online: " + ( online.size() + 1 ) );
 	}
 
 	@EventHandler
-	public void onPlayerQuit(PlayerQuitEvent event) {
+	public void onPlayerQuit(
+			PlayerQuitEvent event
+	) {
 		List<Player> online = plugin.utils.getPlayers();
-		plugin.bot.updatePresence("Graczy online: " + (online.size() - 1));
+		plugin.bot.updatePresence( "Graczy online: " + ( online.size() - 1 ) );
 	}
 
 	@EventHandler(priority = EventPriority.HIGH)
-	public void onPlayerInteract(PlayerInteractEvent event) {
+	public void onPlayerInteract(
+			PlayerInteractEvent event
+	) {
 		Player player = event.getPlayer();
 
-		if (player.isSneaking()) {
+		if ( player.isSneaking() ) {
 			List<Entity> passangers = player.getPassengers();
 
-			if (passangers.size() > 0)
-				for (Entity Passanger : passangers)
-					player.removePassenger(Passanger);
+			if ( passangers.size() > 0 )
+				for ( Entity Passanger : passangers )
+					player.removePassenger( Passanger );
 		}
 
 		ItemStack item = player.getInventory().getItemInMainHand();
-		if (item != null && item.getType() != Material.AIR) {
-			NBTItem nbti = new NBTItem(item, true);
+		if ( item != null && item.getType() != Material.AIR ) {
+			NBTItem nbti = new NBTItem( item, true );
 
-			if (nbti.hasKey("teleportEnchantment")) {
-				event.setCancelled(true);
+			if ( nbti.hasKey( "teleportEnchantment" ) ) {
+				event.setCancelled( true );
 
-				NBTCompound comp = nbti.getCompound("teleportEnchantment");
-				plugin.utils.itemTP(player, comp);
+				NBTCompound comp = nbti.getCompound( "teleportEnchantment" );
+				plugin.utils.itemTP( player, comp );
 			}
 		}
 	}
 
 	@EventHandler
-	public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
-		if (event.getHand().equals(EquipmentSlot.HAND) == false)
+	public void onPlayerInteractEntity(
+			PlayerInteractEntityEvent event
+	) {
+		if ( event.getHand().equals( EquipmentSlot.HAND ) == false )
 			return;
 
 		Entity clicked = event.getRightClicked();
 		Player player = event.getPlayer();
 
-		if (clicked instanceof Player) {
+		if ( clicked instanceof Player ) {
 			Player target = (Player) clicked;
 
-			Boolean check = plugin.playerConfig.getBoolean(target.getUniqueId().toString() + ".canBeRidden");
+			Boolean check = plugin.playerConfig
+					.getBoolean( target.getUniqueId().toString() + ".canBeRidden" );
 
-			if (check == true) {
+			if ( check == true ) {
 				List<Entity> passangers = target.getPassengers();
 
-				if (passangers.size() == 0)
-					target.addPassenger(player);
+				if ( passangers.size() == 0 )
+					target.addPassenger( player );
 			}
 		}
 	}
 
 	@EventHandler
-	public void onPlayerItemDamageEvent(PlayerItemDamageEvent event) {
-		event.setCancelled(true);
+	public void onPlayerItemDamageEvent(
+			PlayerItemDamageEvent event
+	) {
+		event.setCancelled( true );
 	}
 
 	@EventHandler
-	public boolean onPlayerCommandPreprocessEvent(PlayerCommandPreprocessEvent event) {
+	public boolean onPlayerCommandPreprocessEvent(
+			PlayerCommandPreprocessEvent event
+	) {
 		Player player = event.getPlayer();
 
 		List<String> args = new LinkedList<String>();
-		Collections.addAll(args, event.getMessage().split(" "));
+		Collections.addAll( args, event.getMessage().split( " " ) );
 
-		String cmd = args.get(0).replace("/", "");
+		String cmd = args.get( 0 ).replace( "/", "" );
 
-		args.remove(0);
+		args.remove( 0 );
 
-		switch (cmd) {
-		case "ooc": {
-			ChatUtils.cacheMessageForChatLog(ChatUtils.OOCPrefix + " " + player.getName() + ": `("
-					+ String.join(" ", args).replaceAll("`", "") + ")`");
-			break;
-		}
-		case "me":
-		case "k": {
-			ChatUtils.cacheMessageForChatLog(ChatUtils.LocalPrefix + " [" + player.getDisplayName() + "] "
-					+ player.getName() + ": `*" + String.join(" ", args).replaceAll("`", "") + "*`");
-			break;
-		}
-		case "do": {
-			ChatUtils.cacheMessageForChatLog(ChatUtils.LocalPrefix + " [" + player.getDisplayName() + "] "
-					+ player.getName() + ": `**" + String.join(" ", args).replaceAll("`", "") + "**`");
-			break;
-		}
-		case "s": {
-			ChatUtils.cacheMessageForChatLog(ChatUtils.WhisperPrefix + " [" + player.getDisplayName() + "] "
-					+ player.getName() + ": `" + String.join(" ", args).replaceAll("`", "") + "`");
-			break;
-		}
-		case "globalnar": {
-			ChatUtils.cacheMessageForChatLog(ChatUtils.GlobalPrefix + " [" + player.getName() + "] `"
-					+ String.join(" ", args).replaceAll("`", "") + "`");
-			break;
-		}
-		case "midnar":
-		case "localnar": {
-			Location loc = player.getLocation();
-			ChatUtils.cacheMessageForChatLog(ChatUtils.LocalPrefix + " {" + loc.getBlockX() + " " + loc.getBlockY()
-					+ " " + loc.getBlockZ() + "} " + " [" + player.getName() + "] `"
-					+ String.join(" ", args).replaceAll("`", "") + "`");
-			break;
-		}
-		case "privnar": {
-			String narrated = args.get(0);
-			args.remove(0);
+		switch ( cmd ) {
+			case "ooc": {
+				ChatUtils.cacheMessageForChatLog( ChatUtils.OOCPrefix + " " + player.getName()
+						+ ": `(" + String.join( " ", args ).replaceAll( "`", "" ) + ")`" );
+				break;
+			}
 
-			ChatUtils.cacheMessageForChatLog("**[PRIVNAR]** " + "[" + player.getName() + " -> " + narrated + "] `"
-					+ String.join(" ", args).replaceAll("`", "") + "`");
-			break;
-		}
+			case "me":
+			case "k": {
+				ChatUtils.cacheMessageForChatLog( ChatUtils.LocalPrefix + " ["
+						+ player.getDisplayName() + "] " + player.getName() + ": `*"
+						+ String.join( " ", args ).replaceAll( "`", "" ) + "*`" );
+				break;
+			}
+
+			case "do": {
+				ChatUtils.cacheMessageForChatLog( ChatUtils.LocalPrefix + " ["
+						+ player.getDisplayName() + "] " + player.getName() + ": `**"
+						+ String.join( " ", args ).replaceAll( "`", "" ) + "**`" );
+				break;
+			}
+
+			case "s": {
+				ChatUtils.cacheMessageForChatLog( ChatUtils.WhisperPrefix + " ["
+						+ player.getDisplayName() + "] " + player.getName() + ": `"
+						+ String.join( " ", args ).replaceAll( "`", "" ) + "`" );
+				break;
+			}
+
+			case "globalnar": {
+				ChatUtils.cacheMessageForChatLog( ChatUtils.GlobalPrefix + " [" + player.getName()
+						+ "] `" + String.join( " ", args ).replaceAll( "`", "" ) + "`" );
+				break;
+			}
+
+			case "midnar":
+			case "localnar": {
+				Location loc = player.getLocation();
+				ChatUtils.cacheMessageForChatLog(
+						ChatUtils.LocalPrefix + " {" + loc.getBlockX() + " " + loc.getBlockY() + " "
+								+ loc.getBlockZ() + "} " + " [" + player.getName() + "] `"
+								+ String.join( " ", args ).replaceAll( "`", "" ) + "`" );
+				break;
+			}
+
+			case "privnar": {
+				String narrated = args.get( 0 );
+				args.remove( 0 );
+
+				ChatUtils.cacheMessageForChatLog( "**[PRIVNAR]** " + "[" + player.getName() + " -> "
+						+ narrated + "] `" + String.join( " ", args ).replaceAll( "`", "" ) + "`" );
+				break;
+			}
 		}
 
 		return true;

@@ -15,46 +15,55 @@ public class PlayerUtils {
 
 	private Main plugin;
 
-	public PlayerUtils(Main main) {
+	public PlayerUtils(
+			Main main
+	) {
 		this.plugin = main;
 	}
 
 	@SuppressWarnings("deprecation")
-	public String resolveUUID(@Nonnull final String player) {
+	public String resolveUUID(
+			@Nonnull final String player
+	) {
 		String uuid = null;
 
-		Player target = plugin.server.getPlayer(player);
-		if (target != null) {
+		Player target = plugin.server.getPlayer( player );
+		if ( target != null ) {
 			uuid = target.getUniqueId().toString();
 		} else {
-			OfflinePlayer target1 = plugin.server.getOfflinePlayer(player);
-			if (target1 != null)
+			OfflinePlayer target1 = plugin.server.getOfflinePlayer( player );
+			if ( target1 != null )
 				uuid = target1.getUniqueId().toString();
 		}
 
 		return uuid;
 	}
 
-	public void toggleJazda(@Nonnull final Player player, @Nonnull final Boolean change) {
+	public void toggleJazda(
+			@Nonnull final Player player, @Nonnull final Boolean change
+	) {
 		String uuid = player.getUniqueId().toString();
 
-		Boolean check = plugin.playerConfig.getBoolean(uuid + ".canBeRidden");
-		if (check != change) {
-			plugin.playerConfig.set(uuid + ".canBeRidden", change);
+		Boolean check = plugin.playerConfig.getBoolean( uuid + ".canBeRidden" );
+		if ( check != change ) {
+			plugin.playerConfig.set( uuid + ".canBeRidden", change );
 			plugin.savePlayerConfig();
 		}
 
 	}
 
 	public static List<Player> getPlayers() {
-		return Main.getInstance().server.getOnlinePlayers().stream().collect(Collectors.toList());
+		return Main.getInstance().server.getOnlinePlayers().stream().collect( Collectors.toList() );
 	}
 
-	public static List<Player> getPlayersWithinRange(@Nonnull Location location, @Nonnull Long range) {
+	public static List<Player> getPlayersWithinRange(
+			@Nonnull Location location, @Nonnull Long range
+	) {
 		List<Player> players = PlayerUtils.getPlayers();
 
-		return players.stream().filter(player -> player.getLocation().distance(location) <= range)
-				.collect(Collectors.toList());
+		return players.stream()
+				.filter( player -> player.getLocation().distance( location ) <= range )
+				.collect( Collectors.toList() );
 
 	}
 }

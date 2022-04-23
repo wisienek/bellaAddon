@@ -14,15 +14,19 @@ public class dateCommand implements CommandExecutor {
 
 	private Main plugin;
 
-	public dateCommand(Main main) {
+	public dateCommand(
+			Main main
+	) {
 		this.plugin = main;
-		plugin.getCommand("date").setExecutor(this);
+		plugin.getCommand( "date" ).setExecutor( this );
 	}
 
 	@SuppressWarnings("deprecation")
 	@Override
-	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		if (sender instanceof Player) {
+	public boolean onCommand(
+			CommandSender sender, Command cmd, String label, String[] args
+	) {
+		if ( sender instanceof Player ) {
 			Player player = (Player) sender;
 
 			Date today = new Date();
@@ -35,13 +39,13 @@ public class dateCommand implements CommandExecutor {
 			ChatColor day_color = colors[day % size];
 			ChatColor month_color = colors[month % size];
 
-			player.sendMessage(
-					Main.prefixInfo + "Dzisiejsza data to: " + day_color + (day < 10 ? "0" : "") + String.valueOf(day)
-							+ ChatColor.GRAY + "/" + month_color + (month < 10 ? "0" : "") + String.valueOf(month));
+			player.sendMessage( Main.prefixInfo + "Dzisiejsza data to: " + day_color
+					+ ( day < 10 ? "0" : "" ) + String.valueOf( day ) + ChatColor.GRAY + "/"
+					+ month_color + ( month < 10 ? "0" : "" ) + String.valueOf( month ) );
 
 			return true;
 		} else {
-			sender.sendMessage("Komenda tylko dla graczy!");
+			sender.sendMessage( "Komenda tylko dla graczy!" );
 			return true;
 		}
 	}

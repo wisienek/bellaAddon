@@ -19,31 +19,33 @@ public final class CommandManager {
 	}
 
 	public static CommandManager getInstance() {
-		if (INSTANCE == null) {
+		if ( INSTANCE == null ) {
 			INSTANCE = new CommandManager();
 		}
 
 		return INSTANCE;
 	}
 
-	public void initCommands(Main instance) {
+	public void initCommands(
+			Main instance
+	) {
 		// teleportacja
-		new otpCommand(instance);
+		new otpCommand( instance );
 		// teleportacja dla adminów
-		new atpCommand(instance);
+		new atpCommand( instance );
 		// ładne ooc
-		new oocCommand(instance);
+		new oocCommand( instance );
 		// aktualna data
-		new dateCommand(instance);
+		new dateCommand( instance );
 		// kasa portfelowa
-		new moneyCommand(instance);
+		new moneyCommand( instance );
 		// kasa bankowa
-		new bankCommand(instance);
+		new bankCommand( instance );
 		// utilsy chatowe
-		new ChatUtils(instance);
+		new ChatUtils( instance );
 		// jazda na graczach
-		new jazdaCommand(instance);
+		new jazdaCommand( instance );
 		// narracja na range
-		new rnarCommand(instance);
+		new rnarCommand( instance );
 	}
 }
