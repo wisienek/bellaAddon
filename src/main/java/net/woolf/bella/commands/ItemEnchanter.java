@@ -23,171 +23,157 @@ import net.woolf.bella.Main;
 
 public class ItemEnchanter implements CommandExecutor {
 
-	public static final Set<String> AvailableEnchantEffects = new HashSet<String>(
-			Arrays.asList( "test", "lot", "doublejump", "niewidzialnosc", "predkosc" ) );
+  public static final Set<String> AvailableEnchantEffects = new HashSet<>(
+      Arrays.asList("test", "lot", "doublejump", "niewidzialnosc", "predkosc"));
 
-	private Main plugin;
+  public ItemEnchanter (
+      Main main
+  ) {
+    main.getCommand("zaczaruj").setExecutor(this);
+    main.getCommand("przebadaj").setExecutor(this);
+  }
 
-	public ItemEnchanter(
-			Main main
-	) {
-		this.plugin = main;
-		plugin.getCommand( "zaczaruj" ).setExecutor( this );
-		plugin.getCommand( "przebadaj" ).setExecutor( this );
-	}
+  @Override
+  public boolean onCommand (
+      CommandSender sender, Command cmd, String label, String[] args
+  ) {
+    if ( !( sender instanceof Player ) ) {
+      sender.sendMessage(Main.prefixError + "Tylko gracze!");
+      return true;
+    }
 
-	@Override
-	public boolean onCommand(
-			CommandSender sender,
-			Command cmd,
-			String label,
-			String[] args
-	) {
-		if ( sender instanceof Player == false ) {
-			sender.sendMessage( Main.prefixError + "Tylko gracze!" );
-			return true;
-		}
+    Player player = (Player) sender;
 
-		Player player = (Player) sender;
+    if ( label.equals("zaczaruj") ) {
+      if ( !player.hasPermission(Permissions.ENCHANTER.toString()) ) {
+        player.sendMessage(
+            Main.prefixError + "Nie masz permissi " + ChatColor.DARK_RED + Permissions.ENCHANTER + ChatColor.GRAY +
+                " aby użyć tej komendy");
+        return true;
+      }
 
-		if ( label.equals( "zaczaruj" ) ) {
-			if ( !player.hasPermission( Permissions.ENCHANTER.toString() ) ) {
-				player.sendMessage( Main.prefixError + "Nie masz permissi " + ChatColor.DARK_RED
-						+ Permissions.ENCHANTER.toString() + ChatColor.GRAY
-						+ " aby użyć tej komendy" );
-				return true;
-			}
+      if ( args.length < 1 ) {
+        player.sendMessage(Main.prefixError + this.getUsage());
+        return true;
+      }
 
-			if ( args.length < 1 ) {
-				player.sendMessage( Main.prefixError + this.getUsage() );
-				return true;
-			}
+      String action = args[0];
 
-			String action = args[0];
+      switch ( action ) {
+        case "efekt": {
+          if ( args.length < 2 ) {
+            player.sendMessage(Main.prefixError + "Musisz podać efekt aby zaczarować przedmiot w ręce!");
+            return true;
+          }
 
-			switch ( action ) {
-				case "efekt": {
-					if ( args.length < 2 ) {
-						player.sendMessage( Main.prefixError
-								+ "Musisz podać efekt aby zaczarować przedmiot w ręce!" );
-						return true;
-					}
+          String effect = args[1];
 
-					String effect = args[1];
+          if ( !AvailableEnchantEffects.contains(effect) ) {
+            player.sendMessage(Main.prefixError + "Podany efekt nie widnieje na liście dostępnych!");
+            player.sendMessage(Main.prefixInfo + ItemEnchanter.getEffects());
+            return true;
+          }
 
-					if ( !AvailableEnchantEffects.contains( effect ) ) {
-						player.sendMessage( Main.prefixError
-								+ "Podany efekt nie widnieje na liście dostępnych!" );
-						player.sendMessage( Main.prefixInfo + ItemEnchanter.getEffects() );
-						return true;
-					}
+          ItemStack heldItem = player.getInventory().getItemInMainHand();
 
-					ItemStack heldItem = player.getInventory().getItemInMainHand();
+          if ( heldItem == null || !heldItem.getType().isItem() ) {
+            player.sendMessage(Main.prefixError + "Musisz trzymać item aby go zaczarować!");
+            return true;
+          }
 
-					if ( heldItem == null || heldItem.getType().isItem() == false ) {
-						player.sendMessage( Main.prefixError
-								+ "Musisz trzymać item aby go zaczarować!" );
-						return true;
-					}
+          List<String> enchants = this.checkEnchants(heldItem);
 
-					List<String> enchants = this.checkEnchants( heldItem );
+          if ( enchants != null && enchants.contains(effect) ) {
+            player.sendMessage(
+                Main.prefixError + "Przedmiot ma już dany efekt: " + ChatColor.GREEN + String.join(", ", enchants));
+            return true;
+          }
 
-					if ( enchants != null && enchants.contains( effect ) ) {
-						player.sendMessage( Main.prefixError + "Przedmiot ma już dany efekt: "
-								+ ChatColor.GREEN + String.join( ", ", enchants ) );
-						return true;
-					}
+          player.sendMessage(Main.prefixInfo + "Czaruję przedmiot...");
 
-					player.sendMessage( Main.prefixInfo + "Czaruję przedmiot..." );
+          this.enchantItem(heldItem, effect);
 
-					this.enchantItem( heldItem, effect );
+          break;
+        }
 
-					break;
-				}
+        case "lista": {
+          player.sendMessage(Main.prefixInfo + ItemEnchanter.getEffects());
+          return true;
+        }
 
-				case "lista": {
-					player.sendMessage( Main.prefixInfo + ItemEnchanter.getEffects() );
-					return true;
-				}
+        default: {
+          player.sendMessage(Main.prefixError + this.getUsage());
+          return true;
+        }
+      }
+    }
+    else {
+      if ( !player.hasPermission(Permissions.CHECK_ENCHANT.toString()) ) {
+        player.sendMessage(
+            Main.prefixError + "Nie masz permissi " + ChatColor.DARK_RED + Permissions.CHECK_ENCHANT + ChatColor.GRAY + " aby użyć tej komendy");
+        return true;
+      }
 
-				default: {
-					player.sendMessage( Main.prefixError + this.getUsage() );
-					return true;
-				}
-			}
-		} else {
-			if ( !player.hasPermission( Permissions.CHECK_ENCHANT.toString() ) ) {
-				player.sendMessage( Main.prefixError + "Nie masz permissi " + ChatColor.DARK_RED
-						+ Permissions.CHECK_ENCHANT.toString() + ChatColor.GRAY
-						+ " aby użyć tej komendy" );
-				return true;
-			}
+      ItemStack heldItem = player.getInventory().getItemInMainHand();
 
-			ItemStack heldItem = player.getInventory().getItemInMainHand();
+      if ( heldItem == null || !heldItem.getType().isItem() ) {
+        player.sendMessage(Main.prefixError + "Musisz trzymać item aby go sprawdzić!");
+        return true;
+      }
 
-			if ( heldItem == null || heldItem.getType().isItem() == false ) {
-				player.sendMessage( Main.prefixError + "Musisz trzymać item aby go sprawdzić!" );
-				return true;
-			}
+      List<String> enchants = this.checkEnchants(heldItem);
 
-			List<String> enchants = this.checkEnchants( heldItem );
+      if ( enchants != null ) player.sendMessage(
+          Main.prefixInfo + "Przedmiot jest zaczarowany na: " + ChatColor.GREEN + String.join(", ", enchants));
+      else player.sendMessage(Main.prefixInfo + "Przedmiot nie jest zaczarowany!");
 
-			if ( enchants != null )
-				player.sendMessage( Main.prefixInfo + "Przedmiot jest zaczarowany na: "
-						+ ChatColor.GREEN + String.join( ", ", enchants ) );
-			else
-				player.sendMessage( Main.prefixInfo + "Przedmiot nie jest zaczarowany!" );
+      return true;
+    }
 
-			return true;
-		}
+    return true;
+  }
 
-		return true;
-	}
+  private List<String> checkEnchants (
+      @Nonnull ItemStack item
+  ) {
+    NBTItem nbti = new NBTItem(item);
 
-	private List<String> checkEnchants(
-			@Nonnull ItemStack item
-	) {
-		NBTItem nbti = new NBTItem( item );
+    List<String> enchants = new ArrayList<>();
 
-		List<String> enchants = new ArrayList<String>();
+    for ( String enchant : ItemEnchanter.AvailableEnchantEffects )
+      if ( nbti.hasKey(enchant) && nbti.getBoolean(enchant) ) enchants.add(enchant);
 
-		for ( String enchant : ItemEnchanter.AvailableEnchantEffects )
-			if ( nbti.hasKey( enchant ) && nbti.getBoolean( enchant ) )
-				enchants.add( enchant );
+    return enchants.size() > 0 ? enchants : null;
+  }
 
-		return enchants.size() > 0 ? enchants : null;
-	}
+  private void enchantItem (
+      @Nonnull ItemStack item, @Nonnull String effect
+  ) {
+    NBTItem nbti = new NBTItem(item);
+    nbti.setBoolean(effect, true);
 
-	private void enchantItem(
-			@Nonnull ItemStack item,
-			@Nonnull String effect
-	) {
-		NBTItem nbti = new NBTItem( item );
-		nbti.setBoolean( effect, true );
+    nbti.applyNBT(item);
 
-		nbti.applyNBT( item );
+    ItemMeta meta = item.getItemMeta();
+    meta.setUnbreakable(true);
+    meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_UNBREAKABLE, ItemFlag.HIDE_DESTROYS,
+        ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_POTION_EFFECTS);
 
-		ItemMeta meta = item.getItemMeta();
-		meta.setUnbreakable( true );
-		meta.addItemFlags( ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_UNBREAKABLE, ItemFlag.HIDE_DESTROYS, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_POTION_EFFECTS );
+    item.setItemMeta(meta);
+  }
 
-		item.setItemMeta( meta );
+  public static String getEffects () {
+    StringBuilder sb = new StringBuilder();
 
-		return;
-	}
+    sb.append(ChatColor.GRAY).append("Lista efektów możliwych do zaczarowania przedmiotu:");
+    for ( String effect : ItemEnchanter.AvailableEnchantEffects )
+      sb.append("\n" + ChatColor.DARK_PURPLE + "- " + ChatColor.BLUE).append(effect);
 
-	public static String getEffects() {
-		StringBuilder sb = new StringBuilder();
+    return sb.toString();
+  }
 
-		sb.append( ChatColor.GRAY + "Lista efektów możliwych do zaczarowania przedmiotu:" );
-		for ( String effect : ItemEnchanter.AvailableEnchantEffects )
-			sb.append( "\n" + ChatColor.DARK_PURPLE + "- " + ChatColor.BLUE + effect );
-
-		return sb.toString();
-	}
-
-	public String getUsage() {
-		return "Użycie komend: \n/zaczaruj <efekt/lista> [...efekt] \n/przebadaj";
-	}
+  public String getUsage () {
+    return "Użycie komend: \n/zaczaruj <efekt/lista> [...efekt] \n/przebadaj";
+  }
 
 }

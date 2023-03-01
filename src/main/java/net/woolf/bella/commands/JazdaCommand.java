@@ -9,49 +9,47 @@ import net.woolf.bella.Main;
 
 public class JazdaCommand implements CommandExecutor {
 
-	private Main plugin;
+  private final Main plugin;
 
-	public JazdaCommand(
-			Main main
-	) {
-		this.plugin = main;
-		plugin.getCommand( "jazda" ).setExecutor( this );
-	}
+  public JazdaCommand (
+      Main main
+  ) {
+    this.plugin = main;
+    plugin.getCommand("jazda").setExecutor(this);
+  }
 
-	@Override
-	public boolean onCommand(
-			CommandSender sender,
-			Command cmd,
-			String label,
-			String[] args
-	) {
-		if ( sender instanceof Player ) {
-			if ( args.length == 0 ) {
-				sender.sendMessage( Main.prefixError + getUsage() );
-				return true;
-			}
+  @Override
+  public boolean onCommand (
+      CommandSender sender, Command cmd, String label, String[] args
+  ) {
+    if ( sender instanceof Player ) {
+      if ( args.length == 0 ) {
+        sender.sendMessage(Main.prefixError + getUsage());
+        return true;
+      }
 
-			Player player = (Player) sender;
+      Player player = (Player) sender;
 
-			if ( args[0].equals( "on" ) || args[0].equals( "off" ) ) {
-				Boolean check = args[0].equals( "on" ) ? true : false;
+      if ( args[0].equals("on") || args[0].equals("off") ) {
+        Boolean check = args[0].equals("on");
 
-				plugin.putils.toggleJazda( player, check );
-				player.sendMessage( Main.prefixInfo + "Ustawiono jazdę na: " + check );
-			} else {
-				player.sendMessage( Main.prefixError + getUsage() );
-				return true;
-			}
+        plugin.putils.toggleJazda(player, check);
+        player.sendMessage(Main.prefixInfo + "Ustawiono jazdę na: " + check);
+      }
+      else {
+        player.sendMessage(Main.prefixError + getUsage());
+        return true;
+      }
 
-			return true;
-		} else {
-			sender.sendMessage( "Komenda tylko dla graczy!" );
-			return true;
-		}
-	}
+    }
+    else {
+      sender.sendMessage("Komenda tylko dla graczy!");
+    }
+    return true;
+  }
 
-	private String getUsage() {
-		return "/jazda <on/off> - włącza lub wyłącza możliwość jazdy na tobie";
-	}
+  private String getUsage () {
+    return "/jazda <on/off> - włącza lub wyłącza możliwość jazdy na tobie";
+  }
 
 }

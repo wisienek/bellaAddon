@@ -32,164 +32,146 @@ import net.woolf.bella.utils.StringUtils;
 
 public class Bot {
 
-	public static final String ChatLogId = "960200738468925480";
-	public static final String MoneyLogId = "885517500261998633";
-	public static final String VariousLogId = "969288905813803008";
-	public static final String HelpopLogId = "1002690952307163256";
+  public static final String ChatLogId = "960200738468925480";
+  public static final String MoneyLogId = "885517500261998633";
+  public static final String VariousLogId = "969288905813803008";
+  public static final String HelpopLogId = "1002690952307163256";
 
-	public Main plugin;
+  public Main plugin;
 
-	public JDA api;
-	public CommandListUpdateAction commands;
+  public JDA api;
+  public CommandListUpdateAction commands;
 
-	public Bot(
-			Main main
-	) {
-		this.plugin = main;
+  public Bot (
+      Main main
+  ) {
+    this.plugin = main;
 
-		File passwd = new File( plugin.getDataFolder(), "pwd.txt" );
+    File passwd = new File(plugin.getDataFolder(), "pwd.txt");
 
-		if ( !passwd.exists() ) {
-			plugin.logger.info( "Nie udało się wczytać hasła do bota!" );
-			return;
-		}
+    if ( !passwd.exists() ) {
+      plugin.logger.info("Nie udało się wczytać hasła do bota!");
+      return;
+    }
 
-		try {
-			Scanner myReader = new Scanner( passwd );
-			String pwd = myReader.nextLine();
-			myReader.close();
+    try {
+      Scanner myReader = new Scanner(passwd);
+      String pwd = myReader.nextLine();
+      myReader.close();
 
-			if ( pwd == null || pwd.isEmpty() || pwd.length() == 0 )
-				throw new FileNotFoundException( "pwd isblank" );
+      if ( pwd == null || pwd.length() == 0 ) throw new FileNotFoundException("pwd isblank");
 
-			final Set<GatewayIntent> intents = new HashSet<GatewayIntent>( Arrays
-					.asList( GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGE_REACTIONS, GatewayIntent.GUILD_MESSAGES ) );
+      final Set<GatewayIntent> intents = new HashSet<>(
+          Arrays.asList(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGE_REACTIONS,
+              GatewayIntent.GUILD_MESSAGES));
 
-			JDABuilder builder = JDABuilder.createDefault( pwd )
-					.enableIntents( intents )
-					.setActivity( Activity.watching( "Online!" ) );
+      JDABuilder builder = JDABuilder.createDefault(pwd)
+                                     .enableIntents(intents)
+                                     .setActivity(Activity.watching("Online!"));
 
-			MessageListener listener = new MessageListener( this );
-			builder.addEventListeners( listener );
+      MessageListener listener = new MessageListener(this);
+      builder.addEventListeners(listener);
 
-			api = builder.build().awaitReady();
+      api = builder.build().awaitReady();
 
-			plugin.logger.info( "Zalogowano bota!" );
+      plugin.logger.info("Zalogowano bota!");
 
-			setupCommands();
-		} catch ( FileNotFoundException | LoginException | InterruptedException e ) {
-			e.printStackTrace();
-		}
-	}
+      setupCommands();
+    } catch ( FileNotFoundException | LoginException | InterruptedException e ) {
+      e.printStackTrace();
+    }
+  }
 
-	private void setupCommands() {
-		CommandListUpdateAction commands = api.updateCommands();
+  private void setupCommands () {
+    CommandListUpdateAction commands = api.updateCommands();
 
-		ArrayList<OptionData> userCollection = new ArrayList<OptionData>();
-		userCollection.add( new OptionData( OptionType.STRING, "user",
-				"Nick gracza którego chcesz sprawdzić", false ) );
-		userCollection.add( new OptionData( OptionType.USER, "dcuser",
-				"Oznaczony gracz (Musi mieć podpięte konto)", false ) );
+    ArrayList<OptionData> userCollection = new ArrayList<>();
+    userCollection.add(new OptionData(OptionType.STRING, "user", "Nick gracza którego chcesz sprawdzić", false));
+    userCollection.add(new OptionData(OptionType.USER, "dcuser", "Oznaczony gracz (Musi mieć podpięte konto)", false));
 
-		ArrayList<OptionData> moneyInfo = new ArrayList<OptionData>();
-		moneyInfo.add( new OptionData( OptionType.INTEGER, "ile", "Ile kasy dodać graczowi",
-				true ) );
-		moneyInfo.add( new OptionData( OptionType.STRING, "typ", "Typ pieniążka", true )
-				.addChoices( new Choice( "Miedziak", "miedziak" ), new Choice( "Srebrnik",
-						"srebrnik" ), new Choice( "Złotnik", "złotnik" ) ) );
+    ArrayList<OptionData> moneyInfo = new ArrayList<>();
+    moneyInfo.add(new OptionData(OptionType.INTEGER, "ile", "Ile kasy dodać graczowi", true));
+    moneyInfo.add(
+        new OptionData(OptionType.STRING, "typ", "Typ pieniążka", true).addChoices(new Choice("Miedziak", "miedziak"),
+            new Choice("Srebrnik", "srebrnik"), new Choice("Złotnik", "złotnik")));
 
-		OptionData narrText = new OptionData( OptionType.STRING, "text", "Text narracji", true );
+    OptionData narrText = new OptionData(OptionType.STRING, "text", "Text narracji", true);
 
-		ArrayList<OptionData> narrCollection = new ArrayList<OptionData>();
-		narrCollection.add( narrText );
-		narrCollection.add( new OptionData( OptionType.STRING, "warp",
-				"Na jakiego warpa wysłać narrację (lokalna)", false ) );
-		narrCollection.add( new OptionData( OptionType.STRING, "user",
-				"Nick gracza wokół którego chcesz wysłać narrację", false ) );
-		narrCollection.add( new OptionData( OptionType.INTEGER, "range",
-				"Jaki ma być range narracji (default 20m.)", false ) );
+    ArrayList<OptionData> narrCollection = new ArrayList<>();
+    narrCollection.add(narrText);
+    narrCollection.add(new OptionData(OptionType.STRING, "warp", "Na jakiego warpa wysłać narrację (lokalna)", false));
+    narrCollection.add(
+        new OptionData(OptionType.STRING, "user", "Nick gracza wokół którego chcesz wysłać narrację", false));
+    narrCollection.add(new OptionData(OptionType.INTEGER, "range", "Jaki ma być range narracji (default 20m.)", false));
 
-		List<OptionData> moneyAndUsers = Stream
-				.concat( moneyInfo.stream(), userCollection.stream() )
-				.distinct()
-				.collect( Collectors.toList() );
+    List<OptionData> moneyAndUsers = Stream.concat(moneyInfo.stream(), userCollection.stream())
+                                           .distinct()
+                                           .collect(Collectors.toList());
 
-		SubcommandData sprawdz = new SubcommandData( "sprawdz", "Sprawdza stan gotówki" )
-				.addOptions( userCollection );
-		SubcommandData dodaj = new SubcommandData( "dodaj", "Dodaje kasę dla gracza" )
-				.addOptions( moneyAndUsers );
-		SubcommandData zabierz = new SubcommandData( "zabierz", "Zabiera kasę od gracza" )
-				.addOptions( moneyAndUsers );
+    SubcommandData sprawdz = new SubcommandData("sprawdz", "Sprawdza stan gotówki").addOptions(userCollection);
+    SubcommandData dodaj = new SubcommandData("dodaj", "Dodaje kasę dla gracza").addOptions(moneyAndUsers);
+    SubcommandData zabierz = new SubcommandData("zabierz", "Zabiera kasę od gracza").addOptions(moneyAndUsers);
 
-		SubcommandData globalNar = new SubcommandData( "globalna", "Globalna narrracja" )
-				.addOptions( narrText );
-		SubcommandData lokalNar = new SubcommandData( "lokalna",
-				"Lokalna narrracja - podaj warpa lub koordy" ).addOptions( narrCollection );
-		SubcommandData privNar = new SubcommandData( "prywatna", "Prywatna narrracja" )
-				.addOptions( narrCollection );
+    SubcommandData globalNar = new SubcommandData("globalna", "Globalna narrracja").addOptions(narrText);
+    SubcommandData lokalNar = new SubcommandData("lokalna", "Lokalna narrracja - podaj warpa lub koordy").addOptions(
+        narrCollection);
+    SubcommandData privNar = new SubcommandData("prywatna", "Prywatna narrracja").addOptions(narrCollection);
 
-		commands.addCommands( new CommandData( "who", "Listuje wszystkich aktywnych użytkowników" )
-				.addOptions( new OptionData( OptionType.BOOLEAN, "ekipa",
-						"czy wyświetlić też ekipę" ).setRequired( true ) ),
+    commands.addCommands(new CommandData("who", "Listuje wszystkich aktywnych użytkowników").addOptions(
+            new OptionData(OptionType.BOOLEAN, "ekipa", "czy wyświetlić też ekipę").setRequired(true)),
 
-				new CommandData( "link", "Dodaje konto serwerowe do discorda" )
-						.addOption( OptionType.STRING, "code", "Kod wygenerowany w grze", true ),
+        new CommandData("link", "Dodaje konto serwerowe do discorda").addOption(OptionType.STRING, "code",
+            "Kod wygenerowany w grze", true),
 
-				new CommandData( "portfel", "Komendy portfelowe admina" )
-						.addSubcommands( sprawdz, dodaj, zabierz ),
+        new CommandData("portfel", "Komendy portfelowe admina").addSubcommands(sprawdz, dodaj, zabierz),
 
-				new CommandData( "bank", "Komendy bankowe admina" )
-						.addSubcommands( sprawdz, dodaj, zabierz ),
+        new CommandData("bank", "Komendy bankowe admina").addSubcommands(sprawdz, dodaj, zabierz),
 
-				new CommandData( "narracja", "Wysyła narrację na serwer" )
-						.addSubcommands( globalNar, lokalNar, privNar ) );
+        new CommandData("narracja", "Wysyła narrację na serwer").addSubcommands(globalNar, lokalNar, privNar));
 
-		commands.queue();
+    commands.queue();
 
-		plugin.logger.info( "Zarejestrowano komendy!" );
-	}
+    plugin.logger.info("Zarejestrowano komendy!");
+  }
 
-	public void updatePresence(
-			@Nonnull String msg
-	) {
-		api.getPresence().setActivity( Activity.watching( msg ) );
-	}
+  public void updatePresence (
+      @Nonnull String msg
+  ) {
+    api.getPresence().setActivity(Activity.watching(msg));
+  }
 
-	public void sendLog(
-			@Nonnull final String msg,
-			@Nonnull final String logsID
-	) {
-		TextChannel channel = api.getTextChannelById( logsID );
-		if ( channel == null ) {
-			plugin.logger.info( "Nie można było rozwiązać kanału: " + logsID );
-			return;
-		}
+  public void sendLog (
+      @Nonnull final String msg, @Nonnull final String logsID
+  ) {
+    TextChannel channel = api.getTextChannelById(logsID);
+    if ( channel == null ) {
+      plugin.logger.info("Nie można było rozwiązać kanału: " + logsID);
+      return;
+    }
 
-		channel.sendMessage( msg ).complete();
-	}
+    channel.sendMessage(msg).complete();
+  }
 
-	public void sendMessageToUser(
-			@Nonnull final String userId,
-			@Nonnull final String msg
-	) {
-		User user = api.retrieveUserById( userId ).complete();
+  public void sendMessageToUser (
+      @Nonnull final String userId, @Nonnull final String msg
+  ) {
+    User user = api.retrieveUserById(userId).complete();
 
-		if ( user == null ) {
-			this.plugin.logger.info( "Nullish user on BOT.sendmessageToUser id: " + userId );
-			return;
-		}
+    if ( user == null ) {
+      this.plugin.logger.info("Nullish user on BOT.sendmessageToUser id: " + userId);
+      return;
+    }
 
-		if ( msg.length() >= 1800 ) {
-			List<String> messages = StringUtils.divideStringIntoDCMessages( msg );
+    if ( msg.length() >= 1800 ) {
+      List<String> messages = StringUtils.divideStringIntoDCMessages(msg);
 
-			for ( String message : messages )
-				user.openPrivateChannel()
-						.flatMap( channel -> channel.sendMessage( message ) )
-						.queue();
+      for ( String message : messages )
+        user.openPrivateChannel().flatMap(channel -> channel.sendMessage(message)).queue();
 
-		} else {
-			user.openPrivateChannel().flatMap( channel -> channel.sendMessage( msg ) ).queue();
-		}
+    }
+    else {
+      user.openPrivateChannel().flatMap(channel -> channel.sendMessage(msg)).queue();
+    }
 
-	}
+  }
 }

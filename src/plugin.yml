@@ -6,81 +6,84 @@ description: Plugin pomocniczy Dla BelorisRP
 api-version: 1.12.2
 load: STARTUP
 website: https://github.com/wisienek/bellaAddon
+
 commands:
-   wiadomosc:
-      description: Przygotowuje wiadomość do wysłania, po wpisaniu komendy pisz na chacie co chcesz wysłać
-      usage: /wiadomosc <zwierze> <nick>
-   test:
-      description: Testowa komenda
-      usage: /test
-   plecak:
-      description: Komenda plecakowa
-      usage: /plecak
-   zaczaruj:
-      description: Komenda do zaklinania przedmiotów na różne efekty!
-      usage: /zaczaruj <efekt/lista> [efekt]
-   przebadaj:
-      description: Bada przedmiot czy jest zaczarowany
-      usage: /przebadaj
-   link:
-      description: Komenda do linkowania konta z discordem
-      usage: /link
-   jazda:
-      description: komenda do togglowania jazdy
-      usage: /jazda <on/off>
-   otp:
-      description: Komenda do teleportacji!
-      permission: bella.otp.use
-      usage: /otp
-      permission-message: Nie masz permissi otp.use!
-   atp:
-      description: Komenda tp dla administracji.
-      permission: bella.atp.admin
-      usage: /atp
-      permission-message: Nie masz permissi atp.admin!
-   o:
-      description: Komenda ooc
-      usage: /o wiadomość ooc
-   rnar:
-      description: Narracja na dany zasięg
-      usage: /rnar <zasięg> [...text]
-   date:
-      description: Wyświetla obecną datę
-      usage: /date
-   portfel:
-      description: zarządzanie kasą
-      usage: /portfel [ pokaż/daj <typ> <ilość> ]
-   bank:
-      description: Zarządzanie bankiem
-      usage: /bank [ wpłać/wypłać/przelej <typ> <ilosć> <gracz> ]
+  wiadomosc:
+    description: Przygotowuje wiadomość do wysłania, po wpisaniu komendy pisz na chacie co chcesz wysłać
+    usage: /wiadomosc <zwierze> <nick>
+  test:
+    description: Testowa komenda
+    usage: /test
+  plecak:
+    description: Komenda plecakowa
+    usage: /plecak
+  zaczaruj:
+    description: Komenda do zaklinania przedmiotów na różne efekty!
+    usage: /zaczaruj <efekt/lista> [efekt]
+  przebadaj:
+    description: Bada przedmiot czy jest zaczarowany
+    usage: /przebadaj
+  link:
+    description: Komenda do linkowania konta z discordem
+    usage: /link
+  jazda:
+    description: komenda do togglowania jazdy
+    usage: /jazda <on/off>
+  otp:
+    description: Komenda do teleportacji!
+    permission: bella.otp.use
+    usage: /otp
+    permission-message: Nie masz permissi otp.use!
+  atp:
+    description: Komenda tp dla administracji.
+    permission: bella.atp.admin
+    usage: /atp
+    permission-message: Nie masz permissi atp.admin!
+  o:
+    description: Komenda ooc
+    usage: /o wiadomość ooc
+  rnar:
+    description: Narracja na dany zasięg
+    usage: /rnar <zasięg> [...text]
+  date:
+    description: Wyświetla obecną datę
+    usage: /date
+  portfel:
+    description: zarządzanie kasą
+    usage: /portfel [ pokaż/daj <typ> <ilość> ]
+  bank:
+    description: Zarządzanie bankiem
+    usage: /bank [ wpłać/wypłać/przelej <typ> <ilosć> <gracz> ]
+
+
 permissions:
-   beloris.bank.admin:
-      description: Admin bankowy
-      default: op
-   beloris.portfel.admin:
-      description: Admin portfelowy
-      default: op
-   beloris.test:
-      description: Testowanie
-      default: op
-   bella.enchanter:
-      description: Enchanotwanie przedmiotów na efekty
-      default: op
-   bella.enchanter.check:
-      description: Sprawdzanie nechantu na przedmiocie
-      default: op
-   bella.otp.use:
-      description: Daje dostęp do używania teleportacji
-      default: op
-   bella.otp.ws:
-      description: Umożliwia teleportację łączną
-      default: op
-   bella.otp.test:
-      description: Daje dostęp do testowych komend teleportacji
-      default: op
-   bella.otp.enchant:
-      description: Umożliwia enchantowanie przedmiotów do teleportacji
-      default: op
-   bella.atp.admin:
-      description: Adminowe komendy Teleportacji
-      default: op
+  beloris.bank.admin:
+    description: Admin bankowy
+    default: op
+  beloris.portfel.admin:
+    description: Admin portfelowy
+    default: op
+  beloris.test:
+    description: Testowanie
+    default: op
+  bella.enchanter:
+    description: Enchanotwanie przedmiotów na efekty
+    default: op
+  bella.enchanter.check:
+    description: Sprawdzanie nechantu na przedmiocie
+    default: op
+  bella.otp.use:
+    description: Daje dostęp do używania teleportacji
+    default: op
+  bella.otp.ws:
+    description: Umożliwia teleportację łączną
+    default: op
+  bella.otp.test:
+    description: Daje dostęp do testowych komend teleportacji
+    default: op
+  bella.otp.enchant:
+    description: Umożliwia enchantowanie przedmiotów do teleportacji
+    default: op
+  bella.atp.admin:
+    description: Adminowe komendy Teleportacji
+    default: op

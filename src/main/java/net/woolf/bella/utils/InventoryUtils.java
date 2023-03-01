@@ -11,27 +11,25 @@ import de.tr7zw.nbtapi.NBTEntity;
 
 public class InventoryUtils {
 
-	public static void dropInventory(
-			final @NotNull Inventory inv,
-			final @NotNull Location location
-	) {
-		ItemStack[] items = inv.getContents();
+  public static void dropInventory (
+      final @NotNull Inventory inv, final @NotNull Location location
+  ) {
+    ItemStack[] items = inv.getContents();
 
-		for ( ItemStack item : items ) {
-			location.getWorld().dropItemNaturally( location, item );
-			inv.removeItem( item );
-		}
-	}
+    for ( ItemStack item : items ) {
+      location.getWorld().dropItemNaturally(location, item);
+      inv.removeItem(item);
+    }
+  }
 
-	public static String getOpenedBackpack(
-			@NotNull OfflinePlayer player
-	) {
-		NBTEntity nbti = new NBTEntity( (Entity) player );
+  public static String getOpenedBackpack (
+      @NotNull OfflinePlayer player
+  ) {
+    NBTEntity nbti = new NBTEntity((Entity) player);
 
-		if ( nbti.hasKey( "backpack-opened" ) )
-			return nbti.getString( "backpack-opened" );
+    if ( nbti.hasKey("backpack-opened") ) return nbti.getString("backpack-opened");
 
-		return null;
-	}
+    return null;
+  }
 
 }

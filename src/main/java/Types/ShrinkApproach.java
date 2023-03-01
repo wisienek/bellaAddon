@@ -2,7 +2,5 @@ package Types;
 
 
 public enum ShrinkApproach {
-	Fast,
-	Compress,
-	Sort,
+  Fast, Compress, Sort,
 }

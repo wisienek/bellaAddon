@@ -2,18 +2,18 @@ package Types;
 
 public enum CacheKeys {
 
-	ChatCacheKey("chat-cache-key");
+  ChatCacheKey("chat-cache-key");
 
-	private final String text;
+  private final String text;
 
-	CacheKeys(
-			final String text
-	) {
-		this.text = text;
-	}
+  CacheKeys (
+      final String text
+  ) {
+    this.text = text;
+  }
 
-	@Override
-	public String toString() {
-		return text;
-	}
+  @Override
+  public String toString () {
+    return text;
+  }
 }

@@ -13,59 +13,55 @@ import org.jetbrains.annotations.NotNull;
 
 public interface IBackpack extends InventoryHolder {
 
-	void open(
-			@NotNull Player player,
-			boolean editable,
-			@Nullable String title
-	);
+  void open (
+      @NotNull Player player, boolean editable, @Nullable String title
+  );
 
-	boolean isOpen();
+  boolean isOpen ();
 
-	int getSize();
+  int getSize ();
 
-	boolean hasChanged();
+  boolean hasChanged ();
 
-	void setChanged();
+  void setChanged ();
 
-	void save();
+  void save ();
 
-	void clear();
+  void clear ();
 
-	void drop(
-			Location location
-	);
+  void drop (
+      Location location
+  );
 
-	ItemStack getBagItem();
+  ItemStack getBagItem ();
 
-	void setBagItem(
-			@NotNull ItemStack item
-	);
+  void setBagItem (
+      @NotNull ItemStack item
+  );
 
-	default @Nullable ItemStack addItem(
-			ItemStack stack
-	) {
-		Map<Integer, ItemStack> left = this.addItems( stack );
-		if ( left.isEmpty() )
-			return null;
+  default @Nullable ItemStack addItem (
+      ItemStack stack
+  ) {
+    Map<Integer, ItemStack> left = this.addItems(stack);
+    if ( left.isEmpty() ) return null;
 
-		return left.get( 0 );
-	}
+    return left.get(0);
+  }
 
-	default @NotNull Map<Integer, ItemStack> addItems(
-			ItemStack... itemStacks
-	) {
-		setChanged();
-		return getInventory().addItem( itemStacks );
-	}
+  default @NotNull Map<Integer, ItemStack> addItems (
+      ItemStack... itemStacks
+  ) {
+    setChanged();
+    return getInventory().addItem(itemStacks);
+  }
 
-	static boolean isBackPack(
-			@Nullable Inventory inventory
-	) {
-		return inventory instanceof IBackpack;
-	}
+  static boolean isBackPack (
+      @Nullable Inventory inventory
+  ) {
+    return inventory instanceof IBackpack;
+  }
 
-	void open(
-			@NotNull Player player,
-			boolean editable
-	);
+  void open (
+      @NotNull Player player, boolean editable
+  );
 }
