@@ -190,7 +190,9 @@ public class MoneyUtils {
 	}
 
 	public Boolean setMoney(
-			String uuid, String type, Long ammount
+			String uuid,
+			String type,
+			Long ammount
 	) {
 		if ( uuid == null || moneyTypes.contains( type ) == false || ammount == null )
 			return false;
@@ -202,7 +204,9 @@ public class MoneyUtils {
 	}
 
 	public Boolean setBankMoney(
-			String uuid, String type, Long ammount
+			String uuid,
+			String type,
+			Long ammount
 	) {
 		if ( uuid == null || moneyTypes.contains( type ) == false || ammount == null )
 			return false;
@@ -214,7 +218,10 @@ public class MoneyUtils {
 	}
 
 	public Boolean transferToBank(
-			Player player, String type, Long ammount, Map<String, Long> money,
+			Player player,
+			String type,
+			Long ammount,
+			Map<String, Long> money,
 			Map<String, Long> bankMoney
 	) {
 		if ( moneyTypes.contains( type ) == false )
@@ -231,8 +238,8 @@ public class MoneyUtils {
 		Boolean check1 = setMoney( player.getUniqueId().toString(), type, rest );
 		if ( check1 == false )
 			return false;
-		Boolean check2 = setBankMoney( player.getUniqueId().toString(), type,
-				bankMoney.get( type ) + ammount );
+		Boolean check2 = setBankMoney( player.getUniqueId().toString(), type, bankMoney.get( type )
+				+ ammount );
 		if ( check2 == false )
 			return false;
 
@@ -240,7 +247,10 @@ public class MoneyUtils {
 	}
 
 	public Boolean transferFromBank(
-			Player player, String type, Long ammount, Map<String, Long> money,
+			Player player,
+			String type,
+			Long ammount,
+			Map<String, Long> money,
 			Map<String, Long> bankMoney
 	) {
 		if ( moneyTypes.contains( type ) == false )
@@ -257,8 +267,8 @@ public class MoneyUtils {
 		Boolean check1 = setBankMoney( player.getUniqueId().toString(), type, rest );
 		if ( check1 == false )
 			return false;
-		Boolean check2 = setMoney( player.getUniqueId().toString(), type,
-				money.get( type ) + ammount );
+		Boolean check2 = setMoney( player.getUniqueId().toString(), type, money.get( type )
+				+ ammount );
 		if ( check2 == false )
 			return false;
 
@@ -266,7 +276,10 @@ public class MoneyUtils {
 	}
 
 	public Boolean transferMoney(
-			Object from, Object to, String type, Long ammount
+			Object from,
+			Object to,
+			String type,
+			Long ammount
 	) {
 		if ( moneyTypes.contains( type ) == false )
 			return false;
@@ -286,8 +299,8 @@ public class MoneyUtils {
 			return false;
 
 		plugin.moneyConfig.set( "personal." + uuid1 + "." + type, has - ammount );
-		plugin.moneyConfig.set( "personal." + uuid2 + "." + type,
-				targetmoney.get( type ) + ammount );
+		plugin.moneyConfig
+				.set( "personal." + uuid2 + "." + type, targetmoney.get( type ) + ammount );
 		plugin.saveMoneyConfig();
 
 		// updateMoneyScore(uuid1);
@@ -297,7 +310,10 @@ public class MoneyUtils {
 	}
 
 	public Boolean transferBankMoney(
-			Object from, Object to, String type, Long ammount
+			Object from,
+			Object to,
+			String type,
+			Long ammount
 	) {
 		if ( moneyTypes.contains( type ) == false )
 			return false;
@@ -324,13 +340,16 @@ public class MoneyUtils {
 	}
 
 	public Double getConversion(
-			String from, String to
+			String from,
+			String to
 	) {
 		return plugin.moneyConfig.getDouble( "conversion." + from + "." + to );
 	}
 
 	public Boolean setConversion(
-			String from, String to, Long conv
+			String from,
+			String to,
+			Long conv
 	) {
 		if (
 			conv == null || conv <= 0 || moneyTypes.contains( from ) == false

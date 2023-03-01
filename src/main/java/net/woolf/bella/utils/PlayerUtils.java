@@ -4,11 +4,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
+import org.jetbrains.annotations.NotNull;
 
+import de.tr7zw.nbtapi.NBTItem;
 import net.woolf.bella.Main;
 
 public class PlayerUtils {
@@ -22,7 +27,7 @@ public class PlayerUtils {
 	}
 
 	@SuppressWarnings("deprecation")
-	public String resolveUUID(
+	public String resolvePlayerToUUID(
 			@Nonnull final String player
 	) {
 		String uuid = null;
@@ -39,8 +44,31 @@ public class PlayerUtils {
 		return uuid;
 	}
 
+	public Player resolveUUIDToOnlinePlayer(
+			@Nonnull final String UUID
+	) {
+		Player player = plugin.server.getPlayer( UUID );
+		if ( player != null )
+			return player;
+
+		List<Player> players = PlayerUtils.getOnlinePlayers();
+		for ( Player sp : players )
+			if ( sp.getUniqueId().toString().equals( UUID ) )
+				return sp;
+
+		return null;
+	}
+
+	@SuppressWarnings("deprecation")
+	public static OfflinePlayer getOfflinePlayer(
+			@NotNull String uuid
+	) {
+		return Main.getInstance().server.getOfflinePlayer( uuid );
+	}
+
 	public void toggleJazda(
-			@Nonnull final Player player, @Nonnull final Boolean change
+			@Nonnull final Player player,
+			@Nonnull final Boolean change
 	) {
 		String uuid = player.getUniqueId().toString();
 
@@ -52,18 +80,41 @@ public class PlayerUtils {
 
 	}
 
-	public static List<Player> getPlayers() {
+	public static List<Player> getOnlinePlayers() {
 		return Main.getInstance().server.getOnlinePlayers().stream().collect( Collectors.toList() );
 	}
 
 	public static List<Player> getPlayersWithinRange(
-			@Nonnull Location location, @Nonnull Long range
+			@Nonnull Location location,
+			@Nonnull Long range,
+			@Nullable OfflinePlayer excludePlayer
 	) {
-		List<Player> players = PlayerUtils.getPlayers();
+		List<Player> players = PlayerUtils.getOnlinePlayers();
 
 		return players.stream()
-				.filter( player -> player.getLocation().distance( location ) <= range )
+				.filter( player -> player.getLocation().distance( location ) <= range
+						&& player.getName().equals( excludePlayer.getName() ) == false )
 				.collect( Collectors.toList() );
 
 	}
+
+	public static Boolean playerArmourHasEffect(
+			@Nonnull Player player,
+			@Nonnull String effect
+	) {
+		PlayerInventory inv = player.getInventory();
+		ItemStack[] armour = inv.getArmorContents();
+
+		for ( ItemStack singleArmour : armour ) {
+			if ( singleArmour == null )
+				continue;
+
+			NBTItem nbti = new NBTItem( singleArmour );
+			if ( nbti.hasKey( effect ) && nbti.getBoolean( effect ) )
+				return true;
+		}
+
+		return false;
+	}
+
 }

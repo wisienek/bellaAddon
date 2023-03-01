@@ -1,10 +1,14 @@
 package net.woolf.bella.bot;
 
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import javax.annotation.Nonnull;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -20,7 +24,9 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.md_5.bungee.api.ChatColor;
 import net.woolf.bella.Main;
 import net.woolf.bella.bot.Bot;
+import net.woolf.bella.commands.LinkCommand;
 import net.woolf.bella.utils.ChatUtils;
+import net.woolf.bella.utils.DbUtils;
 import net.woolf.bella.utils.FileReader;
 import net.woolf.bella.utils.MoneyUtils;
 import net.woolf.bella.utils.PlayerUtils;
@@ -148,10 +154,64 @@ public class MessageListener extends ListenerAdapter {
 			}
 
 			case "link": {
-				event.reply( "Linkowanie discorda z nickiem w grze" ).queue();
+				OptionMapping codeOpt = event.getOption( "code" );
+				String code = codeOpt != null ? codeOpt.getAsString() : null;
+				if ( code == null ) {
+					event.reply( "Musisz podać poprawny kod!" ).setEphemeral( true ).queue();
+					return;
+				}
+
+				if (
+					!LinkCommand.CachedKeys.containsKey( code )
+							|| LinkCommand.CachedKeys.get( code ) == null
+				) {
+					event.reply( "Wprowadzony kod jest niepoprawny: `" + code + "`" )
+							.setEphemeral( true )
+							.queue();
+					return;
+				}
+
+				this.linkAccount( event, LinkCommand.CachedKeys.get( code ) );
+
+				LinkCommand.CachedKeys.remove( code );
 
 				break;
 			}
+		}
+	}
+
+	private void linkAccount(
+			@Nonnull SlashCommandEvent event,
+			@Nonnull String uuid
+	) {
+		if ( uuid == null ) {
+			event.reply( "Nie znaleziono kodu!" ).queue();
+			return;
+		}
+
+		try {
+			DbUtils db = DbUtils.getInstance();
+
+			String msg = db.connectAccount( event.getMember().getId(), uuid );
+
+			Map<String, String[]> accounts = db.getConnectedAccounts( uuid );
+
+			if ( accounts == null || accounts.containsKey( uuid ) == false ) {
+				event.reply( msg ).queue();
+
+				return;
+			}
+
+			event.reply( "Połączono konto " + accounts.get( uuid )[0] + "(`" + uuid
+					+ "`) z discordem!" ).setEphemeral( true ).queue();
+			return;
+		} catch ( SQLException | IOException e ) {
+			Main.getInstance().logger.info( "Niepowodzenie przy linkowaniu konta! DISCORD" );
+			event.reply( "Jakiś błąd wywaliło przy odczytywaniu danych :(" )
+					.setEphemeral( true )
+					.queue();
+
+			e.printStackTrace();
 		}
 	}
 
@@ -178,10 +238,11 @@ public class MessageListener extends ListenerAdapter {
 						+ "]";
 
 				String logMessage = ChatUtils.DCNarrationPrefix + " " + ChatUtils.GlobalPrefix
-						+ " [" + event.getMember().getEffectiveName() + "]" + " [" + narrMessage
-						+ "]";
+						+ " [" + event.getMember().getEffectiveName() + "]" + " `[" + narrMessage
+						+ "]`";
 
-				this.bot.plugin.server.getOnlinePlayers().stream()
+				this.bot.plugin.server.getOnlinePlayers()
+						.stream()
 						.forEach( p -> p.sendMessage( message ) );
 				ChatUtils.cacheMessageForChatLog( logMessage );
 
@@ -199,15 +260,16 @@ public class MessageListener extends ListenerAdapter {
 						+ "]";
 
 				String logMessage = ChatUtils.DCNarrationPrefix + " " + ChatUtils.LocalPrefix + " ["
-						+ event.getMember().getEffectiveName() + "]" + " {"
-						+ ( user != null ? user : warp ) + "} " + String.valueOf( range ) + " ["
-						+ narrMessage + "]";
+						+ event.getMember().getEffectiveName() + "]" + " {`"
+						+ ( user != null ? user : warp ) + "`} <`" + String.valueOf( range )
+						+ "`> `[" + narrMessage + "]`";
 
 				Location location = user != null
 						? this.bot.plugin.server.getPlayer( user ).getLocation()
 						: FileReader.getWarp( warp );
 
-				PlayerUtils.getPlayersWithinRange( location, range ).stream()
+				PlayerUtils.getPlayersWithinRange( location, range, null )
+						.stream()
 						.forEach( p -> p.sendMessage( message ) );
 
 				ChatUtils.cacheMessageForChatLog( logMessage );
@@ -233,8 +295,8 @@ public class MessageListener extends ListenerAdapter {
 						+ "]";
 
 				String logMessage = ChatUtils.DCNarrationPrefix + " " + ChatUtils.WhisperPrefix
-						+ " [" + event.getMember().getEffectiveName() + " -> " + user + "]" + " ["
-						+ narrMessage + "]";
+						+ " [" + event.getMember().getEffectiveName() + " -> " + user + "]" + " `["
+						+ narrMessage + "]`";
 
 				player.sendMessage( message );
 				ChatUtils.cacheMessageForChatLog( logMessage );
@@ -246,9 +308,12 @@ public class MessageListener extends ListenerAdapter {
 	}
 
 	private void handleMoneyManip(
-			SlashCommandEvent event, String subCommand, String playerName, Boolean isBank
+			SlashCommandEvent event,
+			String subCommand,
+			String playerName,
+			Boolean isBank
 	) {
-		String uuid = bot.plugin.putils.resolveUUID( playerName );
+		String uuid = bot.plugin.putils.resolvePlayerToUUID( playerName );
 
 		if ( uuid == null ) {
 			event.reply( "Nie znaleziono UUID gracza!" ).queue();
@@ -301,8 +366,7 @@ public class MessageListener extends ListenerAdapter {
 			long ileMa = money.get( typ );
 
 			if ( ileMa - ile < 0 ) {
-				event.reply(
-						"Nie można wykonać operacji, po zabraniu będzie miał w banku mniej niż minimalna kwota!" )
+				event.reply( "Nie można wykonać operacji, po zabraniu będzie miał w banku mniej niż minimalna kwota!" )
 						.queue();
 				return;
 			}
@@ -331,10 +395,11 @@ public class MessageListener extends ListenerAdapter {
 		List<Player> online = bot.plugin.utils.getPlayers();
 
 		StringBuilder os = new StringBuilder();
-		os.append( "Gracze online (" + online.size() + " / " + bot.plugin.server.getMaxPlayers()
-				+ "):" );
+		os.append( String.format( "Gracze online (%d / %d):", online.size(), bot.plugin.server
+				.getMaxPlayers() ) );
+
 		for ( Player player : online )
-			os.append( "\n- `" + player.getName() + "`" );
+			os.append( String.format( "\n- `%s`", player.getName() ) );
 
 		event.reply( os.toString() ).queue();
 	}
@@ -342,20 +407,24 @@ public class MessageListener extends ListenerAdapter {
 	private void ShowOPs(
 			SlashCommandEvent event
 	) {
-		List<Player> online = bot.plugin.utils.getPlayers().stream().filter( p -> p.isOp() )
+		List<Player> online = bot.plugin.utils.getPlayers()
+				.stream()
+				.filter( p -> p.isOp() )
 				.collect( Collectors.toList() );
 
 		StringBuilder os = new StringBuilder();
-		os.append( "Ekipa online (" + online.size() + " / " + bot.plugin.server.getMaxPlayers()
-				+ "):" );
+		os.append( String.format( "Ekipa online (%d / %d):", online.size(), bot.plugin.server
+				.getMaxPlayers() ) );
+
 		for ( Player player : online )
-			os.append( "\n- `" + player.getName() + "`" );
+			os.append( String.format( "\n- `%s`", player.getName() ) );
 
 		event.reply( os.toString() ).queue();
 	}
 
 	private boolean checkGuildPerms(
-			Guild guild, boolean checkMaster
+			Guild guild,
+			boolean checkMaster
 	) {
 		if ( guild == null )
 			return false;
@@ -373,12 +442,16 @@ public class MessageListener extends ListenerAdapter {
 	}
 
 	private static boolean hasRole(
-			Member member, String roleId
+			Member member,
+			String roleId
 	) {
 		if ( member == null || roleId == null )
 			return false;
 
-		return member.getRoles().stream().filter( o -> o.getId().equals( "809423929864749086" ) )
-				.findFirst().isPresent();
+		return member.getRoles()
+				.stream()
+				.filter( o -> o.getId().equals( roleId ) )
+				.findFirst()
+				.isPresent();
 	}
 }

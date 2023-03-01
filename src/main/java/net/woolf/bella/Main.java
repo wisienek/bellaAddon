@@ -2,6 +2,7 @@ package net.woolf.bella;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -24,7 +25,10 @@ import de.slikey.effectlib.EffectManager;
 import net.woolf.bella.Utils;
 import net.woolf.bella.bot.Bot;
 import net.woolf.bella.commands.CommandManager;
+//import net.woolf.bella.events.ArmorListener;
+import net.woolf.bella.events.BackpackEvents;
 import net.woolf.bella.events.BellaEvents;
+import net.woolf.bella.utils.DbUtils;
 import net.woolf.bella.utils.MoneyUtils;
 import net.woolf.bella.utils.PlayerUtils;
 
@@ -46,6 +50,7 @@ public class Main extends JavaPlugin {
 
 	public final Bot bot = new Bot( this );
 
+	// TODO: move to FileManager
 	private File file = new File( getDataFolder(), "tpInfo.yml" );
 	private File filelvl = new File( getDataFolder(), "tpLevels.yml" );
 	private File fileMoney = new File( getDataFolder(), "money.yml" );
@@ -63,9 +68,25 @@ public class Main extends JavaPlugin {
 	public void onEnable() {
 		PluginManager pm = Bukkit.getServer().getPluginManager();
 		pm.registerEvents( new BellaEvents( this ), this );
+		pm.registerEvents( new BackpackEvents(), this );
 
 		CommandManager.getInstance().initCommands( this );
 
+		try {
+			DbUtils.getInstance();
+		} catch ( SQLException | IOException e1 ) {
+			logger.info( "Error while loading DB instance" );
+			e1.printStackTrace();
+		}
+	}
+
+	@Override
+	public void onDisable() {
+		this.effectManager.dispose();
+		this.bot.api.shutdownNow();
+	}
+
+	private void handleConfigs() {
 		// otp conf
 		config.addDefault( "OTP-command-delay", true );
 		config.addDefault( "setOTP-command-delay", true );
@@ -75,12 +96,12 @@ public class Main extends JavaPlugin {
 		config.addDefault( "setOTP-message", "&7Teleportowano na miejsce!" );
 		// atp conf
 		for ( int i = 0; i <= 5; i++ ) {
-			config.addDefault( "tp-level-" + i + "-cld",
-					String.valueOf( (int) ( 30 / ( i + 1 ) ) ) );
+			config.addDefault( "tp-level-" + i + "-cld", String
+					.valueOf( (int) ( 30 / ( i + 1 ) ) ) );
 			config.addDefault( "tp-level-" + i + "-radius", String.valueOf( (int) ( i * 400 ) ) );
 			config.addDefault( "tp-level-" + i + "-maxp", String.valueOf( (int) ( i * 1 ) ) );
-			config.addDefault( "tp-level-" + i + "-maxpoints",
-					String.valueOf( (int) ( 0 + Math.floor( ( 3 * i ) / ( i * 0.5 ) ) ) ) );
+			config.addDefault( "tp-level-" + i + "-maxpoints", String
+					.valueOf( (int) ( 0 + Math.floor( ( 3 * i ) / ( i * 0.5 ) ) ) ) );
 			config.addDefault( "tp-level-" + i + "-setmaxuse", String.valueOf( (int) ( i * 15 ) ) );
 		}
 
@@ -105,13 +126,6 @@ public class Main extends JavaPlugin {
 			saveEmojiFile();
 		if ( !filePlayerConfig.exists() )
 			savePlayerConfig();
-
-	}
-
-	@Override
-	public void onDisable() {
-		this.effectManager.dispose();
-		this.bot.api.shutdownNow();
 	}
 
 	private void saveEmojiFile() {
@@ -161,5 +175,9 @@ public class Main extends JavaPlugin {
 
 	public static Main getInstance() {
 		return (Main) Bukkit.getPluginManager().getPlugin( "BellaAddon" );
+	}
+
+	public boolean isTest() {
+		return Main.getInstance().server.getMotd().equals( "test" );
 	}
 }

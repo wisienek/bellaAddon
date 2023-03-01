@@ -11,5 +11,6 @@
 	<classpathentry kind="con" path="org.apache.ivyde.eclipse.cpcontainer.IVYDE_CONTAINER/?project=Wplug&amp;ivyXmlPath=ivy.xml&amp;confs=*"/>
 	<classpathentry kind="lib" path="D:/toshiba copy/mc scripts/server/plugins/Wplug/referencess/EffectLib-9.0.jar"/>
 	<classpathentry kind="lib" path="D:/toshiba copy/mc scripts/server/plugins/Wplug/referencess/item-nbt-api-plugin-2.8.0.jar"/>
+	<classpathentry kind="lib" path="D:/toshiba copy/mc scripts/server/bella1/plugins/ArmorEquipEvent-1.7.6.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

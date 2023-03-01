@@ -2,13 +2,14 @@ package net.woolf.bella.commands;
 
 import net.woolf.bella.Main;
 import net.woolf.bella.utils.ChatUtils;
-import net.woolf.bella.commands.atpCommand;
-import net.woolf.bella.commands.bankCommand;
-import net.woolf.bella.commands.dateCommand;
-import net.woolf.bella.commands.jazdaCommand;
-import net.woolf.bella.commands.moneyCommand;
-import net.woolf.bella.commands.oocCommand;
-import net.woolf.bella.commands.otpCommand;
+import net.woolf.bella.commands.AtpCommand;
+import net.woolf.bella.commands.BankCommand;
+import net.woolf.bella.commands.DateCommand;
+import net.woolf.bella.commands.JazdaCommand;
+import net.woolf.bella.commands.MoneyCommand;
+import net.woolf.bella.commands.OocCommand;
+import net.woolf.bella.commands.OtpCommand;
+import net.woolf.bella.commands.LinkCommand;
 
 @SuppressWarnings("unused")
 public final class CommandManager {
@@ -29,23 +30,19 @@ public final class CommandManager {
 	public void initCommands(
 			Main instance
 	) {
-		// teleportacja
-		new otpCommand( instance );
-		// teleportacja dla adminów
-		new atpCommand( instance );
-		// ładne ooc
-		new oocCommand( instance );
-		// aktualna data
-		new dateCommand( instance );
-		// kasa portfelowa
-		new moneyCommand( instance );
-		// kasa bankowa
-		new bankCommand( instance );
-		// utilsy chatowe
+		new LinkCommand( instance );
+		new OtpCommand( instance );
+		new AtpCommand( instance );
+		new OocCommand( instance );
+		new DateCommand( instance );
+		new MoneyCommand( instance );
+		new BankCommand( instance );
 		new ChatUtils( instance );
-		// jazda na graczach
-		new jazdaCommand( instance );
-		// narracja na range
-		new rnarCommand( instance );
+		new JazdaCommand( instance );
+		new RnarCommand( instance );
+		new ItemEnchanter( instance );
+		new TestCommand();
+		new PlecakCommand();
+		new ListCommand();
 	}
 }

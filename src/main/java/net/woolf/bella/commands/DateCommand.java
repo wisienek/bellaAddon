@@ -10,11 +10,11 @@ import org.bukkit.entity.Player;
 import net.md_5.bungee.api.ChatColor;
 import net.woolf.bella.Main;
 
-public class dateCommand implements CommandExecutor {
+public class DateCommand implements CommandExecutor {
 
 	private Main plugin;
 
-	public dateCommand(
+	public DateCommand(
 			Main main
 	) {
 		this.plugin = main;
@@ -24,7 +24,10 @@ public class dateCommand implements CommandExecutor {
 	@SuppressWarnings("deprecation")
 	@Override
 	public boolean onCommand(
-			CommandSender sender, Command cmd, String label, String[] args
+			CommandSender sender,
+			Command cmd,
+			String label,
+			String[] args
 	) {
 		if ( sender instanceof Player ) {
 			Player player = (Player) sender;

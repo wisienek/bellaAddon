@@ -15,11 +15,11 @@ import net.md_5.bungee.api.ChatColor;
 import net.woolf.bella.Main;
 import net.woolf.bella.utils.ChatUtils;
 
-public class rnarCommand implements CommandExecutor {
+public class RnarCommand implements CommandExecutor {
 
 	private Main plugin;
 
-	public rnarCommand(
+	public RnarCommand(
 			Main instance
 	) {
 		this.plugin = instance;
@@ -33,7 +33,10 @@ public class rnarCommand implements CommandExecutor {
 
 	@Override
 	public boolean onCommand(
-			CommandSender sender, Command cmd, String label, String[] args
+			CommandSender sender,
+			Command cmd,
+			String label,
+			String[] args
 	) {
 		if ( sender instanceof Player ) {
 			Player player = (Player) sender;
@@ -45,7 +48,7 @@ public class rnarCommand implements CommandExecutor {
 			}
 
 			if ( args.length == 0 ) {
-				player.sendMessage( Main.prefixInfo + rnarCommand.getUsage() );
+				player.sendMessage( Main.prefixInfo + RnarCommand.getUsage() );
 				return true;
 			}
 
@@ -53,7 +56,7 @@ public class rnarCommand implements CommandExecutor {
 				int radius = Integer.valueOf( args[0] );
 
 				if ( radius < 2 ) {
-					player.sendMessage( Main.prefixError + rnarCommand.getUsage() );
+					player.sendMessage( Main.prefixError + RnarCommand.getUsage() );
 					return true;
 				}
 
@@ -62,8 +65,9 @@ public class rnarCommand implements CommandExecutor {
 
 				List<Player> nearbyPlayers = plugin.utils.getNearbyPlayers( player, radius );
 
-				String msg = _msg.stream().collect( Collectors.joining( " " ) ).replaceAll( "`",
-						"" );
+				String msg = _msg.stream()
+						.collect( Collectors.joining( " " ) )
+						.replaceAll( "`", "" );
 				String formatedMsg = ChatColor.DARK_RED + "[R] " + ChatColor.YELLOW + "[" + msg
 						+ "]";
 
@@ -78,7 +82,7 @@ public class rnarCommand implements CommandExecutor {
 						+ "[" + player.getDisplayName() + "] " + "`" + msg + "`" );
 			} catch ( NumberFormatException nfe ) {
 				player.sendMessage( Main.prefixError + "Błąd przy formatowaniu liczby!" );
-				player.sendMessage( Main.prefixError + rnarCommand.getUsage() );
+				player.sendMessage( Main.prefixError + RnarCommand.getUsage() );
 				return true;
 			}
 

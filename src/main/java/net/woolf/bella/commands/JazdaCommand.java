@@ -7,11 +7,11 @@ import org.bukkit.entity.Player;
 
 import net.woolf.bella.Main;
 
-public class jazdaCommand implements CommandExecutor {
+public class JazdaCommand implements CommandExecutor {
 
 	private Main plugin;
 
-	public jazdaCommand(
+	public JazdaCommand(
 			Main main
 	) {
 		this.plugin = main;
@@ -20,7 +20,10 @@ public class jazdaCommand implements CommandExecutor {
 
 	@Override
 	public boolean onCommand(
-			CommandSender sender, Command cmd, String label, String[] args
+			CommandSender sender,
+			Command cmd,
+			String label,
+			String[] args
 	) {
 		if ( sender instanceof Player ) {
 			if ( args.length == 0 ) {

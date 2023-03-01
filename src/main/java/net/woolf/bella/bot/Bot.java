@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
 import javax.security.auth.login.LoginException;
 
 import net.dv8tion.jda.api.JDA;
@@ -20,14 +21,21 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.interactions.commands.Command.Choice;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.woolf.bella.Main;
+import net.woolf.bella.utils.StringUtils;
 
 public class Bot {
+
+	public static final String ChatLogId = "960200738468925480";
+	public static final String MoneyLogId = "885517500261998633";
+	public static final String VariousLogId = "969288905813803008";
+	public static final String HelpopLogId = "1002690952307163256";
 
 	public Main plugin;
 
@@ -54,11 +62,11 @@ public class Bot {
 			if ( pwd == null || pwd.isEmpty() || pwd.length() == 0 )
 				throw new FileNotFoundException( "pwd isblank" );
 
-			final Set<GatewayIntent> intents = new HashSet<GatewayIntent>(
-					Arrays.asList( GatewayIntent.GUILD_MEMBERS,
-							GatewayIntent.GUILD_MESSAGE_REACTIONS, GatewayIntent.GUILD_MESSAGES ) );
+			final Set<GatewayIntent> intents = new HashSet<GatewayIntent>( Arrays
+					.asList( GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGE_REACTIONS, GatewayIntent.GUILD_MESSAGES ) );
 
-			JDABuilder builder = JDABuilder.createDefault( pwd ).enableIntents( intents )
+			JDABuilder builder = JDABuilder.createDefault( pwd )
+					.enableIntents( intents )
 					.setActivity( Activity.watching( "Online!" ) );
 
 			MessageListener listener = new MessageListener( this );
@@ -84,11 +92,11 @@ public class Bot {
 				"Oznaczony gracz (Musi mieć podpięte konto)", false ) );
 
 		ArrayList<OptionData> moneyInfo = new ArrayList<OptionData>();
-		moneyInfo.add(
-				new OptionData( OptionType.INTEGER, "ile", "Ile kasy dodać graczowi", true ) );
-		moneyInfo.add( new OptionData( OptionType.STRING, "typ", "Typ pieniążka", true ).addChoices(
-				new Choice( "Miedziak", "miedziak" ), new Choice( "Srebrnik", "srebrnik" ),
-				new Choice( "Złotnik", "złotnik" ) ) );
+		moneyInfo.add( new OptionData( OptionType.INTEGER, "ile", "Ile kasy dodać graczowi",
+				true ) );
+		moneyInfo.add( new OptionData( OptionType.STRING, "typ", "Typ pieniążka", true )
+				.addChoices( new Choice( "Miedziak", "miedziak" ), new Choice( "Srebrnik",
+						"srebrnik" ), new Choice( "Złotnik", "złotnik" ) ) );
 
 		OptionData narrText = new OptionData( OptionType.STRING, "text", "Text narracji", true );
 
@@ -102,7 +110,8 @@ public class Bot {
 				"Jaki ma być range narracji (default 20m.)", false ) );
 
 		List<OptionData> moneyAndUsers = Stream
-				.concat( moneyInfo.stream(), userCollection.stream() ).distinct()
+				.concat( moneyInfo.stream(), userCollection.stream() )
+				.distinct()
 				.collect( Collectors.toList() );
 
 		SubcommandData sprawdz = new SubcommandData( "sprawdz", "Sprawdza stan gotówki" )
@@ -119,19 +128,18 @@ public class Bot {
 		SubcommandData privNar = new SubcommandData( "prywatna", "Prywatna narrracja" )
 				.addOptions( narrCollection );
 
-		commands.addCommands(
-				new CommandData( "who", "Listuje wszystkich aktywnych użytkowników" ).addOptions(
-						new OptionData( OptionType.BOOLEAN, "ekipa", "czy wyświetlić też ekipę" )
-								.setRequired( true ) ),
+		commands.addCommands( new CommandData( "who", "Listuje wszystkich aktywnych użytkowników" )
+				.addOptions( new OptionData( OptionType.BOOLEAN, "ekipa",
+						"czy wyświetlić też ekipę" ).setRequired( true ) ),
 
 				new CommandData( "link", "Dodaje konto serwerowe do discorda" )
 						.addOption( OptionType.STRING, "code", "Kod wygenerowany w grze", true ),
 
-				new CommandData( "portfel", "Komendy portfelowe admina" ).addSubcommands( sprawdz,
-						dodaj, zabierz ),
+				new CommandData( "portfel", "Komendy portfelowe admina" )
+						.addSubcommands( sprawdz, dodaj, zabierz ),
 
-				new CommandData( "bank", "Komendy bankowe admina" ).addSubcommands( sprawdz, dodaj,
-						zabierz ),
+				new CommandData( "bank", "Komendy bankowe admina" )
+						.addSubcommands( sprawdz, dodaj, zabierz ),
 
 				new CommandData( "narracja", "Wysyła narrację na serwer" )
 						.addSubcommands( globalNar, lokalNar, privNar ) );
@@ -142,36 +150,46 @@ public class Bot {
 	}
 
 	public void updatePresence(
-			String msg
+			@Nonnull String msg
 	) {
 		api.getPresence().setActivity( Activity.watching( msg ) );
 	}
 
-	public void moneyLog(
-			String msg
+	public void sendLog(
+			@Nonnull final String msg,
+			@Nonnull final String logsID
 	) {
-		String logsID = "885517500261998633";
-
 		TextChannel channel = api.getTextChannelById( logsID );
 		if ( channel == null ) {
-			plugin.logger.info( "Nie można było rozwiązać kanału moneylog: " + logsID );
+			plugin.logger.info( "Nie można było rozwiązać kanału: " + logsID );
 			return;
 		}
 
 		channel.sendMessage( msg ).complete();
 	}
 
-	public void chatLog(
-			String msg
+	public void sendMessageToUser(
+			@Nonnull final String userId,
+			@Nonnull final String msg
 	) {
-		String logsID = "960200738468925480";
+		User user = api.retrieveUserById( userId ).complete();
 
-		TextChannel channel = api.getTextChannelById( logsID );
-		if ( channel == null ) {
-			plugin.logger.info( "Nie można było rozwiązać kanału chatLog: " + logsID );
+		if ( user == null ) {
+			this.plugin.logger.info( "Nullish user on BOT.sendmessageToUser id: " + userId );
 			return;
 		}
 
-		channel.sendMessage( msg ).complete();
+		if ( msg.length() >= 1800 ) {
+			List<String> messages = StringUtils.divideStringIntoDCMessages( msg );
+
+			for ( String message : messages )
+				user.openPrivateChannel()
+						.flatMap( channel -> channel.sendMessage( message ) )
+						.queue();
+
+		} else {
+			user.openPrivateChannel().flatMap( channel -> channel.sendMessage( msg ) ).queue();
+		}
+
 	}
 }

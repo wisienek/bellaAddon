@@ -11,11 +11,11 @@ import net.md_5.bungee.api.ChatColor;
 import net.woolf.bella.Main;
 import net.woolf.bella.utils.ChatUtils;
 
-public class oocCommand implements CommandExecutor {
+public class OocCommand implements CommandExecutor {
 
 	private Main plugin;
 
-	public oocCommand(
+	public OocCommand(
 			Main main
 	) {
 		this.plugin = main;
@@ -24,7 +24,10 @@ public class oocCommand implements CommandExecutor {
 
 	@Override
 	public boolean onCommand(
-			CommandSender sender, Command cmd, String label, String[] args
+			CommandSender sender,
+			Command cmd,
+			String label,
+			String[] args
 	) {
 		if ( sender instanceof Player ) {
 			if ( args.length == 0 )
@@ -36,7 +39,7 @@ public class oocCommand implements CommandExecutor {
 			String msg = ChatColor.WHITE + "[" + ChatColor.RED + "OOC" + ChatColor.WHITE + "] "
 					+ ChatColor.GRAY + player.getName() + ": (" + String.join( " ", args ) + ")";
 
-			String logMsg = "[OOC] " + player.getName() + ": `("
+			String logMsg = ChatUtils.OOCPrefix + " " + player.getName() + ": `("
 					+ String.join( " ", args ).replaceAll( "`", "" ) + ")`";
 
 			player.sendMessage( msg );

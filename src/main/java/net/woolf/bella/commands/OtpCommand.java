@@ -17,6 +17,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import Types.Permissions;
+
 import org.bukkit.inventory.meta.ItemMeta;
 
 import de.slikey.effectlib.Effect;
@@ -25,13 +28,15 @@ import de.tr7zw.nbtapi.NBTCompound;
 import de.tr7zw.nbtapi.NBTItem;
 import net.woolf.bella.Main;
 import net.woolf.bella.Utils;
+import net.woolf.bella.bot.Bot;
+import net.woolf.bella.utils.PlayerUtils;
 
 @SuppressWarnings("unused")
-public class otpCommand implements CommandExecutor {
+public class OtpCommand implements CommandExecutor {
 
 	private Main plugin;
 
-	public otpCommand(
+	public OtpCommand(
 			Main plugin
 	) {
 		this.plugin = plugin;
@@ -49,7 +54,10 @@ public class otpCommand implements CommandExecutor {
 
 	@Override
 	public boolean onCommand(
-			CommandSender sender, Command cmd, String label, String[] args
+			CommandSender sender,
+			Command cmd,
+			String label,
+			String[] args
 	) {
 		if ( !( sender instanceof Player ) ) {
 			sender.sendMessage( "Tylko dla graczy!" );
@@ -58,7 +66,7 @@ public class otpCommand implements CommandExecutor {
 
 		Player player = (Player) sender;
 
-		if ( player.hasPermission( "bella.otp.use" ) ) {
+		if ( player.hasPermission( Permissions.OTP_USE.toString() ) ) {
 
 			if ( args.length < 1 ) {
 				player.sendMessage( getUsage() );
@@ -95,8 +103,8 @@ public class otpCommand implements CommandExecutor {
 					String type = plugin.utils.getType( player );
 
 					StringBuilder os = new StringBuilder();
-					os.append(
-							Main.prefixInfo + "Twój level wynosi: " + ChatColor.YELLOW + levelS );
+					os.append( Main.prefixInfo + "Twój level wynosi: " + ChatColor.YELLOW
+							+ levelS );
 					os.append( "\n" + ChatColor.GRAY + "Max pkt tp : " + ChatColor.YELLOW
 							+ String.valueOf( len ) + " / " + String.valueOf( maxpts ) );
 					os.append( "\n" + ChatColor.GRAY + "Odległość  : " + ChatColor.YELLOW
@@ -114,8 +122,8 @@ public class otpCommand implements CommandExecutor {
 
 				case "set": {
 					if ( otp == null || otp.isEmpty() ) {
-						player.sendMessage(
-								Main.prefixError + "Niepoprawna nazwa: " + ChatColor.YELLOW + otp );
+						player.sendMessage( Main.prefixError + "Niepoprawna nazwa: "
+								+ ChatColor.YELLOW + otp );
 						return true;
 					}
 
@@ -154,8 +162,8 @@ public class otpCommand implements CommandExecutor {
 
 				case "del": {
 					if ( otp == null || otp.isEmpty() ) {
-						player.sendMessage(
-								Main.prefixError + "Niepoprawny TP: " + ChatColor.YELLOW + otp );
+						player.sendMessage( Main.prefixError + "Niepoprawny TP: " + ChatColor.YELLOW
+								+ otp );
 						return true;
 					}
 
@@ -177,7 +185,8 @@ public class otpCommand implements CommandExecutor {
 
 				case "effect": {
 					if (
-						player.hasPermission( "atp.admin" ) || player.hasPermission( "otp.test" )
+						player.hasPermission( Permissions.ATP_ADMIN.toString() )
+								|| player.hasPermission( Permissions.TEST.toString() )
 					) {
 						String type = plugin.utils.getType( player );
 						plugin.utils.tpEffect( player, null, null );
@@ -196,7 +205,10 @@ public class otpCommand implements CommandExecutor {
 
 					String ef = plugin.utils.getType( player );
 
-					if ( ef.isEmpty() == false && player.hasPermission( "atp.admin" ) == false ) {
+					if (
+						ef.isEmpty() == false
+								&& player.hasPermission( Permissions.ATP_ADMIN.toString() ) == false
+					) {
 						player.sendMessage( Main.prefixError
 								+ "Masz już ustawiony efekt! Jedynie admin może Ci zmienić." );
 						return true;
@@ -207,24 +219,24 @@ public class otpCommand implements CommandExecutor {
 						for ( String type : Utils.types )
 							os.append( ChatColor.GRAY + ", " + ChatColor.YELLOW + type );
 
-						player.sendMessage(
-								Main.prefixError + "Twój efekt nie znajduje się na liście: "
-										+ ChatColor.YELLOW + String.join( ", ", Utils.types ) );
+						player.sendMessage( Main.prefixError
+								+ "Twój efekt nie znajduje się na liście: " + ChatColor.YELLOW
+								+ String.join( ", ", Utils.types ) );
 						return true;
 					}
 
 					Boolean ok = plugin.utils.setType( player, otp );
 
-					player.sendMessage(
-							ok ? Main.prefixInfo + "Ustawiono efekt na: " + ChatColor.BLUE + otp
-									: Main.prefixError + "Nie powiodło się ustawianie efektu!" );
+					player.sendMessage( ok
+							? Main.prefixInfo + "Ustawiono efekt na: " + ChatColor.BLUE + otp
+							: Main.prefixError + "Nie powiodło się ustawianie efektu!" );
 					return true;
 				}
 
 				case "tp": {
 					if ( otp == null || otp.isEmpty() ) {
-						player.sendMessage(
-								Main.prefixError + "Niepoprawny TP: " + ChatColor.YELLOW + otp );
+						player.sendMessage( Main.prefixError + "Niepoprawny TP: " + ChatColor.YELLOW
+								+ otp );
 						return true;
 					}
 
@@ -235,7 +247,8 @@ public class otpCommand implements CommandExecutor {
 
 						// przelicz odległość
 						Location loc = plugin.utils.getOTPLocation( player, otp );
-						double distance = player.getLocation().distance( loc );
+						Location playerLoc = player.getLocation();
+						double distance = playerLoc.distance( loc );
 
 						if ( distance > radius ) {
 							player.sendMessage( Main.prefixError
@@ -246,10 +259,9 @@ public class otpCommand implements CommandExecutor {
 						}
 
 						List<Player> sendTo = plugin.utils.getNearbyPlayers( player, 20 );
-						for ( Player sending : sendTo ) {
+						for ( Player sending : sendTo )
 							sending.sendMessage( ChatColor.WHITE + "[L] " + ChatColor.YELLOW
 									+ "[Niedaleko słychać trzask teleportacji]" );
-						}
 
 						if ( plugin.config.getBoolean( "OTP-command-delay" ) ) {
 							if ( plugin.utils.cooldownTimeOTP.containsKey( player ) ) {
@@ -262,12 +274,26 @@ public class otpCommand implements CommandExecutor {
 								plugin.utils.setCoolDownTimeOTP( player, cld );
 								player.sendMessage( Main.prefixInfo + "Teleportowano do punktu "
 										+ ChatColor.YELLOW + otp );
+
+								this.plugin.bot.sendLog( String
+										.format( "[%s] teleportował {%o %o %o} -> {%o %o %o} (%s)", player
+												.getName(), playerLoc.getBlockX(), playerLoc
+														.getBlockY(), playerLoc.getBlockZ(), loc
+																.getBlockX(), loc.getBlockY(), loc
+																		.getBlockZ(), otp ), Bot.VariousLogId );
 							}
 						} else {
 							plugin.utils.tpEffect( player, otp, null );
 
 							player.sendMessage( Main.prefixInfo + "Teleportowano do punktu "
 									+ ChatColor.YELLOW + otp );
+
+							this.plugin.bot.sendLog( String
+									.format( "[%s] teleportował {%o %o %o} -> {%o %o %o} (%s)", player
+											.getName(), playerLoc.getBlockX(), playerLoc
+													.getBlockY(), playerLoc.getBlockZ(), loc
+															.getBlockX(), loc.getBlockY(), loc
+																	.getBlockZ(), otp ), Bot.VariousLogId );
 						}
 					}
 
@@ -299,7 +325,7 @@ public class otpCommand implements CommandExecutor {
 				}
 
 				case "enchant": {
-					if ( !player.hasPermission( "bella.otp.enchant" ) ) {
+					if ( !player.hasPermission( Permissions.OTP_ENCHANT.toString() ) ) {
 						player.sendMessage( Main.prefixError
 								+ "Musisz posiadać umiejętność enchatnowania aby tego użyć! (bella.otp.enchant)" );
 						return true;
@@ -319,8 +345,8 @@ public class otpCommand implements CommandExecutor {
 					}
 
 					if ( otp == null || otp.isEmpty() ) {
-						player.sendMessage(
-								Main.prefixError + "Niepoprawny TP: " + ChatColor.YELLOW + otp );
+						player.sendMessage( Main.prefixError + "Niepoprawny TP: " + ChatColor.YELLOW
+								+ otp );
 						return true;
 					}
 
@@ -333,7 +359,7 @@ public class otpCommand implements CommandExecutor {
 					}
 
 					String maxu = args.length >= 3 ? args[2]
-							: player.hasPermission( "atp.admin" )
+							: player.hasPermission( Permissions.ATP_ADMIN.toString() )
 									? String.valueOf( Integer.MAX_VALUE )
 									: String.valueOf( setmaxuse );
 
@@ -362,9 +388,10 @@ public class otpCommand implements CommandExecutor {
 				}
 
 				case "inspect": {
-					if ( !player.hasPermission( "bella.otp.enchant" ) ) {
+					if ( !player.hasPermission( Permissions.OTP_ENCHANT.toString() ) ) {
 						player.sendMessage( Main.prefixError
-								+ "Musisz posiadać umiejętność enchatnowania aby tego użyć! (bella.otp.enchant)" );
+								+ "Musisz posiadać umiejętność enchatnowania aby tego użyć! ("
+								+ Permissions.OTP_ENCHANT.toString() + ")" );
 						return true;
 					}
 					ItemStack item = player.getInventory().getItemInMainHand();
@@ -416,14 +443,26 @@ public class otpCommand implements CommandExecutor {
 					}
 
 					if ( otp == null || otp.isEmpty() ) {
-						player.sendMessage(
-								Main.prefixError + "Niepoprawny TP: " + ChatColor.YELLOW + otp );
+						player.sendMessage( Main.prefixError + "Niepoprawny TP: " + ChatColor.YELLOW
+								+ otp );
+						return true;
+					}
+
+					Location loc = plugin.utils.getOTPLocation( player, otp );
+					double distance = player.getLocation().distance( loc );
+
+					if ( distance > radius ) {
+						player.sendMessage( Main.prefixError
+								+ "Za długi dystans pomiędzy lokacją, a punktem teleportacji! ( "
+								+ String.valueOf( (int) distance ) + " / "
+								+ String.valueOf( (int) radius ) + " )" );
 						return true;
 					}
 
 					String pname = args[2];
 
-					List<Player> list = player.getWorld().getPlayers();
+					List<Player> list = PlayerUtils
+							.getPlayersWithinRange( player.getLocation(), 5l, player );
 					Player target = null;
 					for ( Player p : list )
 						if ( p.getName().equals( pname ) )
@@ -435,11 +474,7 @@ public class otpCommand implements CommandExecutor {
 						return true;
 					}
 
-					if ( player.getLocation().distance( target.getLocation() ) > 4 ) {
-						player.sendMessage(
-								Main.prefixError + "Gracz jest za daleko aby go teleportować!" );
-						return true;
-					}
+					Location playerLoc = target.getLocation();
 
 					if ( plugin.config.getBoolean( "OTP-command-delay" ) ) {
 						if ( plugin.utils.cooldownTimeOTP.containsKey( player ) ) {
@@ -454,26 +489,44 @@ public class otpCommand implements CommandExecutor {
 									+ "do punktu " + otp );
 
 							plugin.utils.setCoolDownTimeOTP( player, cld );
+
+							this.plugin.bot.sendLog( String
+									.format( "[%s] teleportował [%s] {%o %o %o} -> {%o %o %o} (%s)", player
+											.getName(), target.getName(), playerLoc
+													.getBlockX(), playerLoc.getBlockY(), playerLoc
+															.getBlockZ(), loc.getBlockX(), loc
+																	.getBlockY(), loc
+																			.getBlockZ(), otp ), Bot.VariousLogId );
 						}
 					} else {
 						plugin.utils.tpEffect( player, otp, target );
 						target.sendMessage( Main.prefixInfo + "Zostałeś teleportowany przez "
 								+ player.getName() + " do punktu " + otp );
-						player.sendMessage(
-								Main.prefixInfo + "Teleportowałeś " + pname + "do punktu " + otp );
+						player.sendMessage( Main.prefixInfo + "Teleportowałeś " + pname
+								+ "do punktu " + otp );
+
+						this.plugin.bot.sendLog( String
+								.format( "[%s] teleportował [%s] {%o %o %o} -> {%o %o %o} (%s)", player
+										.getName(), target.getName(), playerLoc
+												.getBlockX(), playerLoc.getBlockY(), playerLoc
+														.getBlockZ(), loc.getBlockX(), loc
+																.getBlockY(), loc
+																		.getBlockZ(), otp ), Bot.VariousLogId );
 					}
 
 					return true;
 				}
 
 				case "ws": {
-					if ( !player.hasPermission( "bella.otp.ws" ) ) {
-						player.sendMessage(
-								Main.prefixError + "Nie potrafisz jeszcze wspólnej teleportacji!" );
+					if ( !player.hasPermission( Permissions.OTP_WS.toString() ) ) {
+						player.sendMessage( Main.prefixError
+								+ "Nie potrafisz jeszcze wspólnej teleportacji!" );
 						return true;
 					}
 
-					List<Player> nearbyPlayers = plugin.utils.getNearbyPlayers( player, 3 );
+					Location playerLoc = player.getLocation();
+					List<Player> nearbyPlayers = PlayerUtils
+							.getPlayersWithinRange( playerLoc, 3l, player );
 
 					if ( nearbyPlayers.size() > maxp ) {
 						player.sendMessage( Main.prefixError + "Za dużo osób do teleportacji! ( "
@@ -483,8 +536,8 @@ public class otpCommand implements CommandExecutor {
 					}
 
 					if ( otp == null || otp.isEmpty() ) {
-						player.sendMessage(
-								Main.prefixError + "Niepoprawny TP: " + ChatColor.YELLOW + otp );
+						player.sendMessage( Main.prefixError + "Niepoprawny TP: " + ChatColor.YELLOW
+								+ otp );
 						return true;
 					}
 
@@ -494,7 +547,7 @@ public class otpCommand implements CommandExecutor {
 					} else {
 						// przelicz odległość
 						Location loc = plugin.utils.getOTPLocation( player, otp );
-						double distance = player.getLocation().distance( loc );
+						double distance = playerLoc.distance( loc );
 
 						if ( distance > radius ) {
 							player.sendMessage( Main.prefixError
@@ -505,10 +558,14 @@ public class otpCommand implements CommandExecutor {
 						}
 
 						List<Player> sendTo = plugin.utils.getNearbyPlayers( player, 20 );
-						for ( Player sending : sendTo ) {
+						for ( Player sending : sendTo )
 							sending.sendMessage( ChatColor.WHITE + "[L] " + ChatColor.YELLOW
 									+ "[Niedaleko słychać trzask teleportacji łącznej]" );
-						}
+
+						String playerNames = String
+								.format( "[%s]", String.join( ", ", nearbyPlayers.stream()
+										.map( (p) -> String.format( "`%s`", p.getName() ) )
+										.collect( Collectors.toList() ) ) );
 
 						StringBuilder os = new StringBuilder();
 						if ( plugin.config.getBoolean( "OTP-command-delay" ) ) {
@@ -531,6 +588,13 @@ public class otpCommand implements CommandExecutor {
 								player.sendMessage( Main.prefixInfo + "Teleportowano wspólnie z ( "
 										+ os.toString() + " ) do punktu " + ChatColor.YELLOW
 										+ otp );
+
+								this.plugin.bot.sendLog( String
+										.format( "[%s] teleportował {%o %o %o} -> {%o %o %o} (%s) z %s", player
+												.getName(), playerLoc.getBlockX(), playerLoc
+														.getBlockY(), playerLoc.getBlockZ(), loc
+																.getBlockX(), loc.getBlockY(), loc
+																		.getBlockZ(), otp, playerNames ), Bot.VariousLogId );
 							}
 						} else {
 							for ( Player target : nearbyPlayers ) {
@@ -545,6 +609,13 @@ public class otpCommand implements CommandExecutor {
 
 							player.sendMessage( Main.prefixInfo + "Teleportowano wspólnie z ( "
 									+ os.toString() + " ) do punktu " + ChatColor.YELLOW + otp );
+
+							this.plugin.bot.sendLog( String
+									.format( "[%s] teleportował {%o %o %o} -> {%o %o %o} (%s) z %s", player
+											.getName(), playerLoc.getBlockX(), playerLoc
+													.getBlockY(), playerLoc.getBlockZ(), loc
+															.getBlockX(), loc.getBlockY(), loc
+																	.getBlockZ(), otp, playerNames ), Bot.VariousLogId );
 						}
 					}
 
@@ -561,12 +632,13 @@ public class otpCommand implements CommandExecutor {
 	}
 
 	void setPlayerOTP(
-			Player player, String name
+			Player player,
+			String name
 	) {
 		plugin.utils.setOTP( player, name );
 		if ( plugin.config.getBoolean( "show-setOTP-message" ) ) {
-			String strFormatted = plugin.config.getString( "setOTP-message" ).replace( "%player%",
-					player.getDisplayName() );
+			String strFormatted = plugin.config.getString( "setOTP-message" )
+					.replace( "%player%", player.getDisplayName() );
 			player.sendMessage( ChatColor.translateAlternateColorCodes( '&', strFormatted ) );
 		}
 	}

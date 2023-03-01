@@ -1,17 +1,20 @@
 package net.woolf.bella.utils;
 
-import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.bukkit.ChatColor;
 
+import Types.CacheKeys;
 import net.woolf.bella.Main;
+import net.woolf.bella.bot.Bot;
 
 public class ChatUtils {
 
@@ -22,8 +25,9 @@ public class ChatUtils {
 	public static final String WhisperPrefix = "**[S]**";
 	public static final String DCNarrationPrefix = "**[DC]**";
 
-	private static String cachedMessage = "";
-	private static Timer timer;
+	private static final Map<String, String> cachedMessages = new HashMap<String, String>();
+
+	private static Map<String, Timer> timerMap = new HashMap<String, Timer>();
 	public static final Long PullTime = 100l;
 
 	private static Main plugin;
@@ -37,46 +41,48 @@ public class ChatUtils {
 	public static void cacheMessageForChatLog(
 			@Nullable String message
 	) {
-		ChatUtils.cacheMessageForChatLog( message, false );
+		ChatUtils.cacheMessageForChatLog( CacheKeys.ChatCacheKey.toString(), message, false );
 		return;
 	}
 
-	@SuppressWarnings("deprecation")
 	public static void cacheMessageForChatLog(
-			@Nullable String message, Boolean sendFirst
+			@Nonnull String cacheKey,
+			@Nullable String message,
+			Boolean sendFirst
 	) {
 		if ( sendFirst )
-			ChatUtils.sendCachedMessage();
+			ChatUtils.sendCachedMessage( cacheKey );
 
 		if ( message != null ) {
-			Date today = new Date();
-			int hours = today.getHours();
-			int minutes = today.getMinutes();
-			String hourFormat = "[" + ( hours < 10 ? "0" + String.valueOf( hours ) : hours ) + ":"
-					+ ( minutes < 10 ? "0" + String.valueOf( minutes ) : minutes ) + "] ";
+			String hourFormat = StringUtils.getHourMinutes();
 
-			message = message.replaceAll( "§.", "" ).replaceAll( "@(here|everyone)", "" )
-					.replaceAll( "<@\\d{0,24}>", "" ).replaceAll( "\\|", "" );
+			message = StringUtils.synthesizeForDc( message );
 
-			if (
-				ChatUtils.cachedMessage.concat( ( ChatUtils.cachedMessage.length() > 0 ? "\n" : "" )
-						+ hourFormat + message ).length() > 2048
-			) {
-				ChatUtils.sendCachedMessage();
+			String cachedMessage = ChatUtils.cachedMessages.containsKey( cacheKey )
+					? ChatUtils.cachedMessages.get( cacheKey )
+					: "";
 
-				ChatUtils.cachedMessage = hourFormat + message;
-			}
+			String newMsg = cachedMessage
+					.concat( ( cachedMessage.length() > 0 ? "\n" : "" ) + hourFormat + message );
 
-			if ( ChatUtils.timer == null ) {
-				ChatUtils.timer = new Timer();
-				ChatUtils.timer.schedule( new TimerTask() {
+			if ( newMsg.length() >= 2000 )
+				ChatUtils.sendCachedMessage( cacheKey );
+
+			ChatUtils.cachedMessages.put( cacheKey, newMsg );
+
+			if ( ChatUtils.timerMap.get( cacheKey ) == null ) {
+				Timer newTimer = new Timer();
+				newTimer.schedule( new TimerTask() {
 
 					@Override
 					public void run() {
-						ChatUtils.timer = null;
-						ChatUtils.sendCachedMessage();
+						ChatUtils.timerMap.remove( cacheKey );
+
+						ChatUtils.sendCachedMessage( cacheKey );
 					}
 				}, ChatUtils.PullTime * 1000L );
+
+				ChatUtils.timerMap.put( cacheKey, newTimer );
 			}
 		}
 	}
@@ -91,7 +97,6 @@ public class ChatUtils {
 		Boolean found = matcher.find();
 
 		while ( found ) {
-
 			// get text before action
 			int index = message.indexOf( "(" );
 			String first = message.substring( 0, index + 1 ).replace( "(", "" );
@@ -124,8 +129,8 @@ public class ChatUtils {
 		Map<String, Object> mapa = plugin.emojiConfig.getValues( false );
 
 		for ( String emoji : mapa.keySet() )
-			newMsg = newMsg.replaceAll( "(?i)" + escapeMetaCharacters( emoji ),
-					ChatColor.YELLOW + "*" + (String) mapa.get( emoji ) + "*" + ChatColor.WHITE );
+			newMsg = newMsg.replaceAll( "(?i)" + escapeMetaCharacters( emoji ), ChatColor.YELLOW
+					+ "*" + (String) mapa.get( emoji ) + "*" + ChatColor.WHITE );
 
 		return newMsg;
 	}
@@ -144,13 +149,25 @@ public class ChatUtils {
 		return inputString;
 	}
 
-	private static void sendCachedMessage() {
-		int length = ChatUtils.cachedMessage.length();
+	private static void sendCachedMessage(
+			String cacheKey
+	) {
+		String cachedMessage = ChatUtils.cachedMessages.get( cacheKey );
+		int length = cachedMessage.length();
 
 		if ( length > 0 ) {
-			Main.getInstance().bot.chatLog( ChatUtils.cachedMessage );
+			do {
+				String partial = cachedMessage
+						.substring( 0, 2000 > cachedMessage.length() ? cachedMessage.length()
+								: 2000 );
 
-			ChatUtils.cachedMessage = "";
+				ChatUtils.plugin.bot.sendLog( partial, Bot.ChatLogId );
+
+				cachedMessage = cachedMessage.replace( partial, "" );
+
+			} while ( cachedMessage.length() >= 2000 );
+
+			ChatUtils.cachedMessages.put( cacheKey, "" );
 		}
 	}
 

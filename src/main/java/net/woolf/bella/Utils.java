@@ -55,33 +55,42 @@ public class Utils {
 	}
 
 	public List<Player> getNearbyPlayers(
-			Player player, int len
+			Player player,
+			int len
 	) {
 		Collection<Entity> nearbyPlayers = player.getWorld()
 				.getNearbyEntities( player.getLocation(), len, len, len );
 
 		return nearbyPlayers.stream()
 				.filter( e -> e instanceof Player && !e.getName().equals( player.getName() ) )
-				.map( e -> (Player) e ).collect( Collectors.toList() );
+				.map( e -> (Player) e )
+				.collect( Collectors.toList() );
 	}
 
 	public List<Player> getNearbyPlayers(
-			Location loc, int len
+			Location loc,
+			int len
 	) {
 		Collection<Entity> nearbyPlayers = loc.getWorld().getNearbyEntities( loc, len, len, len );
 
-		return nearbyPlayers.stream().filter( e -> e instanceof Player ).map( e -> (Player) e )
+		return nearbyPlayers.stream()
+				.filter( e -> e instanceof Player )
+				.map( e -> (Player) e )
 				.collect( Collectors.toList() );
 	}
 
 	public Boolean isWithinReach(
-			Player player, Player target, Long len
+			Player player,
+			Player target,
+			Long len
 	) {
 		return player.getLocation().distance( target.getLocation() ) < len;
 	}
 
 	public Boolean isWithinReach(
-			Player player, String target, Long len
+			Player player,
+			String target,
+			Long len
 	) {
 		List<Player> playerList = player.getWorld().getPlayers();
 		Player ptarget = null;
@@ -95,7 +104,8 @@ public class Utils {
 	}
 
 	public void setTPL(
-			Player player, String level
+			Player player,
+			String level
 	) {
 		plugin.tpl.set( player.getUniqueId().toString() + ".level", level );
 		plugin.saveTPLFile();
@@ -116,20 +126,21 @@ public class Utils {
 	}
 
 	public void setOTP(
-			Player player, String name
+			Player player,
+			String name
 	) {
-		plugin.tps.set( "tps." + player.getUniqueId().toString() + "." + name + ".X",
-				player.getLocation().getX() );
-		plugin.tps.set( "tps." + player.getUniqueId().toString() + "." + name + ".Y",
-				player.getLocation().getY() );
-		plugin.tps.set( "tps." + player.getUniqueId().toString() + "." + name + ".Z",
-				player.getLocation().getZ() );
-		plugin.tps.set( "tps." + player.getUniqueId().toString() + "." + name + ".Yaw",
-				player.getLocation().getYaw() );
-		plugin.tps.set( "tps." + player.getUniqueId().toString() + "." + name + ".Pitch",
-				player.getLocation().getPitch() );
-		plugin.tps.set( "tps." + player.getUniqueId().toString() + "." + name + ".World",
-				player.getLocation().getWorld().getName() );
+		plugin.tps.set( "tps." + player.getUniqueId().toString() + "." + name
+				+ ".X", player.getLocation().getX() );
+		plugin.tps.set( "tps." + player.getUniqueId().toString() + "." + name
+				+ ".Y", player.getLocation().getY() );
+		plugin.tps.set( "tps." + player.getUniqueId().toString() + "." + name
+				+ ".Z", player.getLocation().getZ() );
+		plugin.tps.set( "tps." + player.getUniqueId().toString() + "." + name
+				+ ".Yaw", player.getLocation().getYaw() );
+		plugin.tps.set( "tps." + player.getUniqueId().toString() + "." + name
+				+ ".Pitch", player.getLocation().getPitch() );
+		plugin.tps.set( "tps." + player.getUniqueId().toString() + "." + name
+				+ ".World", player.getLocation().getWorld().getName() );
 		plugin.saveOTPFile();
 	}
 
@@ -148,7 +159,8 @@ public class Utils {
 	}
 
 	public Boolean setType(
-			Player player, String type
+			Player player,
+			String type
 	) {
 		if ( types.contains( type ) == false )
 			return false;
@@ -169,7 +181,8 @@ public class Utils {
 	}
 
 	public Boolean sendOTP(
-			Player player, String name
+			Player player,
+			String name
 	) {
 		World world = player.getWorld();
 		Location tpLoc = getOTPLocation( player, name );
@@ -187,7 +200,9 @@ public class Utils {
 	}
 
 	public Boolean sendOTP(
-			Player player, String name, Player target
+			Player player,
+			String name,
+			Player target
 	) {
 		World world = player.getWorld();
 		Location tpLoc = getOTPLocation( player, name );
@@ -204,7 +219,8 @@ public class Utils {
 	}
 
 	public Boolean sendOTP(
-			Player player, Location loc
+			Player player,
+			Location loc
 	) {
 		World world = player.getWorld();
 
@@ -221,11 +237,12 @@ public class Utils {
 	}
 
 	public Location getOTPLocation(
-			Player player, String name
+			Player player,
+			String name
 	) {
 		return new Location(
-				Bukkit.getWorld( plugin.tps.getString(
-						"tps." + player.getUniqueId().toString() + "." + name + ".World" ) ),
+				Bukkit.getWorld( plugin.tps.getString( "tps." + player.getUniqueId().toString()
+						+ "." + name + ".World" ) ),
 				plugin.tps
 						.getDouble( "tps." + player.getUniqueId().toString() + "." + name + ".X" ),
 				plugin.tps
@@ -234,12 +251,13 @@ public class Utils {
 						.getDouble( "tps." + player.getUniqueId().toString() + "." + name + ".Z" ),
 				plugin.tps
 						.getLong( "tps." + player.getUniqueId().toString() + "." + name + ".Yaw" ),
-				plugin.tps.getLong(
-						"tps." + player.getUniqueId().toString() + "." + name + ".Pitch" ) );
+				plugin.tps.getLong( "tps." + player.getUniqueId().toString() + "." + name
+						+ ".Pitch" ) );
 	}
 
 	public void deleteOTP(
-			Player player, String name
+			Player player,
+			String name
 	) {
 		plugin.tps.set( "tps." + player.getUniqueId().toString() + "." + name, null );
 		plugin.saveOTPFile();
@@ -247,7 +265,8 @@ public class Utils {
 	}
 
 	public boolean tpsIsNull(
-			Player player, String name
+			Player player,
+			String name
 	) {
 		return plugin.tps.getString( "tps." + player.getUniqueId() + "." + name ) == null;
 	}
@@ -257,25 +276,31 @@ public class Utils {
 	}
 
 	public void tpEffect(
-			Player player, String locName, Player target
+			Player player,
+			String locName,
+			Player target
 	) {
 		executeTP( player, locName, target );
 	}
 
 	public void tpEffect(
-			Player player, String locName
+			Player player,
+			String locName
 	) {
 		executeTP( player, locName, null );
 	}
 
 	public void tpEffect(
-			Player player, Location loc
+			Player player,
+			Location loc
 	) {
 		executeTP( player, loc );
 	}
 
 	void executeTP(
-			Player player, String locName, Player target
+			Player player,
+			String locName,
+			Player target
 	) {
 		Player tpd = target != null ? target : player;
 
@@ -302,7 +327,8 @@ public class Utils {
 	}
 
 	void executeTP(
-			Player player, Location loc
+			Player player,
+			Location loc
 	) {
 		Effect tpParticles = getPlayerEffect( player );
 		tpParticles.duration = 4 * 20;
@@ -320,7 +346,8 @@ public class Utils {
 	}
 
 	public void itemTP(
-			Player player, NBTCompound comp
+			Player player,
+			NBTCompound comp
 	) {
 
 		// String enchanter = comp.getString("enchanter");
@@ -337,19 +364,21 @@ public class Utils {
 
 		Location loc = new Location( player.getWorld(), x, y, z, yaw, pitch );
 
-		if ( player.getLocation().distance( loc ) > maxLen ) {
-			player.sendMessage( Main.prefixError + "Nie można użyć przedmiotu, za daleko!" );
+		if ( used >= maxUse ) {
+			player.sendMessage( Main.prefixError + "Nie można już użyć przedmiotu!" );
 			return;
 		}
 
-		if ( used >= maxUse ) {
-			player.sendMessage( Main.prefixError + "Nie można już użyć przedmiotu!" );
+		if ( player.getLocation().distance( loc ) > maxLen ) {
+			player.sendMessage( Main.prefixError + "Nie można użyć przedmiotu, za daleko!" );
 			return;
 		}
 
 		if ( cooldownTimeOTP.containsKey( player ) ) {
 			player.sendMessage( Main.prefixError + "Musisz odpocząć " + ChatColor.RED
 					+ cooldownTimeOTP.get( player ) + ChatColor.GRAY + " sekund." );
+			
+			return;
 		} else {
 			if ( comp.hasKey( "maxUse" ) ) {
 				used++;
@@ -359,6 +388,8 @@ public class Utils {
 			tpEffect( player, loc );
 			setCoolDownTimeOTP( player, enchCld );
 			player.sendMessage( Main.prefixInfo + "Teleportowano do punktu z przedmiotu!" );
+			
+			return;
 		}
 
 	}
@@ -443,7 +474,8 @@ public class Utils {
 	}
 
 	public void setCoolDownTimeOTP(
-			Player player, int coolDown
+			Player player,
+			int coolDown
 	) {
 		cooldownTimeOTP.put( player, coolDown );
 		cooldownTaskOTP.put( player, new BukkitRunnable() {
@@ -461,7 +493,8 @@ public class Utils {
 	}
 
 	public void setCoolDownTimeSetOTP(
-			Player player, int coolDown
+			Player player,
+			int coolDown
 	) {
 		cooldownTimeSetOTP.put( player, coolDown );
 		cooldownTaskSetOTP.put( player, new BukkitRunnable() {

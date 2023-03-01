@@ -7,16 +7,19 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import Types.Permissions;
+
 import org.bukkit.ChatColor;
 
 import net.woolf.bella.Main;
 import net.woolf.bella.Utils;
 
-public class atpCommand implements CommandExecutor {
+public class AtpCommand implements CommandExecutor {
 
 	private Main plugin;
 
-	public atpCommand(
+	public AtpCommand(
 			Main plugin
 	) {
 		this.plugin = plugin;
@@ -36,9 +39,15 @@ public class atpCommand implements CommandExecutor {
 
 	@Override
 	public boolean onCommand(
-			CommandSender sender, Command cmd, String label, String[] args
+			CommandSender sender,
+			Command cmd,
+			String label,
+			String[] args
 	) {
-		if ( !( sender instanceof Player ) || sender.hasPermission( "bella.atp.admin" ) ) {
+		if (
+			!( sender instanceof Player )
+					|| sender.hasPermission( Permissions.ATP_ADMIN.toString() )
+		) {
 
 			if ( args.length < 2 ) {
 				sender.sendMessage( getUsage() );
@@ -85,26 +94,26 @@ public class atpCommand implements CommandExecutor {
 					e.printStackTrace();
 				}
 
-				plugin.logger.info(
-						Main.prefixInfo + "Zmieniono " + opt + " dla lvl " + level + " na " + val );
-				sender.sendMessage(
-						Main.prefixInfo + "Zmieniono " + opt + " dla lvl " + level + " na " + val );
+				plugin.logger.info( Main.prefixInfo + "Zmieniono " + opt + " dla lvl " + level
+						+ " na " + val );
+				sender.sendMessage( Main.prefixInfo + "Zmieniono " + opt + " dla lvl " + level
+						+ " na " + val );
 				return true;
 			} else if ( args[0].equals( "set" ) ) {
 				String pname = args[2];
 				int ilvl = Integer.parseInt( level );
 
 				if ( ilvl < 0 || ilvl > 5 ) {
-					sender.sendMessage(
-							Main.prefixError + "Level musi się znajdować w przedziale: <0; 5>" );
+					sender.sendMessage( Main.prefixError
+							+ "Level musi się znajdować w przedziale: <0; 5>" );
 					return true;
 				}
 				Player target = sender.getServer().getPlayer( pname );
 
 				plugin.utils.setTPL( target, level );
 
-				sender.sendMessage(
-						Main.prefixInfo + "Zmieniono level dla " + pname + " na " + level );
+				sender.sendMessage( Main.prefixInfo + "Zmieniono level dla " + pname + " na "
+						+ level );
 
 				return true;
 			} else if ( args[0].equals( "info" ) ) {
@@ -119,8 +128,8 @@ public class atpCommand implements CommandExecutor {
 				StringBuilder os = new StringBuilder();
 				os.append( Main.prefixInfo + "Informacje o TP level " + level );
 				os.append( "\n" + ChatColor.GRAY + "Punkty tp  : " + ChatColor.YELLOW + maxpts );
-				os.append(
-						"\n" + ChatColor.GRAY + "Odległość  : " + ChatColor.YELLOW + radius + "m" );
+				os.append( "\n" + ChatColor.GRAY + "Odległość  : " + ChatColor.YELLOW + radius
+						+ "m" );
 				os.append( "\n" + ChatColor.GRAY + "Cooldown   : " + ChatColor.YELLOW + cld + "s" );
 				os.append( "\n" + ChatColor.GRAY + "Max Graczy : " + ChatColor.YELLOW + maxp
 						+ " graczy" );
@@ -154,9 +163,9 @@ public class atpCommand implements CommandExecutor {
 				if ( target != null ) {
 					plugin.utils.setType( target, effect );
 
-					sender.sendMessage(
-							Main.prefixInfo + "Ustawiono efekt gracza " + ChatColor.GREEN + pname
-									+ ChatColor.WHITE + " na: " + ChatColor.AQUA + effect );
+					sender.sendMessage( Main.prefixInfo + "Ustawiono efekt gracza "
+							+ ChatColor.GREEN + pname + ChatColor.WHITE + " na: " + ChatColor.AQUA
+							+ effect );
 					return true;
 				}
 			} else {
@@ -164,8 +173,8 @@ public class atpCommand implements CommandExecutor {
 				return true;
 			}
 		} else {
-			sender.sendMessage(
-					Main.prefixError + "Potrzebujesz permissi atp.admin aby używać tej komendy" );
+			sender.sendMessage( Main.prefixError
+					+ "Potrzebujesz permissi atp.admin aby używać tej komendy" );
 			return true;
 		}
 
