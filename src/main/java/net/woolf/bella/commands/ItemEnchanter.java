@@ -8,6 +8,9 @@ import java.util.Set;
 
 import javax.annotation.Nonnull;
 
+import de.tr7zw.nbtapi.NBTCompound;
+import net.woolf.bella.bot.Bot;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -176,4 +179,18 @@ public class ItemEnchanter implements CommandExecutor {
     return "Użycie komend: \n/zaczaruj <efekt/lista> [...efekt] \n/przebadaj";
   }
 
+  public static void teleportPlayerWithItem (Player player, NBTItem nbti) {
+    Location playerLoc = player.getLocation();
+
+    NBTCompound comp = nbti.getCompound("teleportEnchantment");
+    Main.getInstance().utils.itemTP(player, comp);
+
+    double x = comp.getDouble("x");
+    double y = comp.getDouble("y");
+    double z = comp.getDouble("z");
+
+    Main.getInstance().bot.sendLog(
+        String.format("[%s] teleportował {%d %d %d} -> {%f %f %f} (item)", player.getName(), playerLoc.getBlockX(),
+            playerLoc.getBlockY(), playerLoc.getBlockZ(), x, y, z), Bot.VariousLogId);
+  }
 }

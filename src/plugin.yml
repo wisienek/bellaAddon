@@ -54,7 +54,9 @@ commands:
   bank:
     description: Zarządzanie bankiem
     usage: /bank [ wpłać/wypłać/przelej <typ> <ilosć> <gracz> ]
-
+  wymien:
+    description: Wymiana hajsu z portfela na itemowy
+    usage: /wymien <typ> <ilość>
 
 permissions:
   beloris.bank.admin:

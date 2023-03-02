@@ -1,11 +1,11 @@
 package net.woolf.bella.events;
 
-import java.io.IOException;
-import java.sql.SQLException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.woolf.bella.commands.ItemEnchanter;
+import net.woolf.bella.commands.WymienCommand;
 import org.bukkit.Effect;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -32,13 +32,10 @@ import org.bukkit.inventory.ItemStack;
 
 import Types.BackpackNBTKeys;
 import classes.Backpack;
-import de.tr7zw.nbtapi.NBTCompound;
 import de.tr7zw.nbtapi.NBTItem;
 import net.woolf.bella.Main;
 import net.woolf.bella.bot.Bot;
-import net.woolf.bella.utils.CacheUtils;
 import net.woolf.bella.utils.ChatUtils;
-import net.woolf.bella.utils.DbUtils;
 import net.woolf.bella.utils.PlayerUtils;
 import net.woolf.bella.utils.StringUtils;
 
@@ -95,10 +92,10 @@ public class BellaEvents implements Listener {
     Player player = event.getPlayer();
 
     if ( player.isSneaking() ) {
-      List<Entity> passangers = player.getPassengers();
+      List<Entity> passengers = player.getPassengers();
 
-      if ( passangers.size() > 0 ) for ( Entity Passanger : passangers )
-        player.removePassenger(Passanger);
+      if ( passengers.size() > 0 ) for ( Entity Passenger : passengers )
+        player.removePassenger(Passenger);
     }
 
     ItemStack item = player.getInventory().getItemInMainHand();
@@ -107,50 +104,15 @@ public class BellaEvents implements Listener {
 
       if ( nbti.hasKey("teleportEnchantment") ) {
         event.setCancelled(true);
-        Location playerLoc = player.getLocation();
-
-        NBTCompound comp = nbti.getCompound("teleportEnchantment");
-        plugin.utils.itemTP(player, comp);
-
-        double x = comp.getDouble("x");
-        double y = comp.getDouble("y");
-        double z = comp.getDouble("z");
-
-        this.plugin.bot.sendLog(
-            String.format("[%s] teleportował {%d %d %d} -> {%f %f %f} (item)", player.getName(), playerLoc.getBlockX(),
-                playerLoc.getBlockY(), playerLoc.getBlockZ(), x, y, z), Bot.VariousLogId);
-
+        ItemEnchanter.teleportPlayerWithItem(player, nbti);
       }
       else if ( nbti.hasKey(BackpackNBTKeys.ISBACKPACK.toString()) ) {
-        String bagUUID = nbti.getString(BackpackNBTKeys.UUID.toString());
-        Boolean allowsMultiple = nbti.getBoolean(BackpackNBTKeys.ALLOW_MULTIPLE_VIEWERS.toString());
+        Backpack.OpenBackpackEvent(player, nbti, item);
+      }
+      else if ( nbti.hasKey(WymienCommand.MoneyNbtTag) ) {
+        event.setCancelled(true);
 
-        if ( CacheUtils.hasKey(bagUUID) && !allowsMultiple ) {
-          player.sendMessage(
-              Main.prefixError + "Plecak jest już przez kogoś otwarty i nie pozwala na kilku widzów, albo cache " +
-                  "wariuje ;? " + "0");
-          return;
-        }
-
-        try {
-          Backpack bag = new Backpack();
-          bag.setBagID(bagUUID);
-          bag = DbUtils.getInstance().getBackpackInfo(bagUUID);
-
-          if ( bag == null ) {
-            player.sendMessage(Main.prefixError + "Nie można było odczytać plecaka!");
-            return;
-          }
-
-          bag.setBagItem(item);
-          if ( bag.isDefaultSize() ) bag.setSize(nbti.getInteger(BackpackNBTKeys.ROWS.toString()) * 9, false);
-
-          bag.open(player, true);
-
-        } catch ( SQLException | IOException e ) {
-          player.sendMessage(Main.prefixError + "Pojawił się błąd przy pobieraniu informacji o plecaku!");
-          e.printStackTrace();
-        }
+        WymienCommand.moveMoneyToPurse(player, nbti, item, player.isSneaking());
       }
     }
   }
@@ -174,13 +136,6 @@ public class BellaEvents implements Listener {
 
         if ( passangers.size() == 0 ) target.addPassenger(player);
       }
-
-      // if ( player.isSneaking() ) {
-      // boolean isAdmin = player.hasPermission( Permissions.ADMIN.toString() );
-      //
-      //
-      // // check player stats
-      // }
     }
   }
 
@@ -331,5 +286,4 @@ public class BellaEvents implements Listener {
   // : "null" ) );
   //
   // }
-
 }

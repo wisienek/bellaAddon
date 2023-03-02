@@ -289,4 +289,32 @@ public class MoneyUtils {
 
     return true;
   }
+
+  public boolean hasAmount (String uuid, String type, Integer amount) {
+    Map<String, Long> targetMoney = this.getMoney(uuid);
+
+    Long hasAmount = targetMoney.get(type);
+
+    return hasAmount - amount >= 0;
+  }
+
+  public Long takeMoney (String uuid, String type, Integer amount) {
+    Map<String, Long> targetMoney = this.getMoney(uuid);
+
+    Long hasAmount = targetMoney.get(type);
+    Long after = hasAmount - amount;
+    this.plugin.mutils.setMoney(uuid, type, after);
+
+    return after;
+  }
+
+  public Long giveMoney (String uuid, String type, Integer amount) {
+    Map<String, Long> targetMoney = this.getMoney(uuid);
+
+    Long hasAmount = targetMoney.get(type);
+    Long after = hasAmount + amount;
+    this.plugin.mutils.setMoney(uuid, type, after);
+
+    return after;
+  }
 }

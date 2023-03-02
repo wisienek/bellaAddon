@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import de.tr7zw.nbtapi.NBTItem;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -326,5 +327,37 @@ public class Backpack implements IBackpack {
     if ( plugin.isTest() ) plugin.logger.info(String.format("Saved bp to cache: %s", id));
 
     bp.savedToCache = true;
+  }
+
+  public static void OpenBackpackEvent (Player player, NBTItem nbti, ItemStack item) {
+    String bagUUID = nbti.getString(BackpackNBTKeys.UUID.toString());
+    Boolean allowsMultiple = nbti.getBoolean(BackpackNBTKeys.ALLOW_MULTIPLE_VIEWERS.toString());
+
+    if ( CacheUtils.hasKey(bagUUID) && !allowsMultiple ) {
+      player.sendMessage(
+          Main.prefixError + "Plecak jest już przez kogoś otwarty i nie pozwala na kilku widzów, albo cache " +
+              "wariuje ;? " + "0");
+      return;
+    }
+
+    try {
+      Backpack bag = new Backpack();
+      bag.setBagID(bagUUID);
+      bag = DbUtils.getInstance().getBackpackInfo(bagUUID);
+
+      if ( bag == null ) {
+        player.sendMessage(Main.prefixError + "Nie można było odczytać plecaka!");
+        return;
+      }
+
+      bag.setBagItem(item);
+      if ( bag.isDefaultSize() ) bag.setSize(nbti.getInteger(BackpackNBTKeys.ROWS.toString()) * 9, false);
+
+      bag.open(player, true);
+
+    } catch ( SQLException | IOException e ) {
+      player.sendMessage(Main.prefixError + "Pojawił się błąd przy pobieraniu informacji o plecaku!");
+      e.printStackTrace();
+    }
   }
 }

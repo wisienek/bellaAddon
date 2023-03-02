@@ -235,5 +235,4 @@ public class MoneyCommand implements CommandExecutor {
       return true;
     }
   }
-
 }
