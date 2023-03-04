@@ -1,11 +1,11 @@
 package net.woolf.bella.commands;
 
+import Types.BotChannels;
 import Types.Permissions;
 import de.tr7zw.nbtapi.NBTCompound;
 import de.tr7zw.nbtapi.NBTItem;
 import net.woolf.bella.Main;
 import net.woolf.bella.Utils;
-import net.woolf.bella.bot.Bot;
 import net.woolf.bella.utils.PlayerUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -232,7 +232,7 @@ public class OtpCommand implements CommandExecutor {
                 this.plugin.bot.sendLog(
                     String.format("[%s] teleportował {%o %o %o} -> {%o %o %o} (%s)", player.getName(),
                         playerLoc.getBlockX(), playerLoc.getBlockY(), playerLoc.getBlockZ(), loc.getBlockX(),
-                        loc.getBlockY(), loc.getBlockZ(), otp), Bot.VariousLogId);
+                        loc.getBlockY(), loc.getBlockZ(), otp), BotChannels.VariousLogId.toString());
               }
             }
             else {
@@ -242,7 +242,7 @@ public class OtpCommand implements CommandExecutor {
 
               this.plugin.bot.sendLog(String.format("[%s] teleportował {%o %o %o} -> {%o %o %o} (%s)", player.getName(),
                   playerLoc.getBlockX(), playerLoc.getBlockY(), playerLoc.getBlockZ(), loc.getBlockX(), loc.getBlockY(),
-                  loc.getBlockZ(), otp), Bot.VariousLogId);
+                  loc.getBlockZ(), otp), BotChannels.VariousLogId.toString());
             }
           }
 
@@ -423,7 +423,7 @@ public class OtpCommand implements CommandExecutor {
               this.plugin.bot.sendLog(
                   String.format("[%s] teleportował [%s] {%o %o %o} -> {%o %o %o} (%s)", player.getName(),
                       target.getName(), playerLoc.getBlockX(), playerLoc.getBlockY(), playerLoc.getBlockZ(),
-                      loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), otp), Bot.VariousLogId);
+                      loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), otp), BotChannels.VariousLogId.toString());
             }
           }
           else {
@@ -435,7 +435,7 @@ public class OtpCommand implements CommandExecutor {
             this.plugin.bot.sendLog(
                 String.format("[%s] teleportował [%s] {%o %o %o} -> {%o %o %o} (%s)", player.getName(),
                     target.getName(), playerLoc.getBlockX(), playerLoc.getBlockY(), playerLoc.getBlockZ(),
-                    loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), otp), Bot.VariousLogId);
+                    loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), otp), BotChannels.VariousLogId.toString());
           }
 
           return true;
@@ -508,7 +508,7 @@ public class OtpCommand implements CommandExecutor {
                 this.plugin.bot.sendLog(
                     String.format("[%s] teleportował {%o %o %o} -> {%o %o %o} (%s) z %s", player.getName(),
                         playerLoc.getBlockX(), playerLoc.getBlockY(), playerLoc.getBlockZ(), loc.getBlockX(),
-                        loc.getBlockY(), loc.getBlockZ(), otp, playerNames), Bot.VariousLogId);
+                        loc.getBlockY(), loc.getBlockZ(), otp, playerNames), BotChannels.VariousLogId.toString());
               }
             }
             else {
@@ -527,7 +527,7 @@ public class OtpCommand implements CommandExecutor {
               this.plugin.bot.sendLog(
                   String.format("[%s] teleportował {%o %o %o} -> {%o %o %o} (%s) z %s", player.getName(),
                       playerLoc.getBlockX(), playerLoc.getBlockY(), playerLoc.getBlockZ(), loc.getBlockX(),
-                      loc.getBlockY(), loc.getBlockZ(), otp, playerNames), Bot.VariousLogId);
+                      loc.getBlockY(), loc.getBlockZ(), otp, playerNames), BotChannels.VariousLogId.toString());
             }
           }
 

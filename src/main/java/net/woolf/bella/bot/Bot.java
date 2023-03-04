@@ -31,12 +31,6 @@ import net.woolf.bella.Main;
 import net.woolf.bella.utils.StringUtils;
 
 public class Bot {
-
-  public static final String ChatLogId = "960200738468925480";
-  public static final String MoneyLogId = "885517500261998633";
-  public static final String VariousLogId = "969288905813803008";
-  public static final String HelpopLogId = "1002690952307163256";
-
   public Main plugin;
 
   public JDA api;

@@ -8,8 +8,9 @@ import java.util.Set;
 
 import javax.annotation.Nonnull;
 
+import Types.BotChannels;
 import de.tr7zw.nbtapi.NBTCompound;
-import net.woolf.bella.bot.Bot;
+import net.woolf.bella.utils.ChatUtils;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -197,8 +198,8 @@ public class ItemEnchanter implements CommandExecutor {
     Double y = comp.getDouble("y");
     Double z = comp.getDouble("z");
 
-    Main.getInstance().bot.sendLog(
+    ChatUtils.cacheMessageForBotLog(BotChannels.VariousLogId.toString(),
         String.format("[%s] teleportował {%d %d %d} -> {%d %d %d} (item)", player.getName(), playerLoc.getBlockX(),
-            playerLoc.getBlockY(), playerLoc.getBlockZ(), x.intValue(), y.intValue(), z.intValue()), Bot.VariousLogId);
+            playerLoc.getBlockY(), playerLoc.getBlockZ(), x.intValue(), y.intValue(), z.intValue()));
   }
 }

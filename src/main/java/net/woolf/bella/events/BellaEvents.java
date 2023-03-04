@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import Types.BotChannels;
 import net.woolf.bella.commands.ItemEnchanter;
 import net.woolf.bella.commands.WymienCommand;
 import org.bukkit.Effect;
@@ -34,7 +35,6 @@ import Types.BackpackNBTKeys;
 import classes.Backpack;
 import de.tr7zw.nbtapi.NBTItem;
 import net.woolf.bella.Main;
-import net.woolf.bella.bot.Bot;
 import net.woolf.bella.utils.ChatUtils;
 import net.woolf.bella.utils.PlayerUtils;
 import net.woolf.bella.utils.StringUtils;
@@ -63,7 +63,7 @@ public class BellaEvents implements Listener {
     // Send chat
     event.setMessage(newMsg);
 
-    ChatUtils.cacheMessageForChatLog(
+    ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(),
         ChatUtils.LocalPrefix + " [" + event.getPlayer().getDisplayName() + "] " + event.getPlayer()
                                                                                         .getName() + ": `" + newMsg.replaceAll(
             "(§.)|(`)", "") + "`");
@@ -82,7 +82,9 @@ public class BellaEvents implements Listener {
       PlayerQuitEvent event
   ) {
     List<Player> online = plugin.utils.getPlayers();
-    plugin.bot.updatePresence("Graczy online: " + ( online.size() - 1 ));
+    int size = online.size() - 1;
+
+    plugin.bot.updatePresence(size > 0 ? "Graczy online: " + size : "Czekam na graczy...");
   }
 
   @EventHandler( priority = EventPriority.HIGH )
@@ -161,35 +163,35 @@ public class BellaEvents implements Listener {
 
     switch ( cmd ) {
       case "ooc": {
-        ChatUtils.cacheMessageForChatLog(
+        ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(),
             ChatUtils.OOCPrefix + " " + player.getName() + ": `(" + String.join(" ", args).replaceAll("`", "") + ")`");
         break;
       }
 
       case "me":
       case "k": {
-        ChatUtils.cacheMessageForChatLog(
+        ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(),
             ChatUtils.LocalPrefix + " [" + player.getDisplayName() + "] " + player.getName() + ": `*" + String.join(" ",
                 args).replaceAll("`", "") + "*`");
         break;
       }
 
       case "do": {
-        ChatUtils.cacheMessageForChatLog(
+        ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(),
             ChatUtils.LocalPrefix + " [" + player.getDisplayName() + "] " + player.getName() + ": `**" + String.join(
                 " ", args).replaceAll("`", "") + "**`");
         break;
       }
 
       case "s": {
-        ChatUtils.cacheMessageForChatLog(
+        ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(),
             ChatUtils.WhisperPrefix + " [" + player.getDisplayName() + "] " + player.getName() + ": `" + String.join(
                 " ", args).replaceAll("`", "") + "`");
         break;
       }
 
       case "globalnar": {
-        ChatUtils.cacheMessageForChatLog(
+        ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(),
             ChatUtils.GlobalPrefix + " [" + player.getName() + "] `" + String.join(" ", args)
                                                                              .replaceAll("`", "") + "`");
         break;
@@ -198,7 +200,7 @@ public class BellaEvents implements Listener {
       case "midnar":
       case "localnar": {
         Location loc = player.getLocation();
-        ChatUtils.cacheMessageForChatLog(
+        ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(),
             ChatUtils.LocalPrefix + " {" + loc.getBlockX() + " " + loc.getBlockY() + " " + loc.getBlockZ() + "} " +
                 " [" + player.getName() + "] `" + String.join(
                 " ", args).replaceAll("`", "") + "`");
@@ -209,7 +211,7 @@ public class BellaEvents implements Listener {
         String narrated = args.get(0);
         args.remove(0);
 
-        ChatUtils.cacheMessageForChatLog(
+        ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(),
             "**[PRIVNAR]** " + "[" + player.getName() + " -> " + narrated + "] `" + String.join(" ", args)
                                                                                           .replaceAll("`", "") + "`");
         break;
@@ -219,7 +221,7 @@ public class BellaEvents implements Listener {
         String hourFormat = StringUtils.getHourMinutes();
 
         this.plugin.bot.sendLog(String.format("%s `%s`: `%s`", hourFormat, player.getName(),
-            StringUtils.synthesizeForDc(String.join(" ", args))), Bot.HelpopLogId);
+            StringUtils.synthesizeForDc(String.join(" ", args))), BotChannels.HelpopLogId.toString());
 
         break;
       }

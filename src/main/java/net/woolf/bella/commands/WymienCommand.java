@@ -1,6 +1,8 @@
 package net.woolf.bella.commands;
 
+import Types.BotChannels;
 import de.tr7zw.nbtapi.NBTItem;
+import net.woolf.bella.utils.ChatUtils;
 import net.woolf.bella.utils.MoneyUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -70,6 +72,9 @@ public class WymienCommand implements CommandExecutor {
     player.getInventory().addItem(item);
 
     player.sendMessage(Main.prefixInfo + "Wyciągnięto " + amount + " " + type + " z portfela");
+
+    ChatUtils.cacheMessageForBotLog(BotChannels.MoneyLogId.toString(),
+        String.format("**%s** Wyciągnął z portfela %d " + "%sów", player.getDisplayName(), amount, type));
 
     return true;
   }
@@ -151,5 +156,8 @@ public class WymienCommand implements CommandExecutor {
     item.setAmount(item.getAmount() - amount);
 
     player.sendMessage(Main.prefixInfo + "Wrzucono " + amount + " " + type + " do portfela");
+
+    ChatUtils.cacheMessageForBotLog(BotChannels.MoneyLogId.toString(),
+        String.format("**%s** Wrzucił do portfela %d " + "%sów", player.getDisplayName(), amount, type));
   }
 }

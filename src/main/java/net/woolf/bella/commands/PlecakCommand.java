@@ -1,10 +1,10 @@
 package net.woolf.bella.commands;
 
 import Types.BackpackNBTKeys;
+import Types.BotChannels;
 import Types.Permissions;
 import de.tr7zw.nbtapi.NBTItem;
 import net.woolf.bella.Main;
-import net.woolf.bella.bot.Bot;
 import net.woolf.bella.utils.DbUtils;
 import net.woolf.bella.utils.PlayerUtils;
 import org.bukkit.Material;
@@ -82,7 +82,7 @@ public class PlecakCommand implements CommandExecutor {
 
             plugin.bot.sendLog(
                 String.format("**%s** Utworzył plecak o nazwie `%s` i uuid `%s`", player.getName(), name, uuid),
-                Bot.VariousLogId);
+                BotChannels.VariousLogId.toString());
 
           } catch ( SQLException | IOException e ) {
             player.sendMessage(Main.prefixError + "Coś poszło nie tak przy twożeniu plecaka!");

@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
+import Types.BotChannels;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -219,7 +220,7 @@ public class MessageListener extends ListenerAdapter {
             event.getMember()).getEffectiveName() + "]" + " `[" + narrMessage + "]`";
 
         this.bot.plugin.server.getOnlinePlayers().forEach(p -> p.sendMessage(message));
-        ChatUtils.cacheMessageForChatLog(logMessage);
+        ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(), logMessage);
 
         event.reply("Wysłano narrację!").queue();
         return;
@@ -245,7 +246,7 @@ public class MessageListener extends ListenerAdapter {
         assert location != null;
         PlayerUtils.getPlayersWithinRange(location, range, null).forEach(p -> p.sendMessage(message));
 
-        ChatUtils.cacheMessageForChatLog(logMessage);
+        ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(), logMessage);
 
         event.reply("Wysłano narrację!").queue();
         return;
@@ -270,7 +271,7 @@ public class MessageListener extends ListenerAdapter {
             event.getMember()).getEffectiveName() + " -> " + user + "]" + " `[" + narrMessage + "]`";
 
         player.sendMessage(message);
-        ChatUtils.cacheMessageForChatLog(logMessage);
+        ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(), logMessage);
 
         event.reply("Wysłano narrację!").queue();
       }

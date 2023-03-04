@@ -3,6 +3,8 @@ package net.woolf.bella.commands;
 import java.util.List;
 import java.util.Map;
 
+import Types.BotChannels;
+import net.woolf.bella.utils.ChatUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -11,7 +13,6 @@ import org.bukkit.entity.Player;
 import Types.Permissions;
 import net.md_5.bungee.api.ChatColor;
 import net.woolf.bella.Main;
-import net.woolf.bella.bot.Bot;
 
 public class MoneyCommand implements CommandExecutor {
 
@@ -133,10 +134,10 @@ public class MoneyCommand implements CommandExecutor {
           money = plugin.mutils.getMoney(player);
           Map<String, Long> toMoney = plugin.mutils.getMoney(target);
 
-          plugin.bot.sendLog(String.format(
+          ChatUtils.cacheMessageForBotLog(BotChannels.MoneyLogId.toString(), String.format(
               "**%s** przekazał *%s %sów* dla gracza **%s**\n%s ma teraz: %s %sów\n**%s** ma teraz: %s %sów",
               player.getName(), ammount, type, to, player.getName(), money.get(type), type, target.getName(),
-              toMoney.get(type), type), Bot.MoneyLogId);
+              toMoney.get(type), type));
 
           return true;
         }
@@ -158,9 +159,9 @@ public class MoneyCommand implements CommandExecutor {
           player.sendMessage(
               Main.prefixInfo + "Ustawiono stan portfela " + ChatColor.GREEN + to + ChatColor.WHITE + " na " + ChatColor.YELLOW + ammount + " " + type + "ów");
 
-          plugin.bot.sendLog(
-              String.format("**%s** Ustawił *%si* w portfelu gracza **%s** na %s", player.getName(), type, to, ammount),
-              Bot.MoneyLogId);
+          ChatUtils.cacheMessageForBotLog(BotChannels.MoneyLogId.toString(),
+              String.format("**%s** Ustawił *%si* w portfelu gracza **%s** na %s", player.getName(), type, to,
+                  ammount));
 
           return true;
         }
@@ -184,9 +185,9 @@ public class MoneyCommand implements CommandExecutor {
               Main.prefixInfo + "Dodano " + ChatColor.YELLOW + ammount + " " + type + "ów" + ChatColor.WHITE + " do " + "konta " + ChatColor.GREEN + to + ChatColor.WHITE + ", teraz ma: " + ChatColor.YELLOW + (long) ammount + " " + pm.get(
                   type));
 
-          plugin.bot.sendLog(
+          ChatUtils.cacheMessageForBotLog(BotChannels.MoneyLogId.toString(),
               String.format("**%s** Dodał *%s %sów* do portfela **%s**\nTeraz ma: %s %sów", player.getName(), ammount,
-                  type, to, pm.get(type) + (long) ammount, type), Bot.MoneyLogId);
+                  type, to, pm.get(type) + (long) ammount, type));
 
           return true;
         }
@@ -217,9 +218,9 @@ public class MoneyCommand implements CommandExecutor {
               Main.prefixInfo + "Zabrano " + ChatColor.YELLOW + ammount + " " + type + "ów" + ChatColor.WHITE + " z " + "konta gracza " + ChatColor.GREEN + to + ChatColor.WHITE + ", Teraz ma: " + ChatColor.YELLOW + ( pm.get(
                   type) - (long) ammount ));
 
-          plugin.bot.sendLog(
+          ChatUtils.cacheMessageForBotLog(BotChannels.MoneyLogId.toString(),
               String.format("**%s** Zabrał *%s %sów* z portfela **%s**\nTeraz ma: %s %sów", player.getName(), ammount,
-                  type, to, pm.get(type) - (long) ammount, type), Bot.MoneyLogId);
+                  type, to, pm.get(type) - (long) ammount, type));
 
           return true;
         }

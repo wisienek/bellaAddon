@@ -2,6 +2,7 @@ package net.woolf.bella.commands;
 
 import java.util.List;
 
+import Types.BotChannels;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -43,7 +44,7 @@ public class OocCommand implements CommandExecutor {
       for ( Player target : nearbyPlayers )
         target.sendMessage(msg);
 
-      ChatUtils.cacheMessageForChatLog(logMsg);
+      ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(), logMsg);
     }
     else {
       sender.sendMessage("Komenda tylko dla graczy!");

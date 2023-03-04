@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 
+import Types.BotChannels;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -17,7 +18,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import net.md_5.bungee.api.ChatColor;
 import net.woolf.bella.Main;
-import net.woolf.bella.bot.Bot;
 import net.woolf.bella.utils.DbUtils;
 import net.woolf.bella.utils.PlayerUtils;
 import net.woolf.bella.utils.StringUtils;
@@ -130,7 +130,7 @@ public class ListCommand implements CommandExecutor {
 
     this.plugin.bot.sendLog(
         String.format("`%s` Wysłał Wiadomość do `%s` za pomocą `%s`:\n```%s```", fromUserName, toUserName, carrier,
-            synthesizedMessage), Bot.VariousLogId);
+            synthesizedMessage), BotChannels.VariousLogId.toString());
   }
 
   private void setLetterCoolDownTime (

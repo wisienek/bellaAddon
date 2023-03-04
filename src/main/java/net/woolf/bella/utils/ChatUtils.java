@@ -14,7 +14,6 @@ import org.bukkit.ChatColor;
 
 import Types.CacheKeys;
 import net.woolf.bella.Main;
-import net.woolf.bella.bot.Bot;
 
 public class ChatUtils {
 
@@ -38,16 +37,16 @@ public class ChatUtils {
     ChatUtils.plugin = main;
   }
 
-  public static void cacheMessageForChatLog (
-      @Nullable String message
+  public static void cacheMessageForBotLog (
+      @Nonnull String channel, @Nullable String message
   ) {
-    ChatUtils.cacheMessageForChatLog(CacheKeys.ChatCacheKey.toString(), message, false);
+    ChatUtils.cacheMessageForBotLog(channel, String.format("%s-%s", CacheKeys.ChatCacheKey, channel), message, false);
   }
 
-  public static void cacheMessageForChatLog (
-      @Nonnull String cacheKey, @Nullable String message, Boolean sendFirst
+  public static void cacheMessageForBotLog (
+      @Nonnull String channel, @Nonnull String cacheKey, @Nullable String message, Boolean sendFirst
   ) {
-    if ( sendFirst ) ChatUtils.sendCachedMessage(cacheKey);
+    if ( sendFirst ) ChatUtils.sendCachedMessage(channel, cacheKey);
 
     if ( message != null ) {
       String hourFormat = StringUtils.getHourMinutes();
@@ -58,7 +57,7 @@ public class ChatUtils {
 
       String newMsg = cachedMessage.concat(( cachedMessage.length() > 0 ? "\n" : "" ) + hourFormat + message);
 
-      if ( newMsg.length() >= 2000 ) ChatUtils.sendCachedMessage(cacheKey);
+      if ( newMsg.length() >= 2000 ) ChatUtils.sendCachedMessage(channel, cacheKey);
 
       ChatUtils.cachedMessages.put(cacheKey, newMsg);
 
@@ -70,7 +69,7 @@ public class ChatUtils {
           public void run () {
             ChatUtils.timerMap.remove(cacheKey);
 
-            ChatUtils.sendCachedMessage(cacheKey);
+            ChatUtils.sendCachedMessage(channel, cacheKey);
           }
         }, ChatUtils.PullTime * 1000L);
 
@@ -141,7 +140,7 @@ public class ChatUtils {
   }
 
   private static void sendCachedMessage (
-      String cacheKey
+      @Nonnull String channel, String cacheKey
   ) {
     String cachedMessage = ChatUtils.cachedMessages.get(cacheKey);
     int length = cachedMessage.length();
@@ -150,7 +149,7 @@ public class ChatUtils {
       do {
         String partial = cachedMessage.substring(0, Math.min(2000, cachedMessage.length()));
 
-        ChatUtils.plugin.bot.sendLog(partial, Bot.ChatLogId);
+        ChatUtils.plugin.bot.sendLog(partial, channel);
 
         cachedMessage = cachedMessage.replace(partial, "");
 

@@ -3,6 +3,8 @@ package net.woolf.bella.commands;
 import java.util.List;
 import java.util.Map;
 
+import Types.BotChannels;
+import net.woolf.bella.utils.ChatUtils;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -12,7 +14,6 @@ import org.bukkit.entity.Player;
 import Types.Permissions;
 import net.md_5.bungee.api.ChatColor;
 import net.woolf.bella.Main;
-import net.woolf.bella.bot.Bot;
 import net.woolf.bella.utils.StringUtils;
 
 public class BankCommand implements CommandExecutor {
@@ -106,8 +107,8 @@ public class BankCommand implements CommandExecutor {
               Main.prefixInfo + "Wpłacono " + ChatColor.YELLOW + ammount + " " + type + "ów" + ChatColor.WHITE + ", " + "Aktualny stan konta: " + ChatColor.YELLOW + bankMoney.get(
                   type) + " " + type + "ów");
 
-          plugin.bot.sendLog(String.format("**%s** Wpłacił *%d %sów* do banku!", player.getName(), ammount, type),
-              Bot.MoneyLogId);
+          ChatUtils.cacheMessageForBotLog(BotChannels.MoneyLogId.toString(),
+              String.format("**%s** Wpłacił *%d %sów* do banku!", player.getName(), ammount, type));
 
           return true;
         }
@@ -136,8 +137,8 @@ public class BankCommand implements CommandExecutor {
                   + "Aktualny stan konta: " + ChatColor.YELLOW + bankMoney.get(
                   type) + " " + type + "ów");
 
-          plugin.bot.sendLog(String.format("**%s** Wypłacił *%d %sów* z banku!", player.getName(), ammount, type),
-              Bot.MoneyLogId);
+          ChatUtils.cacheMessageForBotLog(BotChannels.MoneyLogId.toString(),
+              String.format("**%s** Wypłacił *%d %sów* z banku!", player.getName(), ammount, type));
 
           return true;
         }
@@ -161,9 +162,9 @@ public class BankCommand implements CommandExecutor {
           player.sendMessage(
               Main.prefixInfo + "Przelano " + ChatColor.YELLOW + ammount + " " + type + "ów" + ChatColor.WHITE + " " + "na" + " konto gracza " + ChatColor.GREEN + args[3]);
 
-          plugin.bot.sendLog(
+          ChatUtils.cacheMessageForBotLog(BotChannels.MoneyLogId.toString(),
               String.format("**%s** Przelał *%d %sów* na konto gracza **%s**!", player.getName(), ammount, type,
-                  args[3]), Bot.MoneyLogId);
+                  args[3]));
 
           return true;
         }
@@ -234,10 +235,8 @@ public class BankCommand implements CommandExecutor {
             player.sendMessage(
                 Main.prefixInfo + "Prawidłowo wymieniono " + ChatColor.YELLOW + take + " " + from + "ów" + ChatColor.WHITE + " na " + ChatColor.YELLOW + get + " " + to + "ów");
 
-            plugin.bot.sendLog(
-                String.format("**%s** Wymienił %d %sów na %d %sów!", player.getName(), take, from, get, to),
-                Bot.MoneyLogId);
-
+            ChatUtils.cacheMessageForBotLog(BotChannels.MoneyLogId.toString(),
+                String.format("**%s** Wymienił %d %sów na %d %sów!", player.getName(), take, from, get, to));
           }
 
           return true;
@@ -261,9 +260,8 @@ public class BankCommand implements CommandExecutor {
           player.sendMessage(
               Main.prefixInfo + "Ustawiono stan konta gracza " + ChatColor.GREEN + args[3] + ChatColor.WHITE + " na " + ChatColor.YELLOW + ammount + " " + type + "ów");
 
-          plugin.bot.sendLog(
-              String.format("**%s** Ustawił *%si* gracza **%s** na %d", player.getName(), type, args[3], ammount),
-              Bot.MoneyLogId);
+          ChatUtils.cacheMessageForBotLog(BotChannels.MoneyLogId.toString(),
+              String.format("**%s** Ustawił *%si* gracza **%s** na %d", player.getName(), type, args[3], ammount));
 
           return true;
         }
@@ -289,9 +287,8 @@ public class BankCommand implements CommandExecutor {
               Main.prefixInfo + "Dodano " + ChatColor.YELLOW + ammount + " " + type + "ów" + ChatColor.WHITE + " do " + "konta gracza " + ChatColor.GREEN + args[3] + ChatColor.WHITE + ", teraz ma: " + ChatColor.YELLOW + ( bm.get(
                   type) + ammount ));
 
-          plugin.bot.sendLog(
-              String.format("**%s** Dodał %d %sów do banku gracza **%s**!", player.getName(), ammount, type, args[3]),
-              Bot.MoneyLogId);
+          ChatUtils.cacheMessageForBotLog(BotChannels.MoneyLogId.toString(),
+              String.format("**%s** Dodał %d %sów do banku gracza **%s**!", player.getName(), ammount, type, args[3]));
 
           return true;
         }
@@ -323,9 +320,8 @@ public class BankCommand implements CommandExecutor {
               Main.prefixInfo + "Zabrano " + ChatColor.YELLOW + ammount + " " + type + "ów" + ChatColor.WHITE + " z " + "konta gracza " + ChatColor.GREEN + args[3] + ChatColor.WHITE + ", teraz ma: " + ChatColor.YELLOW + ( bm.get(
                   type) - ammount ));
 
-          plugin.bot.sendLog(
-              String.format("**%s** Zabrał %d %sów z banku gracza **%s**!", player.getName(), ammount, type, args[3]),
-              Bot.MoneyLogId);
+          ChatUtils.cacheMessageForBotLog(BotChannels.MoneyLogId.toString(),
+              String.format("**%s** Zabrał %d %sów z banku gracza **%s**!", player.getName(), ammount, type, args[3]));
 
           return true;
         }
@@ -347,8 +343,9 @@ public class BankCommand implements CommandExecutor {
 
             player.sendMessage(Main.prefixInfo + "Stworzono bank w twojej lokalizacji!");
 
-            plugin.bot.sendLog(String.format("**%s** Ustawił nowy bank w lokacji (`%s`)", player.getName(),
-                StringUtils.formatLocation(loc)), Bot.MoneyLogId);
+            ChatUtils.cacheMessageForBotLog(BotChannels.MoneyLogId.toString(),
+                String.format("**%s** Ustawił nowy bank w lokacji (`%s`)", player.getName(),
+                    StringUtils.formatLocation(loc)));
           }
 
           return true;
@@ -371,9 +368,9 @@ public class BankCommand implements CommandExecutor {
 
           player.sendMessage(Main.prefixInfo + "Usunięto bank najbliższy twojej lokalizacji!");
 
-          plugin.bot.sendLog(
-              String.format("**%s** Usunął bank w lokacji (`%s`)", player.getName(), StringUtils.formatLocation(loc)),
-              Bot.MoneyLogId);
+
+          ChatUtils.cacheMessageForBotLog(BotChannels.MoneyLogId.toString(),
+              String.format("**%s** Usunął bank w lokacji (`%s`)", player.getName(), StringUtils.formatLocation(loc)));
 
           return true;
         }
@@ -397,9 +394,8 @@ public class BankCommand implements CommandExecutor {
 
           player.sendMessage(Main.prefixInfo + "Ustawiono konwersję: " + from + " * " + conv + " = 1 * " + to);
 
-          plugin.bot.sendLog(
-              String.format("**%s** Ustawił konwersję: `%s` -> `%s` **%s : 1**", player.getName(), from, to,
-                  String.valueOf(conv)), Bot.MoneyLogId);
+          ChatUtils.cacheMessageForBotLog(BotChannels.MoneyLogId.toString(),
+              String.format("**%s** Ustawił konwersję: `%s` -> `%s` **%s : 1**", player.getName(), from, to, conv));
 
           return true;
         }

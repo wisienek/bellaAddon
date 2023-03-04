@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import javax.annotation.Nonnull;
 
+import Types.BotChannels;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -83,11 +84,13 @@ public class LinkCommand implements CommandExecutor {
 
           if ( deleted ) {
             player.sendMessage(Main.prefixInfo + "Usunięto połączenie konta!");
-            this.plugin.bot.sendLog("Gracz **" + player.getName() + "** Odlinkował konto z dc!", Bot.VariousLogId);
+            this.plugin.bot.sendLog("Gracz **" + player.getName() + "** Odlinkował konto z dc!",
+                BotChannels.VariousLogId.toString());
           }
           else {
             player.sendMessage(Main.prefixError + "Nie udało się usunąć konta!");
-            this.plugin.bot.sendLog("Gracz **" + player.getName() + "** Odlinkował konto z dc!", Bot.VariousLogId);
+            this.plugin.bot.sendLog("Gracz **" + player.getName() + "** Odlinkował konto z dc!",
+                BotChannels.VariousLogId.toString());
           }
 
           return true;

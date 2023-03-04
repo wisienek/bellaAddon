@@ -1,5 +1,6 @@
 package net.woolf.bella.commands;
 
+import Types.BotChannels;
 import net.md_5.bungee.api.ChatColor;
 import net.woolf.bella.Main;
 import net.woolf.bella.utils.ChatUtils;
@@ -68,7 +69,7 @@ public class RnarCommand implements CommandExecutor {
 
         Location loc = player.getLocation();
 
-        ChatUtils.cacheMessageForChatLog(
+        ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(),
             ChatUtils.RangePrefix + " {" + loc.getBlockX() + " " + loc.getBlockY() + " " + loc.getBlockZ() + "} " +
                 " (" + radius + ")" + "[" + player.getDisplayName() + "] " + "`" + msg + "`");
       } catch ( NumberFormatException nfe ) {
