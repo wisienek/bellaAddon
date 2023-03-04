@@ -282,10 +282,15 @@ public class Utils {
     tpParticles.start();
   }
 
+  public boolean hasTpCooldown (
+      Player player
+  ) {
+    return cooldownTimeOTP.containsKey(player);
+  }
+
   public void itemTP (
       Player player, NBTCompound comp
   ) {
-
     // String enchanter = comp.getString("enchanter");
     int maxLen = comp.getInteger("maxLength");
     int enchCld = comp.getInteger("cld");
@@ -310,10 +315,9 @@ public class Utils {
       return;
     }
 
-    if ( cooldownTimeOTP.containsKey(player) ) {
+    if ( hasTpCooldown(player) ) {
       player.sendMessage(Main.prefixError + "Musisz odpocząć " + ChatColor.RED + cooldownTimeOTP.get(
           player) + ChatColor.GRAY + " sekund.");
-
     }
     else {
       if ( comp.hasKey("maxUse") ) {
@@ -322,9 +326,8 @@ public class Utils {
       }
 
       tpEffect(player, loc);
-      setCoolDownTimeOTP(player, enchCld, true);
+      setCoolDownTimeOTP(player, enchCld, false);
       player.sendMessage(Main.prefixInfo + "Teleportowano do punktu z przedmiotu!");
-
     }
   }
 
@@ -421,11 +424,15 @@ public class Utils {
       Player player, int coolDown, Boolean setter
   ) {
     HashMap<Player, Integer> time = ( setter ? cooldownTimeSetOTP : cooldownTimeOTP );
-    HashMap<Player, BukkitRunnable> task = ( cooldownTaskSetOTP );
+    HashMap<Player, BukkitRunnable> task = ( setter ? cooldownTaskSetOTP : cooldownTaskOTP );
 
     time.put(player, coolDown);
     task.put(player, new BukkitRunnable() {
       public void run () {
+        if ( !time.containsKey(player) && !task.containsKey(player) ) {
+          cancel();
+        }
+
         time.put(player, time.get(player) - 1);
         if ( time.get(player) == 0 ) {
           time.remove(player);

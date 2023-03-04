@@ -46,6 +46,7 @@ public class StringUtils {
     return String.format("%s %s %s", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
   }
 
+  @SuppressWarnings( "deprecation" )
   public static String getHourMinutes () {
     Date today = new Date();
     int hours = today.getHours();

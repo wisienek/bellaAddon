@@ -218,7 +218,7 @@ public class OtpCommand implements CommandExecutor {
                   ChatColor.WHITE + "[L] " + ChatColor.YELLOW + "[Niedaleko słychać trzask teleportacji]");
 
             if ( plugin.config.getBoolean("OTP-command-delay") ) {
-              if ( plugin.utils.cooldownTimeOTP.containsKey(player) ) {
+              if ( plugin.utils.hasTpCooldown(player) ) {
                 player.sendMessage(
                     Main.prefixError + "Musisz odpocząć " + ChatColor.RED + plugin.utils.cooldownTimeOTP.get(
                         player) + ChatColor.GRAY + " sekund.");
@@ -283,7 +283,7 @@ public class OtpCommand implements CommandExecutor {
             return true;
           }
 
-          if ( args.length >= 3 && Integer.valueOf(args[2]) == null ) {
+          if ( args.length < 3 ) {
             player.sendMessage(Main.prefixError + "Argument 3 musi być liczbą!");
             return true;
           }
@@ -308,11 +308,7 @@ public class OtpCommand implements CommandExecutor {
             return true;
           }
 
-          String maxu = args.length >= 3
-                        ? args[2]
-                        : player.hasPermission(Permissions.ATP_ADMIN.toString())
-                          ? String.valueOf(Integer.MAX_VALUE)
-                          : String.valueOf(setmaxuse);
+          int maxUses = Integer.parseInt(args[2]);
 
           // otp enchant <name> <maxuse> <????minlvl>
           NBTCompound comp = nbti.addCompound("teleportEnchantment");
@@ -320,7 +316,7 @@ public class OtpCommand implements CommandExecutor {
           comp.setString("enchanter", player.getName());
           comp.setInteger("maxLength", radius);
           comp.setInteger("cld", cld);
-          if ( args.length >= 3 ) comp.setInteger("maxUse", Integer.valueOf(maxu));
+          comp.setInteger("maxUse", maxUses);
           // location
           comp.setDouble("x", loc.getX());
           comp.setDouble("y", loc.getY());
@@ -332,7 +328,7 @@ public class OtpCommand implements CommandExecutor {
 
           player.sendMessage(
               Main.prefixInfo + "Enchantowano item na teleport do punktu " + ChatColor.GOLD + otp + ChatColor.AQUA +
-                  " (MaxU: " + maxu + ")" + "!");
+                  " (MaxU: " + maxUses + ")" + "!");
 
           return true;
         }

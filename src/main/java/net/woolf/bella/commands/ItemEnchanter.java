@@ -180,17 +180,25 @@ public class ItemEnchanter implements CommandExecutor {
   }
 
   public static void teleportPlayerWithItem (Player player, NBTItem nbti) {
+    Main main = Main.getInstance();
+    if ( main.utils.hasTpCooldown(player) ) {
+      player.sendMessage(
+          Main.prefixInfo + "Nie możesz się jeszcze teleportować! ( poczekaj: " + main.utils.cooldownTimeOTP.get(
+              player) + " sekund )");
+      return;
+    }
+
     Location playerLoc = player.getLocation();
 
     NBTCompound comp = nbti.getCompound("teleportEnchantment");
     Main.getInstance().utils.itemTP(player, comp);
 
-    double x = comp.getDouble("x");
-    double y = comp.getDouble("y");
-    double z = comp.getDouble("z");
+    Double x = comp.getDouble("x");
+    Double y = comp.getDouble("y");
+    Double z = comp.getDouble("z");
 
     Main.getInstance().bot.sendLog(
-        String.format("[%s] teleportował {%d %d %d} -> {%f %f %f} (item)", player.getName(), playerLoc.getBlockX(),
-            playerLoc.getBlockY(), playerLoc.getBlockZ(), x, y, z), Bot.VariousLogId);
+        String.format("[%s] teleportował {%d %d %d} -> {%d %d %d} (item)", player.getName(), playerLoc.getBlockX(),
+            playerLoc.getBlockY(), playerLoc.getBlockZ(), x.intValue(), y.intValue(), z.intValue()), Bot.VariousLogId);
   }
 }
