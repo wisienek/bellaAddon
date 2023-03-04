@@ -57,6 +57,9 @@ commands:
   wymien:
     description: Wymiana hajsu z portfela na itemowy
     usage: /wymien <typ> <ilość>
+  slap:
+    description: Daje slapa wymienionej osobie
+    usage: /slap <playerName>
 
 permissions:
   beloris.bank.admin:

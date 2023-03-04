@@ -37,5 +37,6 @@ public final class CommandManager {
     new PlecakCommand();
     new ListCommand();
     new WymienCommand();
+    new SlapCommand();
   }
 }
