@@ -29,8 +29,6 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
-/* import com.codingforcookies.armorequip.ArmorEquipEvent; */
-
 import Types.BackpackNBTKeys;
 import classes.Backpack;
 import de.tr7zw.nbtapi.NBTItem;

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.logging.Logger;
 
+import net.woolf.bella.events.ArmourEquipEventListener;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
@@ -60,6 +61,7 @@ public class Main extends JavaPlugin {
     PluginManager pm = Bukkit.getServer().getPluginManager();
     pm.registerEvents(new BellaEvents(this), this);
     pm.registerEvents(new BackpackEvents(), this);
+    pm.registerEvents(new ArmourEquipEventListener(), this);
 
     CommandManager.getInstance().initCommands(this);
 

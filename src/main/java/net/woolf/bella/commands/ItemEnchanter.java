@@ -176,6 +176,15 @@ public class ItemEnchanter implements CommandExecutor {
     return sb.toString();
   }
 
+  public static boolean isEnchanted (ItemStack item) {
+    NBTItem nbt = new NBTItem(item);
+
+    for ( String effect : ItemEnchanter.AvailableEnchantEffects )
+      if ( nbt.hasKey(effect) && nbt.getBoolean(effect) ) return true;
+
+    return false;
+  }
+
   public String getUsage () {
     return "Użycie komend: \n/zaczaruj <efekt/lista> [...efekt] \n/przebadaj";
   }
