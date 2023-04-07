@@ -1,9 +1,6 @@
 package net.woolf.bella.utils;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,6 +28,36 @@ public class ChatUtils {
 
   private static Main plugin;
 
+  enum TextType {
+    NORMAL, DESCRIPTION, OOC, ACTION
+  }
+
+  static class TextSegment {
+    String text;
+    TextType type;
+
+    TextSegment (String text, TextType type) {
+      this.text = text;
+      this.type = type;
+    }
+
+    @Override
+    public String toString () {
+      switch ( type ) {
+        case NORMAL:
+          return ChatColor.GRAY + text + ChatColor.GRAY;
+        case DESCRIPTION:
+          return ChatColor.GOLD + "**" + text + "**" + ChatColor.GRAY;
+        case OOC:
+          return ChatColor.DARK_GRAY + "(" + text + ")" + ChatColor.GRAY;
+        case ACTION:
+          return ChatColor.YELLOW + "*" + text + "*" + ChatColor.GRAY;
+        default:
+          return "";
+      }
+    }
+  }
+
   public ChatUtils (
       Main main
   ) {
@@ -41,6 +68,38 @@ public class ChatUtils {
       @Nonnull String channel, @Nullable String message
   ) {
     ChatUtils.cacheMessageForBotLog(channel, String.format("%s-%s", CacheKeys.ChatCacheKey, channel), message, false);
+  }
+
+  public static String formatChatMessage (
+      @Nonnull String initial
+  ) {
+    List<TextSegment> segments = new ArrayList<>();
+    Pattern pattern = Pattern.compile("(\\*\\*.*?\\*\\*)|(\\(.*?\\))|(\\*.*?\\*)|([^\\*\\(]+)");
+    Matcher matcher = pattern.matcher(initial);
+
+    while ( matcher.find() ) {
+      String match = matcher.group();
+      if ( match.startsWith("**") && match.endsWith("**") ) {
+        segments.add(new TextSegment(match.substring(2, match.length() - 2), TextType.DESCRIPTION));
+      }
+      else if ( match.startsWith("(") && match.endsWith(")") ) {
+        segments.add(new TextSegment(match.substring(1, match.length() - 1), TextType.OOC));
+      }
+      else if ( match.startsWith("*") && match.endsWith("*") ) {
+        segments.add(new TextSegment(match.substring(1, match.length() - 1), TextType.ACTION));
+      }
+      else {
+        segments.add(new TextSegment(match, TextType.NORMAL));
+      }
+    }
+
+    StringBuilder sb = new StringBuilder();
+    for ( TextSegment segment : segments ) {
+      if ( segment.type == TextType.NORMAL ) sb.append(ChatUtils.formatEmojis(segment.toString()));
+      else sb.append(segment);
+    }
+
+    return sb.toString();
   }
 
   public static void cacheMessageForBotLog (
@@ -78,49 +137,16 @@ public class ChatUtils {
     }
   }
 
-  public static String formatOOC (
-      String message
-  ) {
-    StringBuilder newMsg = new StringBuilder();
-
-    Pattern pattern = Pattern.compile("\\((.*?)\\)");
-    Matcher matcher = pattern.matcher(message);
-    boolean found = matcher.find();
-
-    while ( found ) {
-      // get text before action
-      int index = message.indexOf("(");
-      String first = message.substring(0, index + 1).replace("(", "");
-      message = message.substring(index + 1);
-
-      // get action text till end
-      int index2 = message.indexOf(")");
-      String second = ( index2 == -1 ) ? message : message.substring(0, index2 + 1).replace(")", "");
-
-      message = message.substring(index2 > -1 ? index2 + 1 : 0);
-
-      newMsg.append(first).append(ChatColor.GRAY).append("(").append(second).append(")").append(ChatColor.WHITE);
-
-      found = matcher.find();
-    }
-
-    if ( message.length() > 0 ) {
-      newMsg.append(message);
-    }
-
-    return ( newMsg.length() == 0 ) ? message : newMsg.toString();
-  }
-
   public static String formatEmojis (
       String message
   ) {
     String newMsg = message;
 
-    Map<String, Object> mapa = plugin.emojiConfig.getValues(false);
+    Map<String, Object> map = plugin.emojiConfig.getValues(false);
 
-    for ( String emoji : mapa.keySet() )
+    for ( String emoji : map.keySet() )
       newMsg = newMsg.replaceAll("(?i)" + escapeMetaCharacters(emoji),
-          ChatColor.YELLOW + "*" + mapa.get(emoji) + "*" + ChatColor.WHITE);
+          ChatColor.YELLOW + "*" + map.get(emoji) + "*" + ChatColor.WHITE);
 
     return newMsg;
   }

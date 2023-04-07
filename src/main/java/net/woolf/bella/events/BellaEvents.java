@@ -53,18 +53,14 @@ public class BellaEvents implements Listener {
   ) {
     String msg = event.getMessage();
 
-    // String newMsg = ChatUtils.formatDOaction(msg);
-    // newMsg = ChatUtils.formatMEaction(newMsg);
-    // String newMsg = ChatUtils.formatOOC(msg);
-    String newMsg = ChatUtils.formatEmojis(msg);
+    String actionsFormatted = ChatUtils.formatChatMessage(msg);
 
-    // Send chat
-    event.setMessage(newMsg);
+    event.setMessage(actionsFormatted);
 
-    ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(),
-        ChatUtils.LocalPrefix + " [" + event.getPlayer().getDisplayName() + "] " + event.getPlayer()
-                                                                                        .getName() + ": `" + newMsg.replaceAll(
-            "(§.)|(`)", "") + "`");
+    ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(), ChatUtils.LocalPrefix + " [" + event.getPlayer()
+                                                                                                          .getDisplayName() + "] " + event.getPlayer()
+                                                                                                                                          .getName() + ": `" + actionsFormatted.replaceAll(
+        "(§.)|(`)", "") + "`");
   }
 
   @EventHandler
@@ -162,36 +158,41 @@ public class BellaEvents implements Listener {
     switch ( cmd ) {
       case "ooc": {
         ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(),
-            ChatUtils.OOCPrefix + " " + player.getName() + ": `(" + String.join(" ", args).replaceAll("`", "") + ")`");
+                                        ChatUtils.OOCPrefix + " " + player.getName() + ": `(" + String.join(" ", args)
+                                                                                                      .replaceAll("`",
+                                                                                                                  "") + ")`");
         break;
       }
 
       case "me":
       case "k": {
         ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(),
-            ChatUtils.LocalPrefix + " [" + player.getDisplayName() + "] " + player.getName() + ": `*" + String.join(" ",
-                args).replaceAll("`", "") + "*`");
+                                        ChatUtils.LocalPrefix + " [" + player.getDisplayName() + "] " + player.getName() + ": `*" + String.join(
+                                            " ", args).replaceAll("`", "") + "*`");
         break;
       }
 
       case "do": {
         ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(),
-            ChatUtils.LocalPrefix + " [" + player.getDisplayName() + "] " + player.getName() + ": `**" + String.join(
-                " ", args).replaceAll("`", "") + "**`");
+                                        ChatUtils.LocalPrefix + " [" + player.getDisplayName() + "] " + player.getName() + ": `**" + String.join(
+                                            " ", args).replaceAll("`", "") + "**`");
         break;
       }
 
       case "s": {
         ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(),
-            ChatUtils.WhisperPrefix + " [" + player.getDisplayName() + "] " + player.getName() + ": `" + String.join(
-                " ", args).replaceAll("`", "") + "`");
+                                        ChatUtils.WhisperPrefix + " [" + player.getDisplayName() + "] " + player.getName() + ": `" + String.join(
+                                            " ", args).replaceAll("`", "") + "`");
         break;
       }
 
       case "globalnar": {
         ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(),
-            ChatUtils.GlobalPrefix + " [" + player.getName() + "] `" + String.join(" ", args)
-                                                                             .replaceAll("`", "") + "`");
+                                        ChatUtils.GlobalPrefix + " [" + player.getName() + "] `" + String.join(" ",
+                                                                                                               args)
+                                                                                                         .replaceAll(
+                                                                                                             "`",
+                                                                                                             "") + "`");
         break;
       }
 
@@ -199,9 +200,8 @@ public class BellaEvents implements Listener {
       case "localnar": {
         Location loc = player.getLocation();
         ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(),
-            ChatUtils.LocalPrefix + " {" + loc.getBlockX() + " " + loc.getBlockY() + " " + loc.getBlockZ() + "} " +
-                " [" + player.getName() + "] `" + String.join(
-                " ", args).replaceAll("`", "") + "`");
+                                        ChatUtils.LocalPrefix + " {" + loc.getBlockX() + " " + loc.getBlockY() + " " + loc.getBlockZ() + "} " + " [" + player.getName() + "] `" + String.join(
+                                            " ", args).replaceAll("`", "") + "`");
         break;
       }
 
@@ -210,8 +210,8 @@ public class BellaEvents implements Listener {
         args.remove(0);
 
         ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(),
-            "**[PRIVNAR]** " + "[" + player.getName() + " -> " + narrated + "] `" + String.join(" ", args)
-                                                                                          .replaceAll("`", "") + "`");
+                                        "**[PRIVNAR]** " + "[" + player.getName() + " -> " + narrated + "] `" + String.join(
+                                            " ", args).replaceAll("`", "") + "`");
         break;
       }
 
@@ -219,7 +219,8 @@ public class BellaEvents implements Listener {
         String hourFormat = StringUtils.getHourMinutes();
 
         this.plugin.bot.sendLog(String.format("%s `%s`: `%s`", hourFormat, player.getName(),
-            StringUtils.synthesizeForDc(String.join(" ", args))), BotChannels.HelpopLogId.toString());
+                                              StringUtils.synthesizeForDc(String.join(" ", args))),
+                                BotChannels.HelpopLogId.toString());
 
         break;
       }

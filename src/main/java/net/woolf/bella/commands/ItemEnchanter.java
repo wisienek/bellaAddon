@@ -192,9 +192,8 @@ public class ItemEnchanter implements CommandExecutor {
   public static void teleportPlayerWithItem (Player player, NBTItem nbti) {
     Main main = Main.getInstance();
     if ( main.utils.hasTpCooldown(player) ) {
-      player.sendMessage(
-          Main.prefixInfo + "Nie możesz się jeszcze teleportować! ( poczekaj: " + main.utils.cooldownTimeOTP.get(
-              player) + " sekund )");
+      player.sendMessage(String.format("%sNie możesz się jeszcze teleportować! ( poczekaj %d sekund )", Main.prefixInfo,
+          main.utils.cooldownTimeOTP.get(player)));
       return;
     }
 
