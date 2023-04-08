@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.logging.Logger;
 
+import net.luckperms.api.LuckPerms;
 import net.woolf.bella.events.ArmourEquipEventListener;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -12,6 +13,7 @@ import org.bukkit.Server;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import de.slikey.effectlib.EffectManager;
@@ -39,6 +41,7 @@ public class Main extends JavaPlugin {
   public final Utils utils = new Utils(this);
   public final PlayerUtils putils = new PlayerUtils(this);
   public final MoneyUtils mutils = new MoneyUtils(this);
+  public LuckPerms lpApi;
 
   public final Bot bot = new Bot(this);
 
@@ -64,6 +67,14 @@ public class Main extends JavaPlugin {
     pm.registerEvents(new ArmourEquipEventListener(), this);
 
     CommandManager.getInstance().initCommands(this);
+
+    RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
+    if ( provider != null ) {
+      this.lpApi = provider.getProvider();
+    }
+    else {
+      this.logger.info("No LP API!");
+    }
 
     try {
       DbUtils.getInstance();
@@ -93,7 +104,7 @@ public class Main extends JavaPlugin {
       config.addDefault("tp-level-" + i + "-radius", String.valueOf(i * 400));
       config.addDefault("tp-level-" + i + "-maxp", String.valueOf(i));
       config.addDefault("tp-level-" + i + "-maxpoints",
-          String.valueOf((int) ( 0 + Math.floor(( 3 * i ) / ( i * 0.5 )) )));
+                        String.valueOf((int) ( 0 + Math.floor(( 3 * i ) / ( i * 0.5 )) )));
       config.addDefault("tp-level-" + i + "-setmaxuse", String.valueOf(i * 15));
     }
 

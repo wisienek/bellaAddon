@@ -5,6 +5,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import Types.BotChannels;
+import net.luckperms.api.cacheddata.CachedDataManager;
+import net.luckperms.api.model.user.User;
 import net.woolf.bella.commands.ItemEnchanter;
 import net.woolf.bella.commands.WymienCommand;
 import org.bukkit.Effect;
@@ -52,15 +54,27 @@ public class BellaEvents implements Listener {
       AsyncPlayerChatEvent event
   ) {
     String msg = event.getMessage();
-
     String actionsFormatted = ChatUtils.formatChatMessage(msg);
 
     event.setMessage(actionsFormatted);
 
-    ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(), ChatUtils.LocalPrefix + " [" + event.getPlayer()
-                                                                                                          .getDisplayName() + "] " + event.getPlayer()
-                                                                                                                                          .getName() + ": `" + actionsFormatted.replaceAll(
-        "(§.)|(`)", "") + "`");
+    String userPrefix = "[-]";
+
+    User user = this.plugin.lpApi.getUserManager().getUser(event.getPlayer().getUniqueId());
+    if ( user != null ) {
+      CachedDataManager cachedData = user.getCachedData();
+      String lpPrefix = cachedData.getMetaData().getPrefix();
+
+      if ( lpPrefix != null ) {
+        userPrefix = lpPrefix;
+      }
+    }
+
+    ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(),
+                                    ChatUtils.LocalPrefix + " " + userPrefix.replaceAll("(§.)|(&.)|(`)",
+                                                                                        "") + " " + event.getPlayer()
+                                                                                                         .getName() + ": " + "`" + actionsFormatted.replaceAll(
+                                        "(§.)|(`)", "") + "`");
   }
 
   @EventHandler

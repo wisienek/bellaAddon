@@ -45,13 +45,13 @@ public class ChatUtils {
     public String toString () {
       switch ( type ) {
         case NORMAL:
-          return ChatColor.GRAY + text + ChatColor.GRAY;
+          return ChatColor.WHITE + text + ChatColor.WHITE;
         case DESCRIPTION:
-          return ChatColor.GOLD + "**" + text + "**" + ChatColor.GRAY;
+          return ChatColor.GOLD + "**" + text + "**" + ChatColor.WHITE;
         case OOC:
-          return ChatColor.DARK_GRAY + "(" + text + ")" + ChatColor.GRAY;
+          return ChatColor.DARK_GRAY + "(" + text + ")" + ChatColor.WHITE;
         case ACTION:
-          return ChatColor.YELLOW + "*" + text + "*" + ChatColor.GRAY;
+          return ChatColor.YELLOW + "*" + text + "*" + ChatColor.WHITE;
         default:
           return "";
       }
@@ -146,7 +146,7 @@ public class ChatUtils {
 
     for ( String emoji : map.keySet() )
       newMsg = newMsg.replaceAll("(?i)" + escapeMetaCharacters(emoji),
-          ChatColor.YELLOW + "*" + map.get(emoji) + "*" + ChatColor.WHITE);
+                                 ChatColor.YELLOW + "*" + map.get(emoji) + "*" + ChatColor.WHITE);
 
     return newMsg;
   }
