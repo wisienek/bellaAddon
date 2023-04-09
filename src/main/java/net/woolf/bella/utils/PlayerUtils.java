@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import net.luckperms.api.cacheddata.CachedDataManager;
+import net.luckperms.api.model.user.User;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -109,6 +111,21 @@ public class PlayerUtils {
     }
 
     return false;
+  }
+
+  public static String getPlayerPrefix (Player player) {
+    String userPrefix = "[-]";
+
+    User user = Main.getInstance().lpApi.getUserManager().getUser(player.getUniqueId());
+    if ( user != null ) {
+      CachedDataManager cachedData = user.getCachedData();
+      String lpPrefix = cachedData.getMetaData().getPrefix();
+
+      if ( lpPrefix != null ) {
+        userPrefix = lpPrefix;
+      }
+    }
+    return userPrefix;
   }
 
 }

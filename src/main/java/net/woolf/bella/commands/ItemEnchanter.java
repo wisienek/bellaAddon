@@ -1,14 +1,13 @@
 package net.woolf.bella.commands;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
 
 import Types.BotChannels;
+import Types.ItemEffects;
 import de.tr7zw.nbtapi.NBTCompound;
 import net.woolf.bella.utils.ChatUtils;
 import org.bukkit.Location;
@@ -27,8 +26,7 @@ import net.woolf.bella.Main;
 
 public class ItemEnchanter implements CommandExecutor {
 
-  public static final Set<String> AvailableEnchantEffects = new HashSet<>(
-      Arrays.asList("test", "lot", "doublejump", "niewidzialnosc", "predkosc"));
+  public static final Set<String> AvailableEnchantEffects = ItemEffects.stringToEnum.keySet();
 
   public ItemEnchanter (
       Main main
@@ -161,7 +159,7 @@ public class ItemEnchanter implements CommandExecutor {
     ItemMeta meta = item.getItemMeta();
     meta.setUnbreakable(true);
     meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_UNBREAKABLE, ItemFlag.HIDE_DESTROYS,
-        ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_POTION_EFFECTS);
+                      ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_POTION_EFFECTS);
 
     item.setItemMeta(meta);
   }
@@ -185,6 +183,18 @@ public class ItemEnchanter implements CommandExecutor {
     return false;
   }
 
+  public static List<String> getItemEffects (ItemStack item) {
+    NBTItem nbt = new NBTItem(item);
+
+    List<String> effects = new ArrayList<>();
+
+    for ( String effect : ItemEnchanter.AvailableEnchantEffects )
+      if ( nbt.hasKey(effect) && nbt.getBoolean(effect) ) effects.add(effect);
+
+    return effects;
+  }
+
+
   public String getUsage () {
     return "Użycie komend: \n/zaczaruj <efekt/lista> [...efekt] \n/przebadaj";
   }
@@ -193,7 +203,7 @@ public class ItemEnchanter implements CommandExecutor {
     Main main = Main.getInstance();
     if ( main.utils.hasTpCooldown(player) ) {
       player.sendMessage(String.format("%sNie możesz się jeszcze teleportować! ( poczekaj %d sekund )", Main.prefixInfo,
-          main.utils.cooldownTimeOTP.get(player)));
+                                       main.utils.cooldownTimeOTP.get(player)));
       return;
     }
 
@@ -207,7 +217,8 @@ public class ItemEnchanter implements CommandExecutor {
     Double z = comp.getDouble("z");
 
     ChatUtils.cacheMessageForBotLog(BotChannels.VariousLogId.toString(),
-        String.format("[%s] teleportował {%d %d %d} -> {%d %d %d} (item)", player.getName(), playerLoc.getBlockX(),
-            playerLoc.getBlockY(), playerLoc.getBlockZ(), x.intValue(), y.intValue(), z.intValue()));
+                                    String.format("[%s] teleportował {%d %d %d} -> {%d %d %d} (item)", player.getName(),
+                                                  playerLoc.getBlockX(), playerLoc.getBlockY(), playerLoc.getBlockZ(),
+                                                  x.intValue(), y.intValue(), z.intValue()));
   }
 }

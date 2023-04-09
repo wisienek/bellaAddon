@@ -15,7 +15,7 @@ public class ConfigLoader {
 
   private final File baseConfigFile = Main.getInstance().getDataFolder();
 
-  private final Map<String, YamlConfiguration> configs = new HashMap<>();
+  public final Map<String, YamlConfiguration> configs = new HashMap<>();
 
   ConfigLoader () {
     readConfigDirectory();
@@ -29,21 +29,20 @@ public class ConfigLoader {
   }
 
   private void readConfigDirectory () {
-
     for ( final File inFolder : Objects.requireNonNull(baseConfigFile.listFiles()) ) {
-      if ( isYamlFile(inFolder.getName()) ) {
+      String fileName = inFolder.getName();
+
+      if ( isYamlFile(fileName) ) {
         YamlConfiguration config = YamlConfiguration.loadConfiguration(inFolder);
 
-        configs.put(inFolder.getName(), config);
+        configs.put(fileName, config);
       }
-
     }
   }
 
   private void saveDefaults () throws IOException {
     if ( !configs.containsKey(ConfigFiles.DB.toString()) )
       getDefaultDBConfig().save(new File(baseConfigFile, ConfigFiles.DB.toString()));
-
   }
 
   private YamlConfiguration getDefaultDBConfig () {

@@ -5,8 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import Types.BotChannels;
-import net.luckperms.api.cacheddata.CachedDataManager;
-import net.luckperms.api.model.user.User;
 import net.woolf.bella.commands.ItemEnchanter;
 import net.woolf.bella.commands.WymienCommand;
 import org.bukkit.Effect;
@@ -58,17 +56,7 @@ public class BellaEvents implements Listener {
 
     event.setMessage(actionsFormatted);
 
-    String userPrefix = "[-]";
-
-    User user = this.plugin.lpApi.getUserManager().getUser(event.getPlayer().getUniqueId());
-    if ( user != null ) {
-      CachedDataManager cachedData = user.getCachedData();
-      String lpPrefix = cachedData.getMetaData().getPrefix();
-
-      if ( lpPrefix != null ) {
-        userPrefix = lpPrefix;
-      }
-    }
+    String userPrefix = PlayerUtils.getPlayerPrefix(event.getPlayer());
 
     ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(),
                                     ChatUtils.LocalPrefix + " " + userPrefix.replaceAll("(§.)|(&.)|(`)",
@@ -164,10 +152,10 @@ public class BellaEvents implements Listener {
 
     List<String> args = new LinkedList<>();
     Collections.addAll(args, event.getMessage().split(" "));
-
     String cmd = args.get(0).replace("/", "");
-
     args.remove(0);
+
+    String userPrefix = PlayerUtils.getPlayerPrefix(event.getPlayer());
 
     switch ( cmd ) {
       case "ooc": {
@@ -181,21 +169,21 @@ public class BellaEvents implements Listener {
       case "me":
       case "k": {
         ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(),
-                                        ChatUtils.LocalPrefix + " [" + player.getDisplayName() + "] " + player.getName() + ": `*" + String.join(
+                                        ChatUtils.LocalPrefix + " [" + userPrefix + "] " + player.getName() + ": `*" + String.join(
                                             " ", args).replaceAll("`", "") + "*`");
         break;
       }
 
       case "do": {
         ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(),
-                                        ChatUtils.LocalPrefix + " [" + player.getDisplayName() + "] " + player.getName() + ": `**" + String.join(
+                                        ChatUtils.LocalPrefix + " [" + userPrefix + "] " + player.getName() + ": `**" + String.join(
                                             " ", args).replaceAll("`", "") + "**`");
         break;
       }
 
       case "s": {
         ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(),
-                                        ChatUtils.WhisperPrefix + " [" + player.getDisplayName() + "] " + player.getName() + ": `" + String.join(
+                                        ChatUtils.WhisperPrefix + " [" + userPrefix + "] " + player.getName() + ": `" + String.join(
                                             " ", args).replaceAll("`", "") + "`");
         break;
       }
@@ -254,9 +242,9 @@ public class BellaEvents implements Listener {
 
     if ( !PlayerUtils.playerArmourHasEffect(player, "doublejump") ) return;
 
-    Location ploc = player.getLocation();
+    Location playerLocation = player.getLocation();
 
-    if ( player.getWorld().getBlockAt(ploc).getType() == Material.WATER ) return;
+    if ( player.getWorld().getBlockAt(playerLocation).getType() == Material.WATER ) return;
 
     this.onPlayerDoubleJump(player);
     event.setCancelled(true);
@@ -286,19 +274,4 @@ public class BellaEvents implements Listener {
     p.playEffect(p.getLocation(), Effect.MOBSPAWNER_FLAMES, null);
     p.playSound(p.getLocation(), Sound.ENTITY_RABBIT_JUMP, 1.3f, 1.0f);
   }
-
-  // @EventHandler(priority = EventPriority.HIGHEST)
-  // public void equip(
-  // final ArmorEquipEvent event
-  // ) {
-  // System.out.println( "ArmorEquipEvent - " + event.getMethod() );
-  // System.out.println( "Type: " + event.getType() );
-  // System.out.println( "New: "
-  // + ( event.getNewArmorPiece() != null ? event.getNewArmorPiece().getType()
-  // : "null" ) );
-  // System.out.println( "Old: "
-  // + ( event.getOldArmorPiece() != null ? event.getOldArmorPiece().getType()
-  // : "null" ) );
-  //
-  // }
 }
