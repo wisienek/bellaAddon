@@ -61,7 +61,7 @@ public class Utils {
 
     return nearbyPlayers.stream()
                         .filter(e -> e instanceof Player && !e.getName().equals(player.getName()))
-                        .map(e -> (Player) e)
+                        .map(Player.class::cast)
                         .collect(Collectors.toList());
   }
 
@@ -70,7 +70,7 @@ public class Utils {
   ) {
     Collection<Entity> nearbyPlayers = loc.getWorld().getNearbyEntities(loc, len, len, len);
 
-    return nearbyPlayers.stream().filter(e -> e instanceof Player).map(e -> (Player) e).collect(Collectors.toList());
+    return nearbyPlayers.stream().filter(Player.class::isInstance).map(Player.class::cast).collect(Collectors.toList());
   }
 
   public Boolean isWithinReach (
@@ -122,7 +122,7 @@ public class Utils {
     plugin.tps.set("tps." + player.getUniqueId().toString() + "." + name + ".Yaw", player.getLocation().getYaw());
     plugin.tps.set("tps." + player.getUniqueId().toString() + "." + name + ".Pitch", player.getLocation().getPitch());
     plugin.tps.set("tps." + player.getUniqueId().toString() + "." + name + ".World",
-        player.getLocation().getWorld().getName());
+                   player.getLocation().getWorld().getName());
     plugin.saveOTPFile();
   }
 
@@ -154,7 +154,7 @@ public class Utils {
     return type;
   }
 
-  public Boolean sendOTP (
+  public void sendOTP (
       Player player, String name
   ) {
     World world = player.getWorld();
@@ -166,10 +166,10 @@ public class Utils {
     for ( Player sender : sendTo )
       sender.sendMessage(ChatColor.DARK_GRAY + "[L]" + ChatColor.GOLD + " [Niedaleko słychać odgłos teleportacji]");
 
-    return player.teleport(tpLoc);
+    player.teleport(tpLoc);
   }
 
-  public Boolean sendOTP (
+  public void sendOTP (
       Player player, String name, Player target
   ) {
     World world = player.getWorld();
@@ -180,10 +180,10 @@ public class Utils {
     for ( Player sender : sendTo )
       sender.sendMessage(ChatColor.DARK_GRAY + "[L]" + ChatColor.GOLD + " [Niedaleko słychać odgłos teleportacji]");
 
-    return target.teleport(tpLoc);
+    target.teleport(tpLoc);
   }
 
-  public Boolean sendOTP (
+  public void sendOTP (
       Player player, Location loc
   ) {
     World world = player.getWorld();
@@ -194,7 +194,7 @@ public class Utils {
     for ( Player sender : sendTo )
       sender.sendMessage(ChatColor.DARK_GRAY + "[L]" + ChatColor.GOLD + " [Niedaleko słychać odgłos teleportacji]");
 
-    return player.teleport(loc);
+    player.teleport(loc);
   }
 
   public Location getOTPLocation (
@@ -288,7 +288,7 @@ public class Utils {
     return cooldownTimeOTP.containsKey(player);
   }
 
-  public void itemTP (
+  public Boolean itemTP (
       Player player, NBTCompound comp
   ) {
     // String enchanter = comp.getString("enchanter");
@@ -307,17 +307,19 @@ public class Utils {
 
     if ( used >= maxUse ) {
       player.sendMessage(Main.prefixError + "Nie można już użyć przedmiotu!");
-      return;
+      return false;
     }
 
     if ( player.getLocation().distance(loc) > maxLen ) {
       player.sendMessage(Main.prefixError + "Nie można użyć przedmiotu, za daleko!");
-      return;
+      return false;
     }
 
     if ( hasTpCooldown(player) ) {
       player.sendMessage(Main.prefixError + "Musisz odpocząć " + ChatColor.RED + cooldownTimeOTP.get(
           player) + ChatColor.GRAY + " sekund.");
+
+      return false;
     }
     else {
       if ( comp.hasKey("maxUse") ) {
@@ -328,6 +330,8 @@ public class Utils {
       tpEffect(player, loc);
       setCoolDownTimeOTP(player, enchCld, false);
       player.sendMessage(Main.prefixInfo + "Teleportowano do punktu z przedmiotu!");
+
+      return true;
     }
   }
 
