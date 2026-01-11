@@ -5,6 +5,7 @@ import java.util.Map;
 
 import Types.BotChannels;
 import net.woolf.bella.utils.ChatUtils;
+import net.woolf.bella.utils.LocationUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -75,7 +76,7 @@ public class MoneyCommand implements CommandExecutor {
         return true;
       }
 
-      List<Player> nearbyPlayers = plugin.utils.getNearbyPlayers( player, 4 );
+      List<Player> nearbyPlayers = LocationUtils.getNearbyPlayers( player, 4 );
       Player target = null;
 
       for ( Player p : nearbyPlayers )

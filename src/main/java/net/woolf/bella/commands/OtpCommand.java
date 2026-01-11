@@ -5,7 +5,7 @@ import Types.Permissions;
 import de.tr7zw.nbtapi.NBTCompound;
 import de.tr7zw.nbtapi.NBTItem;
 import net.woolf.bella.Main;
-import net.woolf.bella.Utils;
+import net.woolf.bella.utils.LocationUtils;
 import net.woolf.bella.utils.PlayerUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -65,7 +65,7 @@ public class OtpCommand implements CommandExecutor {
       }
 
       String otp = "";
-      String levelS = plugin.utils.getLevel( player );
+      String levelS = plugin.teleportUtils.getLevel( player );
       int level = Integer.parseInt( levelS );
 
       if ( args.length > 1 )
@@ -76,20 +76,22 @@ public class OtpCommand implements CommandExecutor {
         return true;
       }
 
-      int cld = Integer.parseInt( (String) plugin.config.get( "tp-level-" + levelS + "-cld" ) );
+      int cld = Integer
+          .parseInt( (String) plugin.configManager.config.get( "tp-level-" + levelS + "-cld" ) );
       int radius = Integer
-          .parseInt( (String) plugin.config.get( "tp-level-" + levelS + "-radius" ) );
-      int maxp = Integer.parseInt( (String) plugin.config.get( "tp-level-" + levelS + "-maxp" ) );
-      int maxpts = Integer
-          .parseInt( (String) plugin.config.get( "tp-level-" + levelS + "-maxpoints" ) );
-      int setmaxuse = Integer
-          .parseInt( (String) plugin.config.get( "tp-level-" + levelS + "-setmaxuse" ) );
+          .parseInt( (String) plugin.configManager.config.get( "tp-level-" + levelS + "-radius" ) );
+      int maxp = Integer
+          .parseInt( (String) plugin.configManager.config.get( "tp-level-" + levelS + "-maxp" ) );
+      int maxpts = Integer.parseInt( (String) plugin.configManager.config
+          .get( "tp-level-" + levelS + "-maxpoints" ) );
+      int setmaxuse = Integer.parseInt( (String) plugin.configManager.config
+          .get( "tp-level-" + levelS + "-setmaxuse" ) );
 
       switch ( args[0] ) {
         case "info": {
-          Map<String, Object> list = plugin.utils.getOTP( player );
+          Map<String, Object> list = plugin.teleportUtils.getOTP( player );
           int len = list.size();
-          String type = plugin.utils.getType( player );
+          String type = plugin.teleportUtils.getType( player );
 
           String os = Main.prefixInfo + "Twój level wynosi: " + ChatColor.YELLOW + levelS + "\n"
               + ChatColor.GRAY + "Max pkt tp : " + ChatColor.YELLOW + len + " / " + maxpts + "\n"
@@ -110,7 +112,7 @@ public class OtpCommand implements CommandExecutor {
           }
 
           // sprawdmax
-          Map<String, Object> list = plugin.utils.getOTP( player );
+          Map<String, Object> list = plugin.teleportUtils.getOTP( player );
           int len = list.size();
           if ( len >= maxpts ) {
             player.sendMessage( Main.prefixError + "Nie możesz mieć więcej punktów tp (" + maxpts
@@ -119,13 +121,14 @@ public class OtpCommand implements CommandExecutor {
           }
 
           // ustaw
-          if ( plugin.config.getBoolean( "setOTP-command-delay" ) ) {
-            if ( plugin.utils.cooldownTimeSetOTP.containsKey( player ) ) {
+          if ( plugin.configManager.config.getBoolean( "setOTP-command-delay" ) ) {
+            if ( plugin.cooldownUtils.hasSetTpCooldown( player ) ) {
               player.sendMessage( Main.prefixError + "Musisz poczekać " + ChatColor.RED
-                  + plugin.utils.cooldownTimeSetOTP.get( player ) + ChatColor.GRAY + " sekund." );
+                  + plugin.cooldownUtils.getSetCooldownTime( player ) + ChatColor.GRAY
+                  + " sekund." );
             } else {
               setPlayerOTP( player, otp );
-              plugin.utils.setCoolDownTimeOTP( player, cld, true );
+              plugin.cooldownUtils.setCoolDownTimeOTP( player, cld, true );
               player.sendMessage( Main.prefixInfo + "Ustawiono TP : " + ChatColor.AQUA + otp
                   + ChatColor.WHITE + ". Zajęte tp: " + ( len + 1 ) + " / " + maxpts );
             }
@@ -144,14 +147,14 @@ public class OtpCommand implements CommandExecutor {
             return true;
           }
 
-          if ( plugin.utils.tpsIsNull( player, otp ) ) {
+          if ( plugin.teleportUtils.tpsIsNull( player, otp ) ) {
             player
                 .sendMessage( Main.prefixError + "Nie masz takiego TP: " + ChatColor.YELLOW + otp );
           } else {
-            Map<String, Object> list = plugin.utils.getOTP( player );
+            Map<String, Object> list = plugin.teleportUtils.getOTP( player );
             int len = list.size();
 
-            plugin.utils.deleteOTP( player, otp );
+            plugin.teleportUtils.deleteOTP( player, otp );
             player.sendMessage( Main.prefixInfo + "Usunięto teleport: " + ChatColor.AQUA + otp
                 + ChatColor.WHITE + ". Wolne: " + ( len - 1 ) + " / " + maxpts );
           }
@@ -164,8 +167,8 @@ public class OtpCommand implements CommandExecutor {
             player.hasPermission( Permissions.ATP_ADMIN.toString() )
                 || player.hasPermission( Permissions.TEST.toString() )
           ) {
-            String type = plugin.utils.getType( player );
-            plugin.utils.tpEffect( player, null, null );
+            String type = plugin.teleportUtils.getType( player );
+            plugin.teleportUtils.tpEffect( player, null, null );
 
             player.sendMessage( Main.prefixInfo + "Typ: " + ChatColor.BLUE + type );
           }
@@ -179,7 +182,7 @@ public class OtpCommand implements CommandExecutor {
             return true;
           }
 
-          String ef = plugin.utils.getType( player );
+          String ef = plugin.teleportUtils.getType( player );
 
           if ( !ef.isEmpty() && !player.hasPermission( Permissions.ATP_ADMIN.toString() ) ) {
             player.sendMessage( Main.prefixError
@@ -187,13 +190,17 @@ public class OtpCommand implements CommandExecutor {
             return true;
           }
 
-          if ( !Utils.types.contains( otp ) ) {
+          net.woolf.bella.types.EffectType effectType = net.woolf.bella.types.EffectType
+              .fromString( otp );
+          if (
+            effectType == net.woolf.bella.types.EffectType.IGNIS && !otp.equalsIgnoreCase( "ignis" )
+          ) {
             player.sendMessage( Main.prefixError + "Twój efekt nie znajduje się na liście: "
-                + ChatColor.YELLOW + String.join( ", ", Utils.types ) );
+                + ChatColor.YELLOW + "ignis, aqua, geo, electro, aeter, caligo, lux" );
             return true;
           }
 
-          Boolean ok = plugin.utils.setType( player, otp );
+          Boolean ok = plugin.teleportUtils.setType( player, otp );
 
           player.sendMessage( ok ? Main.prefixInfo + "Ustawiono efekt na: " + ChatColor.BLUE + otp
               : Main.prefixError + "Nie powiodło się ustawianie efektu!" );
@@ -206,13 +213,13 @@ public class OtpCommand implements CommandExecutor {
             return true;
           }
 
-          if ( plugin.utils.tpsIsNull( player, otp ) ) {
+          if ( plugin.teleportUtils.tpsIsNull( player, otp ) ) {
             player
                 .sendMessage( Main.prefixError + "Nie masz takiego TP: " + ChatColor.YELLOW + otp );
           } else {
 
             // przelicz odległość
-            Location loc = plugin.utils.getOTPLocation( player, otp );
+            Location loc = plugin.teleportUtils.getOTPLocation( player, otp );
             Location playerLoc = player.getLocation();
             double distance = playerLoc.distance( loc );
 
@@ -223,19 +230,20 @@ public class OtpCommand implements CommandExecutor {
               return true;
             }
 
-            List<Player> sendTo = plugin.utils.getNearbyPlayers( player, 20 );
+            List<Player> sendTo = LocationUtils.getNearbyPlayers( player, 20 );
             for ( Player sending : sendTo )
               sending.sendMessage( ChatColor.WHITE + "[L] " + ChatColor.YELLOW
                   + "[Niedaleko słychać trzask teleportacji]" );
 
-            if ( plugin.config.getBoolean( "OTP-command-delay" ) ) {
-              if ( plugin.utils.hasTpCooldown( player ) ) {
+            if ( plugin.configManager.config.getBoolean( "OTP-command-delay" ) ) {
+              if ( plugin.cooldownUtils.hasTpCooldown( player ) ) {
                 player.sendMessage( Main.prefixError + "Musisz odpocząć " + ChatColor.RED
-                    + plugin.utils.cooldownTimeOTP.get( player ) + ChatColor.GRAY + " sekund." );
+                    + plugin.cooldownUtils.getCooldownTime( player ) + ChatColor.GRAY
+                    + " sekund." );
               } else {
-                plugin.utils.tpEffect( player, otp, null );
+                plugin.teleportUtils.tpEffect( player, otp, null );
 
-                plugin.utils.setCoolDownTimeOTP( player, cld, false );
+                plugin.cooldownUtils.setCoolDownTimeOTP( player, cld, false );
                 player.sendMessage( Main.prefixInfo + "Teleportowano do punktu " + ChatColor.YELLOW
                     + otp );
 
@@ -247,7 +255,7 @@ public class OtpCommand implements CommandExecutor {
                                     .toString() );
               }
             } else {
-              plugin.utils.tpEffect( player, otp, null );
+              plugin.teleportUtils.tpEffect( player, otp, null );
 
               player.sendMessage( Main.prefixInfo + "Teleportowano do punktu " + ChatColor.YELLOW
                   + otp );
@@ -265,7 +273,7 @@ public class OtpCommand implements CommandExecutor {
         }
 
         case "list": {
-          Map<String, Object> list = plugin.utils.getOTP( player );
+          Map<String, Object> list = plugin.teleportUtils.getOTP( player );
           int len = list.size();
 
           if ( len == 0 ) {
@@ -282,7 +290,7 @@ public class OtpCommand implements CommandExecutor {
               .append( maxpts )
               .append( " ) : " );
           for ( String key : list.keySet() ) {
-            Location loc = plugin.utils.getOTPLocation( player, key );
+            Location loc = plugin.teleportUtils.getOTPLocation( player, key );
             os.append( "\n- " )
                 .append( key )
                 .append( " (" )
@@ -320,7 +328,8 @@ public class OtpCommand implements CommandExecutor {
             return true;
           }
 
-          Location loc = plugin.utils.getOTPLocation( player, otp );
+          Location loc = plugin.teleportUtils.getOTPLocation( player, otp );
+          @SuppressWarnings("deprecation")
           NBTItem nbti = new NBTItem( item, true );
 
           if ( nbti.hasKey( "teleportEnchantment" ) ) {
@@ -410,7 +419,7 @@ public class OtpCommand implements CommandExecutor {
             return true;
           }
 
-          Location loc = plugin.utils.getOTPLocation( player, otp );
+          Location loc = plugin.teleportUtils.getOTPLocation( player, otp );
           double distance = player.getLocation().distance( loc );
 
           if ( distance > radius ) {
@@ -436,18 +445,18 @@ public class OtpCommand implements CommandExecutor {
 
           Location playerLoc = target.getLocation();
 
-          if ( plugin.config.getBoolean( "OTP-command-delay" ) ) {
-            if ( plugin.utils.cooldownTimeOTP.containsKey( player ) ) {
+          if ( plugin.configManager.config.getBoolean( "OTP-command-delay" ) ) {
+            if ( plugin.cooldownUtils.hasTpCooldown( player ) ) {
               player.sendMessage( Main.prefixError + "Musisz odpocząć " + ChatColor.RED
-                  + plugin.utils.cooldownTimeOTP.get( player ) + ChatColor.GRAY + " sekund." );
+                  + plugin.cooldownUtils.getCooldownTime( player ) + ChatColor.GRAY + " sekund." );
             } else {
-              plugin.utils.tpEffect( player, otp, target );
+              plugin.teleportUtils.tpEffect( player, otp, target );
               target.sendMessage( Main.prefixInfo + "Zostałeś teleportowany przez "
                   + player.getName() + " do punktu " + otp );
               player
                   .sendMessage( Main.prefixInfo + "Teleportowałeś " + pname + "do punktu " + otp );
 
-              plugin.utils.setCoolDownTimeOTP( player, cld, false );
+              plugin.cooldownUtils.setCoolDownTimeOTP( player, cld, false );
 
               this.plugin.bot.sendLog( String
                   .format( "[%s] teleportował [%s] {%o %o %o} -> {%o %o %o} (%s)", player
@@ -457,7 +466,7 @@ public class OtpCommand implements CommandExecutor {
                                   .toString() );
             }
           } else {
-            plugin.utils.tpEffect( player, otp, target );
+            plugin.teleportUtils.tpEffect( player, otp, target );
             target.sendMessage( Main.prefixInfo + "Zostałeś teleportowany przez " + player.getName()
                 + " do punktu " + otp );
             player.sendMessage( Main.prefixInfo + "Teleportowałeś " + pname + "do punktu " + otp );
@@ -493,12 +502,12 @@ public class OtpCommand implements CommandExecutor {
             return true;
           }
 
-          if ( plugin.utils.tpsIsNull( player, otp ) ) {
+          if ( plugin.teleportUtils.tpsIsNull( player, otp ) ) {
             player
                 .sendMessage( Main.prefixError + "Nie masz takiego TP: " + ChatColor.YELLOW + otp );
           } else {
             // przelicz odległość
-            Location loc = plugin.utils.getOTPLocation( player, otp );
+            Location loc = plugin.teleportUtils.getOTPLocation( player, otp );
             double distance = playerLoc.distance( loc );
 
             if ( distance > radius ) {
@@ -508,7 +517,7 @@ public class OtpCommand implements CommandExecutor {
               return true;
             }
 
-            List<Player> sendTo = plugin.utils.getNearbyPlayers( player, 20 );
+            List<Player> sendTo = LocationUtils.getNearbyPlayers( player, 20 );
             for ( Player sending : sendTo )
               sending.sendMessage( ChatColor.WHITE + "[L] " + ChatColor.YELLOW
                   + "[Niedaleko słychać trzask teleportacji łącznej]" );
@@ -518,21 +527,22 @@ public class OtpCommand implements CommandExecutor {
                 .collect( Collectors.joining( ", " ) ) );
 
             StringBuilder os = new StringBuilder();
-            if ( plugin.config.getBoolean( "OTP-command-delay" ) ) {
-              if ( plugin.utils.cooldownTimeOTP.containsKey( player ) ) {
+            if ( plugin.configManager.config.getBoolean( "OTP-command-delay" ) ) {
+              if ( plugin.cooldownUtils.hasTpCooldown( player ) ) {
                 player.sendMessage( Main.prefixError + "Musisz odpocząć " + ChatColor.RED
-                    + plugin.utils.cooldownTimeOTP.get( player ) + ChatColor.GRAY + " sekund." );
+                    + plugin.cooldownUtils.getCooldownTime( player ) + ChatColor.GRAY
+                    + " sekund." );
               } else {
                 for ( Player target : nearbyPlayers ) {
-                  plugin.utils.tpEffect( player, otp, target );
+                  plugin.teleportUtils.tpEffect( player, otp, target );
 
                   os.append( target.getName() ).append( " " );
                   target.sendMessage( Main.prefixInfo + player.getDisplayName()
                       + " Teleportował się z tobą do punktu: " + ChatColor.YELLOW + otp );
                 }
-                plugin.utils.tpEffect( player, otp, null );
+                plugin.teleportUtils.tpEffect( player, otp, null );
 
-                plugin.utils.setCoolDownTimeOTP( player, cld, false );
+                plugin.cooldownUtils.setCoolDownTimeOTP( player, cld, false );
                 player.sendMessage( Main.prefixInfo + "Teleportowano wspólnie z ( " + os
                     + " ) do punktu " + ChatColor.YELLOW + otp );
 
@@ -545,13 +555,13 @@ public class OtpCommand implements CommandExecutor {
               }
             } else {
               for ( Player target : nearbyPlayers ) {
-                plugin.utils.tpEffect( player, otp, target );
+                plugin.teleportUtils.tpEffect( player, otp, target );
 
                 os.append( target.getName() ).append( " " );
                 target.sendMessage( Main.prefixInfo + player.getDisplayName()
                     + " Teleportował się z tobą do punktu: " + ChatColor.YELLOW + otp );
               }
-              plugin.utils.tpEffect( player, otp, null );
+              plugin.teleportUtils.tpEffect( player, otp, null );
 
               player.sendMessage( Main.prefixInfo + "Teleportowano wspólnie z ( " + os
                   + " ) do punktu " + ChatColor.YELLOW + otp );
@@ -581,9 +591,9 @@ public class OtpCommand implements CommandExecutor {
       Player player,
       String name
   ) {
-    plugin.utils.setOTP( player, name );
-    if ( plugin.config.getBoolean( "show-setOTP-message" ) ) {
-      String strFormatted = plugin.config.getString( "setOTP-message" )
+    plugin.teleportUtils.setOTP( player, name );
+    if ( plugin.configManager.config.getBoolean( "show-setOTP-message" ) ) {
+      String strFormatted = plugin.configManager.config.getString( "setOTP-message" )
           .replace( "%player%", player.getDisplayName() );
       player.sendMessage( ChatColor.translateAlternateColorCodes( '&', strFormatted ) );
     }

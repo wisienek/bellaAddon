@@ -1,5 +1,7 @@
 package net.woolf.bella.events;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -67,7 +69,8 @@ public class BellaEvents implements Listener {
   public void onPlayerJoin(
       PlayerJoinEvent event
   ) {
-    List<Player> online = plugin.utils.getPlayers();
+    Collection<? extends Player> onlineCollection = plugin.server.getOnlinePlayers();
+    List<Player> online = new ArrayList<>( onlineCollection );
     plugin.bot.updatePresence( "Graczy online: " + ( online.size() + 1 ) );
   }
 
@@ -75,7 +78,8 @@ public class BellaEvents implements Listener {
   public void onPlayerQuit(
       PlayerQuitEvent event
   ) {
-    List<Player> online = plugin.utils.getPlayers();
+    Collection<? extends Player> onlineCollection = plugin.server.getOnlinePlayers();
+    List<Player> online = new ArrayList<>( onlineCollection );
     int size = online.size() - 1;
 
     plugin.bot.updatePresence( size > 0 ? "Graczy online: " + size : "Czekam na graczy..." );
@@ -125,7 +129,7 @@ public class BellaEvents implements Listener {
     if ( clicked instanceof Player ) {
       Player target = (Player) clicked;
 
-      boolean canBeRidden = plugin.playerConfig
+      boolean canBeRidden = plugin.configManager.playerConfig
           .getBoolean( target.getUniqueId().toString() + ".canBeRidden" );
 
       if ( canBeRidden ) {

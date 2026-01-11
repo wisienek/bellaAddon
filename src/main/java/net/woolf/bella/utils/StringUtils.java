@@ -1,8 +1,8 @@
 package net.woolf.bella.utils;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.time.LocalDateTime;
 
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
@@ -47,11 +47,10 @@ public class StringUtils {
     return String.format( "%s %s %s", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ() );
   }
 
-  @SuppressWarnings("deprecation")
   public static String getHourMinutes() {
-    Date today = new Date();
-    int hours = today.getHours();
-    int minutes = today.getMinutes();
+    LocalDateTime now = LocalDateTime.now();
+    int hours = now.getHour();
+    int minutes = now.getMinute();
 
     return "[" + ( hours < 10 ? "0" + hours : hours ) + ":"
         + ( minutes < 10 ? "0" + minutes : minutes ) + "] ";

@@ -66,31 +66,32 @@ public class AtpCommand implements CommandExecutor {
 
           switch ( opt ) {
             case "cld": {
-              plugin.config.set( "tp-level-" + level + "-cld", val );
+              plugin.configManager.config.set( "tp-level-" + level + "-cld", val );
               break;
             }
 
             case "radius": {
-              plugin.config.set( "tp-level-" + level + "-radius", val );
+              plugin.configManager.config.set( "tp-level-" + level + "-radius", val );
               break;
             }
 
             case "maxp": {
-              plugin.config.set( "tp-level-" + level + "-maxp", val );
+              plugin.configManager.config.set( "tp-level-" + level + "-maxp", val );
               break;
             }
 
             case "maxpts": {
-              plugin.config.set( "tp-level-" + level + "-maxpoints", val );
+              plugin.configManager.config.set( "tp-level-" + level + "-maxpoints", val );
             }
 
             case "maxuse": {
-              plugin.config.set( "tp-level-" + level + "-setmaxuse", val );
+              plugin.configManager.config.set( "tp-level-" + level + "-setmaxuse", val );
             }
           }
 
           try {
-            plugin.config.save( plugin.getDataFolder() + File.separator + "config.yml" );
+            plugin.configManager.config
+                .save( plugin.getDataFolder() + File.separator + "config.yml" );
           } catch ( IOException e ) {
             e.printStackTrace();
           }
@@ -112,7 +113,7 @@ public class AtpCommand implements CommandExecutor {
           }
           Player target = sender.getServer().getPlayer( pname );
 
-          plugin.utils.setTPL( target, level );
+          plugin.teleportUtils.setTPL( target, level );
 
           sender.sendMessage( Main.prefixInfo + "Zmieniono level dla " + pname + " na " + level );
 
@@ -120,10 +121,12 @@ public class AtpCommand implements CommandExecutor {
         }
 
         case "info":
-          String cld = (String) plugin.config.get( "tp-level-" + level + "-cld" );
-          String radius = (String) plugin.config.get( "tp-level-" + level + "-radius" );
-          String maxp = (String) plugin.config.get( "tp-level-" + level + "-maxp" );
-          String maxpts = (String) plugin.config.get( "tp-level-" + level + "-maxpoints" );
+          String cld = (String) plugin.configManager.config.get( "tp-level-" + level + "-cld" );
+          String radius = (String) plugin.configManager.config
+              .get( "tp-level-" + level + "-radius" );
+          String maxp = (String) plugin.configManager.config.get( "tp-level-" + level + "-maxp" );
+          String maxpts = (String) plugin.configManager.config
+              .get( "tp-level-" + level + "-maxpoints" );
 
           // plugin.logger.info(" cld " + cld + " r " + radius + " mxp " + maxp + ",
           // maxpts: "+ maxpts);
@@ -141,7 +144,7 @@ public class AtpCommand implements CommandExecutor {
           String pname = args[1];
           Player target = sender.getServer().getPlayer( pname );
           if ( target != null ) {
-            String lvl = plugin.utils.getLevel( target );
+            String lvl = plugin.teleportUtils.getLevel( target );
 
             sender.sendMessage( Main.prefixInfo + "Level gracza " + pname + " to: " + lvl );
           }
@@ -156,14 +159,19 @@ public class AtpCommand implements CommandExecutor {
           String effect = args[2];
           Player target = sender.getServer().getPlayer( pname );
 
-          if ( effect == null || effect.isEmpty() || !Utils.types.contains( effect ) ) {
+          net.woolf.bella.types.EffectType effectType = net.woolf.bella.types.EffectType
+              .fromString( effect );
+          if (
+            effectType == net.woolf.bella.types.EffectType.IGNIS
+                && !effect.equalsIgnoreCase( "ignis" )
+          ) {
             sender.sendMessage( Main.prefixError + "Efekt nie znajduje się na liście: "
-                + ChatColor.YELLOW + String.join( ", ", Utils.types ) );
+                + ChatColor.YELLOW + "ignis, aqua, geo, electro, aeter, caligo, lux" );
             return true;
           }
 
           if ( target != null ) {
-            plugin.utils.setType( target, effect );
+            plugin.teleportUtils.setType( target, effect );
 
             sender.sendMessage( Main.prefixInfo + "Ustawiono efekt gracza " + ChatColor.GREEN
                 + pname + ChatColor.WHITE + " na: " + ChatColor.AQUA + effect );

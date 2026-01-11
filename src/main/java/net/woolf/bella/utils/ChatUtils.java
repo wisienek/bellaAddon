@@ -159,7 +159,7 @@ public class ChatUtils {
   ) {
     String newMsg = message;
 
-    Map<String, Object> map = plugin.emojiConfig.getValues( false );
+    Map<String, Object> map = plugin.configManager.emojiConfig.getValues( false );
 
     for ( String emoji : map.keySet() )
       newMsg = newMsg.replaceAll( "(?i)" + escapeMetaCharacters( emoji ), ChatColor.YELLOW + "*"

@@ -215,17 +215,17 @@ public class ItemEnchanter implements CommandExecutor {
       NBTItem nbti
   ) {
     Main main = Main.getInstance();
-    if ( main.utils.hasTpCooldown( player ) ) {
+    if ( main.cooldownUtils.hasTpCooldown( player ) ) {
       player.sendMessage( String
-          .format( "%sNie możesz się jeszcze teleportować! ( poczekaj %d sekund )", Main.prefixInfo, main.utils.cooldownTimeOTP
-              .get( player ) ) );
+          .format( "%sNie możesz się jeszcze teleportować! ( poczekaj %d sekund )", Main.prefixInfo, main.cooldownUtils
+              .getCooldownTime( player ) ) );
       return;
     }
 
     Location playerLoc = player.getLocation();
     NBTCompound comp = nbti.getCompound( "teleportEnchantment" );
 
-    if ( Main.getInstance().utils.itemTP( player, comp ) ) {
+    if ( Main.getInstance().teleportUtils.itemTP( player, comp ) ) {
       Double x = comp.getDouble( "x" );
       Double y = comp.getDouble( "y" );
       Double z = comp.getDouble( "z" );

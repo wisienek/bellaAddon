@@ -15,9 +15,11 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import net.woolf.bella.Main;
+import net.woolf.bella.types.MoneyType;
 
 public class MoneyUtils {
 
+  @Deprecated
   public static final Set<String> moneyTypes = new HashSet<>(
       Arrays.asList( "miedziak", "srebrnik", "złotnik" ) );
   private final Main plugin;
@@ -85,9 +87,9 @@ public class MoneyUtils {
       locs.add( bank.getWorld().getName() + " " + bank.getX() + " " + bank.getY() + " "
           + bank.getZ() );
 
-    plugin.moneyConfig.set( "banks", locs );
+    plugin.configManager.moneyConfig.set( "banks", locs );
 
-    plugin.saveMoneyConfig();
+    plugin.configManager.saveMoneyConfig();
     return true;
   }
 
@@ -119,14 +121,14 @@ public class MoneyUtils {
       }
     }
 
-    plugin.moneyConfig.set( "banks", locs );
-    plugin.saveMoneyConfig();
+    plugin.configManager.moneyConfig.set( "banks", locs );
+    plugin.configManager.saveMoneyConfig();
 
     return deleted;
   }
 
   public List<Location> getBanks() {
-    List<?> banksList = plugin.moneyConfig.getList( "banks" );
+    List<?> banksList = plugin.configManager.moneyConfig.getList( "banks" );
     List<Location> banks = new ArrayList<>();
 
     if ( banksList == null || banksList.size() == 0 )
@@ -135,9 +137,13 @@ public class MoneyUtils {
     for ( Object item : banksList ) {
       if ( item instanceof String ) {
         String[] args = ( (String) item ).split( " " );
-
-        banks.add( new Location( Bukkit.getWorld( args[0] ), Double.parseDouble( args[1] ),
-            Double.parseDouble( args[2] ), Double.parseDouble( args[3] ) ) );
+        if ( args.length >= 4 ) {
+          org.bukkit.World world = Bukkit.getWorld( args[0] );
+          if ( world != null ) {
+            banks.add( new Location( world, Double.parseDouble( args[1] ),
+                Double.parseDouble( args[2] ), Double.parseDouble( args[3] ) ) );
+          }
+        }
       }
     }
 
@@ -158,9 +164,9 @@ public class MoneyUtils {
 
     Map<String, Long> money = new HashMap<>();
 
-    Long miedziak = plugin.moneyConfig.getLong( "personal." + uuid + ".miedziak" );
-    Long srebrnik = plugin.moneyConfig.getLong( "personal." + uuid + ".srebrnik" );
-    Long zlotnik = plugin.moneyConfig.getLong( "personal." + uuid + ".złotnik" );
+    Long miedziak = plugin.configManager.moneyConfig.getLong( "personal." + uuid + ".miedziak" );
+    Long srebrnik = plugin.configManager.moneyConfig.getLong( "personal." + uuid + ".srebrnik" );
+    Long zlotnik = plugin.configManager.moneyConfig.getLong( "personal." + uuid + ".złotnik" );
 
     money.put( "miedziak", miedziak );
     money.put( "srebrnik", srebrnik );
@@ -176,9 +182,9 @@ public class MoneyUtils {
         : ( (Player) player ).getUniqueId().toString();
     Map<String, Long> money = new HashMap<>();
 
-    Long miedziak = plugin.moneyConfig.getLong( "bank." + uuid + ".miedziak" );
-    Long srebrnik = plugin.moneyConfig.getLong( "bank." + uuid + ".srebrnik" );
-    Long zlotnik = plugin.moneyConfig.getLong( "bank." + uuid + ".złotnik" );
+    Long miedziak = plugin.configManager.moneyConfig.getLong( "bank." + uuid + ".miedziak" );
+    Long srebrnik = plugin.configManager.moneyConfig.getLong( "bank." + uuid + ".srebrnik" );
+    Long zlotnik = plugin.configManager.moneyConfig.getLong( "bank." + uuid + ".złotnik" );
 
     money.put( "miedziak", miedziak );
     money.put( "srebrnik", srebrnik );
@@ -195,8 +201,8 @@ public class MoneyUtils {
     if ( uuid == null || !moneyTypes.contains( type ) || ammount == null )
       return false;
 
-    plugin.moneyConfig.set( "personal." + uuid + "." + type, ammount );
-    plugin.saveMoneyConfig();
+    plugin.configManager.moneyConfig.set( "personal." + uuid + "." + type, ammount );
+    plugin.configManager.saveMoneyConfig();
 
     return true;
   }
@@ -209,8 +215,8 @@ public class MoneyUtils {
     if ( uuid == null || !moneyTypes.contains( type ) || ammount == null )
       return false;
 
-    plugin.moneyConfig.set( "bank." + uuid + "." + type, ammount );
-    plugin.saveMoneyConfig();
+    plugin.configManager.moneyConfig.set( "bank." + uuid + "." + type, ammount );
+    plugin.configManager.saveMoneyConfig();
 
     return true;
   }
@@ -286,9 +292,10 @@ public class MoneyUtils {
     if ( has < ammount )
       return false;
 
-    plugin.moneyConfig.set( "personal." + uuid1 + "." + type, has - ammount );
-    plugin.moneyConfig.set( "personal." + uuid2 + "." + type, targetmoney.get( type ) + ammount );
-    plugin.saveMoneyConfig();
+    plugin.configManager.moneyConfig.set( "personal." + uuid1 + "." + type, has - ammount );
+    plugin.configManager.moneyConfig
+        .set( "personal." + uuid2 + "." + type, targetmoney.get( type ) + ammount );
+    plugin.configManager.saveMoneyConfig();
 
     // updateMoneyScore(uuid1);
     // updateMoneyScore(uuid2);
@@ -319,9 +326,10 @@ public class MoneyUtils {
     if ( has < ammount )
       return false;
 
-    plugin.moneyConfig.set( "bank." + uuid1 + "." + type, has - ammount );
-    plugin.moneyConfig.set( "bank." + uuid2 + "." + type, targetmoney.get( type ) + ammount );
-    plugin.saveMoneyConfig();
+    plugin.configManager.moneyConfig.set( "bank." + uuid1 + "." + type, has - ammount );
+    plugin.configManager.moneyConfig
+        .set( "bank." + uuid2 + "." + type, targetmoney.get( type ) + ammount );
+    plugin.configManager.saveMoneyConfig();
 
     return true;
   }
@@ -330,7 +338,7 @@ public class MoneyUtils {
       String from,
       String to
   ) {
-    return plugin.moneyConfig.getDouble( "conversion." + from + "." + to );
+    return plugin.configManager.moneyConfig.getDouble( "conversion." + from + "." + to );
   }
 
   public Boolean setConversion(
@@ -343,9 +351,9 @@ public class MoneyUtils {
 
     Double converted = 1.0 / conv;
 
-    plugin.moneyConfig.set( "conversion." + from + "." + to, conv );
-    plugin.moneyConfig.set( "conversion." + to + "." + from, converted );
-    plugin.saveMoneyConfig();
+    plugin.configManager.moneyConfig.set( "conversion." + from + "." + to, conv );
+    plugin.configManager.moneyConfig.set( "conversion." + to + "." + from, converted );
+    plugin.configManager.saveMoneyConfig();
 
     return true;
   }
