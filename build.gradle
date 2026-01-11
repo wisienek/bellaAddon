@@ -134,6 +134,18 @@ tasks.withType(JavaCompile).configureEach {
     options.incremental = true
 }
 
+tasks.withType(Javadoc).configureEach {
+    options.encoding = 'UTF-8'
+    options.addStringOption('Xdoclint:none', '-quiet')
+    options.addStringOption('charSet', 'UTF-8')
+}
+
+tasks.register('javadocJar', Jar) {
+    dependsOn javadoc
+    archiveClassifier.set('javadoc')
+    from javadoc.destinationDir
+}
+
 // Configure IDE to use sources and javadoc
 idea {
     module {
@@ -159,5 +171,6 @@ tasks.register('downloadDependencies') {
 
 build {
     dependsOn shadowJar
+    dependsOn javadoc
 }
 
