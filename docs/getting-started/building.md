@@ -22,3 +22,6 @@ pip install mkdocs mkdocs-material
 mkdocs serve
 # open http://127.0.0.1:8000
 ```
+
+CI notes:
+- GitHub Actions runs on Linux; wrapper path is `./gradlew` (made executable in workflows).

@@ -17,6 +17,11 @@ BellaAddon is a helper plugin for BelorisRP servers (Spigot/Magma 1.20.1). It pr
 - Enchanted items that store teleport points
 - Admin/test utilities (OOC chat, date, slap, list, etc.)
 
+## Navigation Tips
+- Top tabs jump between major sections (Getting Started, Configuration, Features, API, Dev).
+- Left sidebar lists pages; right sidebar is an in-page table of contents.
+- Use the search bar (top) for commands, config keys, or classes.
+
 ## Support Matrix
 - Java: 17
 - Minecraft: Spigot/Magma 1.20.1
