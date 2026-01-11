@@ -11,44 +11,45 @@ public class JazdaCommand implements CommandExecutor {
 
   private final Main plugin;
 
-  public JazdaCommand (
+  public JazdaCommand(
       Main main
   ) {
     this.plugin = main;
-    plugin.getCommand("jazda").setExecutor(this);
+    plugin.getCommand( "jazda" ).setExecutor( this );
   }
 
   @Override
-  public boolean onCommand (
-      CommandSender sender, Command cmd, String label, String[] args
+  public boolean onCommand(
+      CommandSender sender,
+      Command cmd,
+      String label,
+      String[] args
   ) {
     if ( sender instanceof Player ) {
       if ( args.length == 0 ) {
-        sender.sendMessage(Main.prefixError + getUsage());
+        sender.sendMessage( Main.prefixError + getUsage() );
         return true;
       }
 
       Player player = (Player) sender;
 
-      if ( args[0].equals("on") || args[0].equals("off") ) {
-        Boolean check = args[0].equals("on");
+      if ( args[0].equals( "on" ) || args[0].equals( "off" ) ) {
+        Boolean check = args[0].equals( "on" );
 
-        plugin.putils.toggleJazda(player, check);
-        player.sendMessage(Main.prefixInfo + "Ustawiono jazdę na: " + check);
-      }
-      else {
-        player.sendMessage(Main.prefixError + getUsage());
+        plugin.putils.toggleJazda( player, check );
+        player.sendMessage( Main.prefixInfo + "Ustawiono jazdę na: " + check );
+      } else {
+        player.sendMessage( Main.prefixError + getUsage() );
         return true;
       }
 
-    }
-    else {
-      sender.sendMessage("Komenda tylko dla graczy!");
+    } else {
+      sender.sendMessage( "Komenda tylko dla graczy!" );
     }
     return true;
   }
 
-  private String getUsage () {
+  private String getUsage() {
     return "/jazda <on/off> - włącza lub wyłącza możliwość jazdy na tobie";
   }
 

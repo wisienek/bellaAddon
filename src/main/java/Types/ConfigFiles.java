@@ -10,14 +10,14 @@ public enum ConfigFiles {
 
   private final String text;
 
-  ConfigFiles (
+  ConfigFiles(
       final String text
   ) {
     this.text = text;
   }
 
   @Override
-  public String toString () {
+  public String toString() {
     return text;
   }
 }

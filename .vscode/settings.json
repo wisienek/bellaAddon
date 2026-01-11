@@ -1,0 +1,31 @@
+{
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.import.gradle.enabled": true,
+    "java.import.gradle.wrapper.enabled": true,
+    "java.import.gradle.version": null,
+    "java.import.gradle.java.home": null,
+    "java.import.gradle.arguments": null,
+    "java.import.gradle.jvmArguments": null,
+    "java.import.gradle.user.home": null,
+    "java.import.gradle.home": null,
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.configuration.downloadSources": true,
+    "java.configuration.maven.downloadSources": true,
+    "java.configuration.checkProjectSettingsExclusions": false,
+    "java.project.referencedLibraries": [
+        "references/**/*.jar"
+    ],
+    "java.project.sourcePaths": [
+        "src/main/java"
+    ],
+    "java.project.outputPath": "build/classes",
+    "java.project.resourceFilters": [
+        "node_modules",
+        ".git"
+    ],
+    "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx2G -Xms100m",
+    "files.exclude": {
+        "**/.gradle": true,
+        "**/build": false
+    }
+}

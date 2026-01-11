@@ -12,16 +12,19 @@ import net.woolf.bella.Main;
 
 public class DateCommand implements CommandExecutor {
 
-  public DateCommand (
+  public DateCommand(
       Main main
   ) {
-    main.getCommand("date").setExecutor(this);
+    main.getCommand( "date" ).setExecutor( this );
   }
 
-  @SuppressWarnings( "deprecation" )
+  @SuppressWarnings("deprecation")
   @Override
-  public boolean onCommand (
-      CommandSender sender, Command cmd, String label, String[] args
+  public boolean onCommand(
+      CommandSender sender,
+      Command cmd,
+      String label,
+      String[] args
   ) {
     if ( sender instanceof Player ) {
       Player player = (Player) sender;
@@ -36,16 +39,12 @@ public class DateCommand implements CommandExecutor {
       ChatColor day_color = colors[day % size];
       ChatColor month_color = colors[month % size];
 
-      player.sendMessage(Main.prefixInfo + "Dzisiejsza data to: " + day_color + ( day < 10
-                                                                                  ? "0"
-                                                                                  : "" ) + day + ChatColor.GRAY + "/" + month_color + (
-          month < 10
-          ? "0"
-          : "" ) + month);
+      player.sendMessage( Main.prefixInfo + "Dzisiejsza data to: " + day_color
+          + ( day < 10 ? "0" : "" ) + day + ChatColor.GRAY + "/" + month_color
+          + ( month < 10 ? "0" : "" ) + month );
 
-    }
-    else {
-      sender.sendMessage("Komenda tylko dla graczy!");
+    } else {
+      sender.sendMessage( "Komenda tylko dla graczy!" );
     }
 
     return true;

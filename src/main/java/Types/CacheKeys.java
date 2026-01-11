@@ -6,14 +6,14 @@ public enum CacheKeys {
 
   private final String text;
 
-  CacheKeys (
+  CacheKeys(
       final String text
   ) {
     this.text = text;
   }
 
   @Override
-  public String toString () {
+  public String toString() {
     return text;
   }
 }

@@ -22,47 +22,60 @@ public class BankCommand implements CommandExecutor {
 
   private final Main plugin;
 
-  public BankCommand (
+  public BankCommand(
       Main main
   ) {
     this.plugin = main;
-    plugin.getCommand("bank").setExecutor(this);
+    plugin.getCommand( "bank" ).setExecutor( this );
   }
 
-  public String getUsage (
+  public String getUsage(
       Player player
   ) {
-    String add = player.hasPermission(Permissions.BANK_ADMIN.toString())
-                 ? "\n/bank ustaw <typ> <ile> <komu> - ustawia graczu ileś kasy" + "\n/bank dodaj <typ> <ile> <komu> "
-                     + "- dodaje komuś ileś kasy" + "\n/bank zabierz <typ> <ile> <komu> - zabiera komuś ileś kasy" +
-                     "\n/bank stwórz miejsce - tworzy bank w miejscu gdzie stoisz" + "\n/bank usuń - usuwa bank obok "
-                     + "którego stoisz" + "\n/bank konwersje <z czego> <na co> <kwota> - ile potrzebujesz 1 waluty " + "aby " + "zrobić konwersję na drugą" + "\n/bank sprawdz <gracz> - sprawdza stan banku gracza"
-                 : "";
+    String add = player.hasPermission( Permissions.BANK_ADMIN.toString() )
+        ? "\n/bank ustaw <typ> <ile> <komu> - ustawia graczu ileś kasy"
+            + "\n/bank dodaj <typ> <ile> <komu> " + "- dodaje komuś ileś kasy"
+            + "\n/bank zabierz <typ> <ile> <komu> - zabiera komuś ileś kasy"
+            + "\n/bank stwórz miejsce - tworzy bank w miejscu gdzie stoisz"
+            + "\n/bank usuń - usuwa bank obok " + "którego stoisz"
+            + "\n/bank konwersje <z czego> <na co> <kwota> - ile potrzebujesz 1 waluty " + "aby "
+            + "zrobić konwersję na drugą" + "\n/bank sprawdz <gracz> - sprawdza stan banku gracza"
+        : "";
 
-    return Main.prefixInfo + "Użycie komendy: /bank" + "\n/bank - pokazuje stan banku" + "\n/bank wpłać <typ> <ile> " + "-" + " Wpłaca ilość monet do banku" + "\n/bank wypłać <typ> <ile> - Wypłaca ilość monet z banku" + "\n/bank " + "przelej <typ> <ile> <komu> - Przelewa ileś kaski dla innego gracza" + "\n/bank wymień <z czego> <na co> " + "<ile" + " chcesz wymienić> - wymienia jedną walutę na drugą" + add;
+    return Main.prefixInfo + "Użycie komendy: /bank" + "\n/bank - pokazuje stan banku"
+        + "\n/bank wpłać <typ> <ile> " + "-" + " Wpłaca ilość monet do banku"
+        + "\n/bank wypłać <typ> <ile> - Wypłaca ilość monet z banku" + "\n/bank "
+        + "przelej <typ> <ile> <komu> - Przelewa ileś kaski dla innego gracza"
+        + "\n/bank wymień <z czego> <na co> " + "<ile"
+        + " chcesz wymienić> - wymienia jedną walutę na drugą" + add;
   }
 
   @Override
-  public boolean onCommand (
-      CommandSender sender, Command cmd, String label, String[] args
+  public boolean onCommand(
+      CommandSender sender,
+      Command cmd,
+      String label,
+      String[] args
   ) {
     if ( sender instanceof Player ) {
       Player player = (Player) sender;
 
-      Map<String, Long> money = plugin.mutils.getMoney(player);
-      Map<String, Long> bankMoney = plugin.mutils.getBankMoney(player);
+      Map<String, Long> money = plugin.mutils.getMoney( player );
+      Map<String, Long> bankMoney = plugin.mutils.getBankMoney( player );
 
-      if ( !player.hasPermission(Permissions.BANK_ADMIN.toString()) && !plugin.mutils.isNearBank(
-          player.getLocation()) ) {
-        player.sendMessage(Main.prefixError + "Musisz być w pewnej lokacji aby używać banku!");
+      if (
+        !player.hasPermission( Permissions.BANK_ADMIN.toString() )
+            && !plugin.mutils.isNearBank( player.getLocation() )
+      ) {
+        player.sendMessage( Main.prefixError + "Musisz być w pewnej lokacji aby używać banku!" );
         return true;
       }
 
       if ( args.length == 0 ) {
-        player.sendMessage(
-            Main.prefixInfo + "Twoje pieniążki w banku: \n" + ChatColor.WHITE + "Miedziaki : " + bankMoney.get(
-                "miedziak") + "\n" + ChatColor.GRAY + "Srebrniki : " + bankMoney.get(
-                "srebrnik") + "\n" + ChatColor.YELLOW + "Złotniki : " + bankMoney.get("złotnik"));
+        player.sendMessage( Main.prefixInfo + "Twoje pieniążki w banku: \n" + ChatColor.WHITE
+            + "Miedziaki : " + bankMoney.get( "miedziak" ) + "\n" + ChatColor.GRAY + "Srebrniki : "
+            + bankMoney.get( "srebrnik" ) + "\n" + ChatColor.YELLOW + "Złotniki : "
+            + bankMoney.get( "złotnik" ) );
         return true;
       }
 
@@ -71,100 +84,105 @@ public class BankCommand implements CommandExecutor {
 
       switch ( make ) {
         case "sprawdz": {
-          if ( !player.hasPermission("") ) return true;
+          if ( !player.hasPermission( "" ) )
+            return true;
 
           assert type != null;
-          String uuid = plugin.putils.resolvePlayerToUUID(type);
+          String uuid = plugin.putils.resolvePlayerToUUID( type );
 
-          Map<String, Long> targetBankMoney = plugin.mutils.getBankMoney(uuid);
-          player.sendMessage(
-              Main.prefixInfo + "Stan banku dla gracza " + type + ": \n" + ChatColor.WHITE + "Miedziaki : " + targetBankMoney.get(
-                  "miedziak") + "\n" + ChatColor.GRAY + "Srebrniki : " + targetBankMoney.get(
-                  "srebrnik") + "\n" + ChatColor.YELLOW + "Złotniki : " + targetBankMoney.get("złotnik"));
+          Map<String, Long> targetBankMoney = plugin.mutils.getBankMoney( uuid );
+          player.sendMessage( Main.prefixInfo + "Stan banku dla gracza " + type + ": \n"
+              + ChatColor.WHITE + "Miedziaki : " + targetBankMoney.get( "miedziak" ) + "\n"
+              + ChatColor.GRAY + "Srebrniki : " + targetBankMoney.get( "srebrnik" ) + "\n"
+              + ChatColor.YELLOW + "Złotniki : " + targetBankMoney.get( "złotnik" ) );
           return true;
         }
 
         case "wpłać": {
-          Long ammount = args.length >= 3 ? Long.parseLong(args[2]) : 0L;
+          Long ammount = args.length >= 3 ? Long.parseLong( args[2] ) : 0L;
 
-          long rest = money.get(type) - ammount;
+          long rest = money.get( type ) - ammount;
           if ( rest < 0 ) {
-            player.sendMessage(
-                Main.prefixError + "Nie możesz wpłacić " + ChatColor.YELLOW + ammount + ChatColor.GRAY + " bo twój " + "balans portfela będzie na minusie: " + ChatColor.RED + rest);
+            player.sendMessage( Main.prefixError + "Nie możesz wpłacić " + ChatColor.YELLOW
+                + ammount + ChatColor.GRAY + " bo twój " + "balans portfela będzie na minusie: "
+                + ChatColor.RED + rest );
             return true;
           }
 
-          Boolean check = plugin.mutils.transferToBank(player, type, ammount, money, bankMoney);
+          Boolean check = plugin.mutils.transferToBank( player, type, ammount, money, bankMoney );
           if ( !check ) {
-            player.sendMessage(Main.prefixError + "Nie udało się wpłacić kasy!");
-            player.sendMessage(getUsage(player));
+            player.sendMessage( Main.prefixError + "Nie udało się wpłacić kasy!" );
+            player.sendMessage( getUsage( player ) );
             return true;
           }
 
-          bankMoney.put(type, bankMoney.get(type) + ammount);
-          money.put(type, rest);
-          player.sendMessage(
-              Main.prefixInfo + "Wpłacono " + ChatColor.YELLOW + ammount + " " + type + "ów" + ChatColor.WHITE + ", " + "Aktualny stan konta: " + ChatColor.YELLOW + bankMoney.get(
-                  type) + " " + type + "ów");
+          bankMoney.put( type, bankMoney.get( type ) + ammount );
+          money.put( type, rest );
+          player.sendMessage( Main.prefixInfo + "Wpłacono " + ChatColor.YELLOW + ammount + " "
+              + type + "ów" + ChatColor.WHITE + ", " + "Aktualny stan konta: " + ChatColor.YELLOW
+              + bankMoney.get( type ) + " " + type + "ów" );
 
-          ChatUtils.cacheMessageForBotLog(BotChannels.MoneyLogId.toString(),
-              String.format("**%s** Wpłacił *%d %sów* do banku!", player.getName(), ammount, type));
+          ChatUtils.cacheMessageForBotLog( BotChannels.MoneyLogId.toString(), String
+              .format( "**%s** Wpłacił *%d %sów* do banku!", player.getName(), ammount, type ) );
 
           return true;
         }
 
         case "wypłać": {
-          Long ammount = args.length >= 3 ? Long.parseLong(args[2]) : 0L;
+          Long ammount = args.length >= 3 ? Long.parseLong( args[2] ) : 0L;
 
-          long rest = bankMoney.get(type) - ammount;
+          long rest = bankMoney.get( type ) - ammount;
           if ( rest < 0 ) {
-            player.sendMessage(
-                Main.prefixError + "Nie możesz wypłacić " + ChatColor.YELLOW + ammount + ChatColor.GRAY + " bo twój " + "balans banku będzie na minusie: " + ChatColor.RED + rest);
+            player.sendMessage( Main.prefixError + "Nie możesz wypłacić " + ChatColor.YELLOW
+                + ammount + ChatColor.GRAY + " bo twój " + "balans banku będzie na minusie: "
+                + ChatColor.RED + rest );
             return true;
           }
 
-          Boolean check = plugin.mutils.transferFromBank(player, type, ammount, money, bankMoney);
+          Boolean check = plugin.mutils.transferFromBank( player, type, ammount, money, bankMoney );
           if ( !check ) {
-            player.sendMessage(Main.prefixError + "Nie udało się wypłacić kasy!");
-            player.sendMessage(getUsage(player));
+            player.sendMessage( Main.prefixError + "Nie udało się wypłacić kasy!" );
+            player.sendMessage( getUsage( player ) );
             return true;
           }
 
-          bankMoney.put(type, rest);
-          money.put(type, money.get(type) + ammount);
-          player.sendMessage(
-              Main.prefixInfo + "Wypłacono " + ChatColor.YELLOW + ammount + " " + type + "ów" + ChatColor.WHITE + ", "
-                  + "Aktualny stan konta: " + ChatColor.YELLOW + bankMoney.get(
-                  type) + " " + type + "ów");
+          bankMoney.put( type, rest );
+          money.put( type, money.get( type ) + ammount );
+          player.sendMessage( Main.prefixInfo + "Wypłacono " + ChatColor.YELLOW + ammount + " "
+              + type + "ów" + ChatColor.WHITE + ", " + "Aktualny stan konta: " + ChatColor.YELLOW
+              + bankMoney.get( type ) + " " + type + "ów" );
 
-          ChatUtils.cacheMessageForBotLog(BotChannels.MoneyLogId.toString(),
-              String.format("**%s** Wypłacił *%d %sów* z banku!", player.getName(), ammount, type));
+          ChatUtils.cacheMessageForBotLog( BotChannels.MoneyLogId.toString(), String
+              .format( "**%s** Wypłacił *%d %sów* z banku!", player.getName(), ammount, type ) );
 
           return true;
         }
 
         case "przelej": {
           if ( args.length < 4 ) {
-            player.sendMessage(getUsage(player));
+            player.sendMessage( getUsage( player ) );
             return true;
           }
 
-          Long ammount = Long.valueOf(args[2]);
+          Long ammount = Long.valueOf( args[2] );
 
-          String uuid = plugin.putils.resolvePlayerToUUID(args[3]);
+          String uuid = plugin.putils.resolvePlayerToUUID( args[3] );
 
-          Boolean done = plugin.mutils.transferBankMoney(player.getUniqueId().toString(), uuid, type, ammount);
+          Boolean done = plugin.mutils
+              .transferBankMoney( player.getUniqueId().toString(), uuid, type, ammount );
           if ( !done ) {
-            player.sendMessage(Main.prefixError + "Błąd podczas dodawania, sprawdz pisownie i czy gracz jest online.");
+            player.sendMessage( Main.prefixError
+                + "Błąd podczas dodawania, sprawdz pisownie i czy gracz jest online." );
             return true;
           }
 
-          player.sendMessage(
-              Main.prefixInfo + "Przelano " + ChatColor.YELLOW + ammount + " " + type + "ów" + ChatColor.WHITE + " " + "na" + " konto gracza " + ChatColor.GREEN + args[3]);
+          player.sendMessage( Main.prefixInfo + "Przelano " + ChatColor.YELLOW + ammount + " "
+              + type + "ów" + ChatColor.WHITE + " " + "na" + " konto gracza " + ChatColor.GREEN
+              + args[3] );
 
-          ChatUtils.cacheMessageForBotLog(BotChannels.MoneyLogId.toString(),
-              String.format("**%s** Przelał *%d %sów* na konto gracza **%s**!", player.getName(), ammount, type,
-                  args[3]));
+          ChatUtils.cacheMessageForBotLog( BotChannels.MoneyLogId.toString(), String
+              .format( "**%s** Przelał *%d %sów* na konto gracza **%s**!", player
+                  .getName(), ammount, type, args[3] ) );
 
           return true;
         }
@@ -172,267 +190,282 @@ public class BankCommand implements CommandExecutor {
         case "wymień":
         case "zamień": {
           if ( args.length < 4 ) {
-            player.sendMessage(getUsage(player));
+            player.sendMessage( getUsage( player ) );
             return true;
           }
 
           String from = args[1].toLowerCase();
           String to = args[2].toLowerCase();
-          long ammount = Long.parseLong(args[3]);
+          long ammount = Long.parseLong( args[3] );
 
-          Double conversion = plugin.mutils.getConversion(from, to);
+          Double conversion = plugin.mutils.getConversion( from, to );
           if ( conversion == null ) {
-            player.sendMessage(Main.prefixError + "Brak konwersji!");
+            player.sendMessage( Main.prefixError + "Brak konwersji!" );
             return true;
           }
 
-          Long bfrom = bankMoney.get(from);
-          Long mfrom = money.get(from);
+          Long bfrom = bankMoney.get( from );
+          Long mfrom = money.get( from );
 
           long get = (long) ( ammount / conversion );
           long take = (long) ( get * conversion );
 
           boolean converseUp = get < take;
 
-          if ( converseUp ) take += tax;
+          if ( converseUp )
+            take += tax;
 
-          plugin.logger.info(
-              "Get: " + get + ", take: " + take + ", ammount - tax: " + ( ammount - tax ) + ", conversion: " + conversion);
+          plugin.logger.info( "Get: " + get + ", take: " + take + ", ammount - tax: "
+              + ( ammount - tax ) + ", conversion: " + conversion );
           if ( bfrom < take && mfrom < take ) {
-            player.sendMessage(
-                Main.prefixError + "Nie masz odpowiedniej sumy: " + ChatColor.YELLOW + take + " " + from + "ów " +
-                    "(wliczony podatek)");
+            player.sendMessage( Main.prefixError + "Nie masz odpowiedniej sumy: " + ChatColor.YELLOW
+                + take + " " + from + "ów " + "(wliczony podatek)" );
             return true;
           }
 
           boolean taken = false;
 
           if ( bfrom >= take ) {
-            Boolean check = plugin.mutils.setBankMoney(player.getUniqueId().toString(), from, bfrom - take);
+            Boolean check = plugin.mutils
+                .setBankMoney( player.getUniqueId().toString(), from, bfrom - take );
             if ( !check ) {
-              player.sendMessage(Main.prefixError + "Nie udało się pobrać kasy z banku!");
+              player.sendMessage( Main.prefixError + "Nie udało się pobrać kasy z banku!" );
               return true;
             }
-            bankMoney.put(from, bfrom - take);
+            bankMoney.put( from, bfrom - take );
             taken = true;
           }
           if ( !taken ) {
-            Boolean check = plugin.mutils.setMoney(player.getUniqueId().toString(), from, mfrom - take);
+            Boolean check = plugin.mutils
+                .setMoney( player.getUniqueId().toString(), from, mfrom - take );
             if ( !check ) {
-              player.sendMessage(Main.prefixError + "Nie udało się pobrać kasy z banku!");
+              player.sendMessage( Main.prefixError + "Nie udało się pobrać kasy z banku!" );
               return true;
             }
 
-            money.put(from, mfrom - take);
-          }
-          else {
-            Boolean check = plugin.mutils.setBankMoney(player.getUniqueId().toString(), to, bankMoney.get(to) + get);
+            money.put( from, mfrom - take );
+          } else {
+            Boolean check = plugin.mutils
+                .setBankMoney( player.getUniqueId().toString(), to, bankMoney.get( to ) + get );
             if ( !check ) {
-              player.sendMessage(Main.prefixError + "Nie udało się dodać kasy do banku!");
+              player.sendMessage( Main.prefixError + "Nie udało się dodać kasy do banku!" );
               return true;
             }
 
-            player.sendMessage(
-                Main.prefixInfo + "Prawidłowo wymieniono " + ChatColor.YELLOW + take + " " + from + "ów" + ChatColor.WHITE + " na " + ChatColor.YELLOW + get + " " + to + "ów");
+            player.sendMessage( Main.prefixInfo + "Prawidłowo wymieniono " + ChatColor.YELLOW + take
+                + " " + from + "ów" + ChatColor.WHITE + " na " + ChatColor.YELLOW + get + " " + to
+                + "ów" );
 
-            ChatUtils.cacheMessageForBotLog(BotChannels.MoneyLogId.toString(),
-                String.format("**%s** Wymienił %d %sów na %d %sów!", player.getName(), take, from, get, to));
+            ChatUtils.cacheMessageForBotLog( BotChannels.MoneyLogId.toString(), String
+                .format( "**%s** Wymienił %d %sów na %d %sów!", player
+                    .getName(), take, from, get, to ) );
           }
 
           return true;
         }
 
         case "ustaw": {
-          if ( !player.hasPermission(Permissions.BANK_ADMIN.toString()) || ( args.length < 4 ) ) {
-            player.sendMessage(getUsage(player));
+          if ( !player.hasPermission( Permissions.BANK_ADMIN.toString() ) || ( args.length < 4 ) ) {
+            player.sendMessage( getUsage( player ) );
             return true;
           }
-          long ammount = Long.parseLong(args[2]);
+          long ammount = Long.parseLong( args[2] );
 
-          String uuid = plugin.putils.resolvePlayerToUUID(args[3]);
+          String uuid = plugin.putils.resolvePlayerToUUID( args[3] );
 
-          Boolean done = plugin.mutils.setBankMoney(uuid, type, ammount);
+          Boolean done = plugin.mutils.setBankMoney( uuid, type, ammount );
           if ( !done ) {
-            player.sendMessage(Main.prefixError + "Błąd podczas setowania, sprawdz pisownie i czy gracz jest online.");
+            player.sendMessage( Main.prefixError
+                + "Błąd podczas setowania, sprawdz pisownie i czy gracz jest online." );
             return true;
           }
 
-          player.sendMessage(
-              Main.prefixInfo + "Ustawiono stan konta gracza " + ChatColor.GREEN + args[3] + ChatColor.WHITE + " na " + ChatColor.YELLOW + ammount + " " + type + "ów");
+          player.sendMessage( Main.prefixInfo + "Ustawiono stan konta gracza " + ChatColor.GREEN
+              + args[3] + ChatColor.WHITE + " na " + ChatColor.YELLOW + ammount + " " + type
+              + "ów" );
 
-          ChatUtils.cacheMessageForBotLog(BotChannels.MoneyLogId.toString(),
-              String.format("**%s** Ustawił *%si* gracza **%s** na %d", player.getName(), type, args[3], ammount));
+          ChatUtils.cacheMessageForBotLog( BotChannels.MoneyLogId.toString(), String
+              .format( "**%s** Ustawił *%si* gracza **%s** na %d", player
+                  .getName(), type, args[3], ammount ) );
 
           return true;
         }
 
         case "dodaj": {
-          if ( !player.hasPermission(Permissions.BANK_ADMIN.toString()) || ( args.length < 4 ) ) {
-            player.sendMessage(getUsage(player));
+          if ( !player.hasPermission( Permissions.BANK_ADMIN.toString() ) || ( args.length < 4 ) ) {
+            player.sendMessage( getUsage( player ) );
             return true;
           }
-          Long ammount = Long.valueOf(args[2]);
+          Long ammount = Long.valueOf( args[2] );
 
-          String uuid = plugin.putils.resolvePlayerToUUID(args[3]);
+          String uuid = plugin.putils.resolvePlayerToUUID( args[3] );
 
-          Map<String, Long> bm = plugin.mutils.getBankMoney(uuid);
+          Map<String, Long> bm = plugin.mutils.getBankMoney( uuid );
 
-          Boolean done = plugin.mutils.setBankMoney(uuid, type, bm.get(type) + ammount);
+          Boolean done = plugin.mutils.setBankMoney( uuid, type, bm.get( type ) + ammount );
           if ( !done ) {
-            player.sendMessage(Main.prefixError + "Błąd podczas dodawania, sprawdz pisownie i czy gracz jest online.");
+            player.sendMessage( Main.prefixError
+                + "Błąd podczas dodawania, sprawdz pisownie i czy gracz jest online." );
             return true;
           }
 
-          player.sendMessage(
-              Main.prefixInfo + "Dodano " + ChatColor.YELLOW + ammount + " " + type + "ów" + ChatColor.WHITE + " do " + "konta gracza " + ChatColor.GREEN + args[3] + ChatColor.WHITE + ", teraz ma: " + ChatColor.YELLOW + ( bm.get(
-                  type) + ammount ));
+          player.sendMessage( Main.prefixInfo + "Dodano " + ChatColor.YELLOW + ammount + " " + type
+              + "ów" + ChatColor.WHITE + " do " + "konta gracza " + ChatColor.GREEN + args[3]
+              + ChatColor.WHITE + ", teraz ma: " + ChatColor.YELLOW
+              + ( bm.get( type ) + ammount ) );
 
-          ChatUtils.cacheMessageForBotLog(BotChannels.MoneyLogId.toString(),
-              String.format("**%s** Dodał %d %sów do banku gracza **%s**!", player.getName(), ammount, type, args[3]));
+          ChatUtils.cacheMessageForBotLog( BotChannels.MoneyLogId.toString(), String
+              .format( "**%s** Dodał %d %sów do banku gracza **%s**!", player
+                  .getName(), ammount, type, args[3] ) );
 
           return true;
         }
 
         case "zabierz": {
-          if ( !player.hasPermission(Permissions.BANK_ADMIN.toString()) || ( args.length < 4 ) ) {
-            player.sendMessage(getUsage(player));
+          if ( !player.hasPermission( Permissions.BANK_ADMIN.toString() ) || ( args.length < 4 ) ) {
+            player.sendMessage( getUsage( player ) );
             return true;
           }
-          Long ammount = Long.valueOf(args[2]);
+          Long ammount = Long.valueOf( args[2] );
 
-          String uuid = plugin.putils.resolvePlayerToUUID(args[3]);
-          Map<String, Long> bm = plugin.mutils.getBankMoney(uuid);
+          String uuid = plugin.putils.resolvePlayerToUUID( args[3] );
+          Map<String, Long> bm = plugin.mutils.getBankMoney( uuid );
 
-          if ( bm.get(type) - ammount < 0 ) {
-            player.sendMessage(
-                Main.prefixError + "Nie można zabrać tyle kasy, gracz będzie na minusie! " + ChatColor.RED + bm.get(
-                    type) + " -> " + ( bm.get(type) - ammount ));
+          if ( bm.get( type ) - ammount < 0 ) {
+            player.sendMessage( Main.prefixError
+                + "Nie można zabrać tyle kasy, gracz będzie na minusie! " + ChatColor.RED
+                + bm.get( type ) + " -> " + ( bm.get( type ) - ammount ) );
             return true;
           }
 
-          Boolean done = plugin.mutils.setBankMoney(uuid, type, bm.get(type) - ammount);
+          Boolean done = plugin.mutils.setBankMoney( uuid, type, bm.get( type ) - ammount );
           if ( !done ) {
-            player.sendMessage(Main.prefixError + "Błąd podczas zabierania, sprawdz pisownie i czy gracz jest online.");
+            player.sendMessage( Main.prefixError
+                + "Błąd podczas zabierania, sprawdz pisownie i czy gracz jest online." );
             return true;
           }
 
-          player.sendMessage(
-              Main.prefixInfo + "Zabrano " + ChatColor.YELLOW + ammount + " " + type + "ów" + ChatColor.WHITE + " z " + "konta gracza " + ChatColor.GREEN + args[3] + ChatColor.WHITE + ", teraz ma: " + ChatColor.YELLOW + ( bm.get(
-                  type) - ammount ));
+          player.sendMessage( Main.prefixInfo + "Zabrano " + ChatColor.YELLOW + ammount + " " + type
+              + "ów" + ChatColor.WHITE + " z " + "konta gracza " + ChatColor.GREEN + args[3]
+              + ChatColor.WHITE + ", teraz ma: " + ChatColor.YELLOW
+              + ( bm.get( type ) - ammount ) );
 
-          ChatUtils.cacheMessageForBotLog(BotChannels.MoneyLogId.toString(),
-              String.format("**%s** Zabrał %d %sów z banku gracza **%s**!", player.getName(), ammount, type, args[3]));
+          ChatUtils.cacheMessageForBotLog( BotChannels.MoneyLogId.toString(), String
+              .format( "**%s** Zabrał %d %sów z banku gracza **%s**!", player
+                  .getName(), ammount, type, args[3] ) );
 
           return true;
         }
 
         case "stwórz": {
-          if ( !player.hasPermission(Permissions.BANK_ADMIN.toString()) ) {
-            player.sendMessage(getUsage(player));
+          if ( !player.hasPermission( Permissions.BANK_ADMIN.toString() ) ) {
+            player.sendMessage( getUsage( player ) );
             return true;
           }
           Location loc = player.getLocation();
 
           assert type != null;
-          if ( type.equals("miejsce") ) {
-            Boolean check = plugin.mutils.createBank(loc);
+          if ( type.equals( "miejsce" ) ) {
+            Boolean check = plugin.mutils.createBank( loc );
             if ( !check ) {
-              player.sendMessage(Main.prefixError + "Coś poszło nie tak! Banki można ustawiać co 50m.");
+              player.sendMessage( Main.prefixError
+                  + "Coś poszło nie tak! Banki można ustawiać co 50m." );
               return true;
             }
 
-            player.sendMessage(Main.prefixInfo + "Stworzono bank w twojej lokalizacji!");
+            player.sendMessage( Main.prefixInfo + "Stworzono bank w twojej lokalizacji!" );
 
-            ChatUtils.cacheMessageForBotLog(BotChannels.MoneyLogId.toString(),
-                String.format("**%s** Ustawił nowy bank w lokacji (`%s`)", player.getName(),
-                    StringUtils.formatLocation(loc)));
+            ChatUtils.cacheMessageForBotLog( BotChannels.MoneyLogId.toString(), String
+                .format( "**%s** Ustawił nowy bank w lokacji (`%s`)", player.getName(), StringUtils
+                    .formatLocation( loc ) ) );
           }
 
           return true;
         }
 
         case "usuń": {
-          if ( !player.hasPermission(Permissions.BANK_ADMIN.toString()) ) {
-            player.sendMessage(getUsage(player));
+          if ( !player.hasPermission( Permissions.BANK_ADMIN.toString() ) ) {
+            player.sendMessage( getUsage( player ) );
             return true;
           }
           Location loc = player.getLocation();
 
-          Boolean check = plugin.mutils.deleteBank(player);
+          Boolean check = plugin.mutils.deleteBank( player );
           if ( !check ) {
-            player.sendMessage(
-                Main.prefixError + "Coś poszło nie tak przy usuwaniu banku! Upewnij się, że jesteś w obszarze 20m od "
-                    + "centrum.");
+            player.sendMessage( Main.prefixError
+                + "Coś poszło nie tak przy usuwaniu banku! Upewnij się, że jesteś w obszarze 20m od "
+                + "centrum." );
             return true;
           }
 
-          player.sendMessage(Main.prefixInfo + "Usunięto bank najbliższy twojej lokalizacji!");
+          player.sendMessage( Main.prefixInfo + "Usunięto bank najbliższy twojej lokalizacji!" );
 
-
-          ChatUtils.cacheMessageForBotLog(BotChannels.MoneyLogId.toString(),
-              String.format("**%s** Usunął bank w lokacji (`%s`)", player.getName(), StringUtils.formatLocation(loc)));
+          ChatUtils.cacheMessageForBotLog( BotChannels.MoneyLogId.toString(), String
+              .format( "**%s** Usunął bank w lokacji (`%s`)", player.getName(), StringUtils
+                  .formatLocation( loc ) ) );
 
           return true;
         }
 
         case "konwersje": {
-          if ( !player.hasPermission(Permissions.BANK_ADMIN.toString()) || ( args.length < 4 ) ) {
-            player.sendMessage(getUsage(player));
+          if ( !player.hasPermission( Permissions.BANK_ADMIN.toString() ) || ( args.length < 4 ) ) {
+            player.sendMessage( getUsage( player ) );
             return true;
           }
 
           String from = args[1].toLowerCase();
           String to = args[2].toLowerCase();
-          Long conv = Long.valueOf(args[3]);
+          Long conv = Long.valueOf( args[3] );
 
-          Boolean check = plugin.mutils.setConversion(from, to, conv);
+          Boolean check = plugin.mutils.setConversion( from, to, conv );
           if ( !check ) {
-            player.sendMessage(
-                Main.prefixError + "Nie udało się ustawić konwersji: " + from + " * " + conv + " = 1 * " + to);
+            player.sendMessage( Main.prefixError + "Nie udało się ustawić konwersji: " + from
+                + " * " + conv + " = 1 * " + to );
             return true;
           }
 
-          player.sendMessage(Main.prefixInfo + "Ustawiono konwersję: " + from + " * " + conv + " = 1 * " + to);
+          player.sendMessage( Main.prefixInfo + "Ustawiono konwersję: " + from + " * " + conv
+              + " = 1 * " + to );
 
-          ChatUtils.cacheMessageForBotLog(BotChannels.MoneyLogId.toString(),
-              String.format("**%s** Ustawił konwersję: `%s` -> `%s` **%s : 1**", player.getName(), from, to, conv));
+          ChatUtils.cacheMessageForBotLog( BotChannels.MoneyLogId.toString(), String
+              .format( "**%s** Ustawił konwersję: `%s` -> `%s` **%s : 1**", player
+                  .getName(), from, to, conv ) );
 
           return true;
         }
 
         case "list": {
-          if ( !player.hasPermission(Permissions.BANK_ADMIN.toString()) ) {
-            player.sendMessage(getUsage(player));
+          if ( !player.hasPermission( Permissions.BANK_ADMIN.toString() ) ) {
+            player.sendMessage( getUsage( player ) );
             return true;
           }
           List<Location> banks = plugin.mutils.getBanks();
 
-          StringBuilder os = new StringBuilder(Main.prefixInfo + "Banki: ");
+          StringBuilder os = new StringBuilder( Main.prefixInfo + "Banki: " );
           for ( Location bank : banks )
-            os.append(ChatColor.GREEN + "\nX: " + ChatColor.RED)
-              .append(bank.getBlockX())
-              .append(ChatColor.GREEN)
-              .append(", Y: ")
-              .append(ChatColor.RED)
-              .append(bank.getBlockY())
-              .append(ChatColor.GREEN)
-              .append(", Z: ")
-              .append(ChatColor.RED)
-              .append(bank.getBlockZ());
+            os.append( ChatColor.GREEN + "\nX: " + ChatColor.RED )
+                .append( bank.getBlockX() )
+                .append( ChatColor.GREEN )
+                .append( ", Y: " )
+                .append( ChatColor.RED )
+                .append( bank.getBlockY() )
+                .append( ChatColor.GREEN )
+                .append( ", Z: " )
+                .append( ChatColor.RED )
+                .append( bank.getBlockZ() );
 
-          player.sendMessage(os.toString());
+          player.sendMessage( os.toString() );
 
           return true;
         }
 
         default: {
-          player.sendMessage(getUsage(player));
+          player.sendMessage( getUsage( player ) );
           return true;
         }
       }
-    }
-    else {
-      sender.sendMessage("Komenda tylko dla graczy!");
+    } else {
+      sender.sendMessage( "Komenda tylko dla graczy!" );
       return true;
     }
   }

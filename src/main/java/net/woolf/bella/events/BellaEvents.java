@@ -41,50 +41,48 @@ public class BellaEvents implements Listener {
 
   private final Main plugin;
 
-  public BellaEvents (
+  public BellaEvents(
       Main main
   ) {
     this.plugin = main;
   }
 
-  @EventHandler( priority = EventPriority.HIGH )
-  public void onPlayerChat (
+  @EventHandler(priority = EventPriority.HIGH)
+  public void onPlayerChat(
       AsyncPlayerChatEvent event
   ) {
     String msg = event.getMessage();
-    String actionsFormatted = ChatUtils.formatChatMessage(msg);
+    String actionsFormatted = ChatUtils.formatChatMessage( msg );
 
-    event.setMessage(actionsFormatted);
+    event.setMessage( actionsFormatted );
 
-    String userPrefix = PlayerUtils.getPlayerPrefix(event.getPlayer());
+    String userPrefix = PlayerUtils.getPlayerPrefix( event.getPlayer() );
 
-    ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(),
-                                    ChatUtils.LocalPrefix + " " + userPrefix.replaceAll("(§.)|(&.)|(`)",
-                                                                                        "") + " " + event.getPlayer()
-                                                                                                         .getName() + ": " + "`" + actionsFormatted.replaceAll(
-                                        "(§.)|(`)", "") + "`");
+    ChatUtils.cacheMessageForBotLog( BotChannels.ChatLogId.toString(), ChatUtils.LocalPrefix + " "
+        + userPrefix.replaceAll( "(§.)|(&.)|(`)", "" ) + " " + event.getPlayer().getName() + ": "
+        + "`" + actionsFormatted.replaceAll( "(§.)|(`)", "" ) + "`" );
   }
 
   @EventHandler
-  public void onPlayerJoin (
+  public void onPlayerJoin(
       PlayerJoinEvent event
   ) {
     List<Player> online = plugin.utils.getPlayers();
-    plugin.bot.updatePresence("Graczy online: " + ( online.size() + 1 ));
+    plugin.bot.updatePresence( "Graczy online: " + ( online.size() + 1 ) );
   }
 
   @EventHandler
-  public void onPlayerQuit (
+  public void onPlayerQuit(
       PlayerQuitEvent event
   ) {
     List<Player> online = plugin.utils.getPlayers();
     int size = online.size() - 1;
 
-    plugin.bot.updatePresence(size > 0 ? "Graczy online: " + size : "Czekam na graczy...");
+    plugin.bot.updatePresence( size > 0 ? "Graczy online: " + size : "Czekam na graczy..." );
   }
 
-  @EventHandler( priority = EventPriority.HIGH )
-  public void onPlayerInteract (
+  @EventHandler(priority = EventPriority.HIGH)
+  public void onPlayerInteract(
       PlayerInteractEvent event
   ) {
     Player player = event.getPlayer();
@@ -92,34 +90,34 @@ public class BellaEvents implements Listener {
     if ( player.isSneaking() ) {
       List<Entity> passengers = player.getPassengers();
 
-      if ( passengers.size() > 0 ) for ( Entity Passenger : passengers )
-        player.removePassenger(Passenger);
+      if ( passengers.size() > 0 )
+        for ( Entity Passenger : passengers )
+          player.removePassenger( Passenger );
     }
 
     ItemStack item = player.getInventory().getItemInMainHand();
     if ( item != null && item.getType() != Material.AIR ) {
-      NBTItem nbti = new NBTItem(item, true);
+      NBTItem nbti = new NBTItem( item, true );
 
-      if ( nbti.hasKey("teleportEnchantment") ) {
-        event.setCancelled(true);
-        ItemEnchanter.teleportPlayerWithItem(player, nbti);
-      }
-      else if ( nbti.hasKey(BackpackNBTKeys.ISBACKPACK.toString()) ) {
-        Backpack.OpenBackpackEvent(player, nbti, item);
-      }
-      else if ( nbti.hasKey(WymienCommand.MoneyNbtTag) ) {
-        event.setCancelled(true);
+      if ( nbti.hasKey( "teleportEnchantment" ) ) {
+        event.setCancelled( true );
+        ItemEnchanter.teleportPlayerWithItem( player, nbti );
+      } else if ( nbti.hasKey( BackpackNBTKeys.ISBACKPACK.toString() ) ) {
+        Backpack.OpenBackpackEvent( player, nbti, item );
+      } else if ( nbti.hasKey( WymienCommand.MoneyNbtTag ) ) {
+        event.setCancelled( true );
 
-        WymienCommand.moveMoneyToPurse(player, nbti, item, player.isSneaking());
+        WymienCommand.moveMoneyToPurse( player, nbti, item, player.isSneaking() );
       }
     }
   }
 
   @EventHandler
-  public void onPlayerInteractEntity (
+  public void onPlayerInteractEntity(
       PlayerInteractEntityEvent event
   ) {
-    if ( !event.getHand().equals(EquipmentSlot.HAND) ) return;
+    if ( !event.getHand().equals( EquipmentSlot.HAND ) )
+      return;
 
     Entity clicked = event.getRightClicked();
     Player player = event.getPlayer();
@@ -127,102 +125,100 @@ public class BellaEvents implements Listener {
     if ( clicked instanceof Player ) {
       Player target = (Player) clicked;
 
-      boolean canBeRidden = plugin.playerConfig.getBoolean(target.getUniqueId().toString() + ".canBeRidden");
+      boolean canBeRidden = plugin.playerConfig
+          .getBoolean( target.getUniqueId().toString() + ".canBeRidden" );
 
       if ( canBeRidden ) {
         List<Entity> passangers = target.getPassengers();
 
-        if ( passangers.size() == 0 ) target.addPassenger(player);
+        if ( passangers.size() == 0 )
+          target.addPassenger( player );
       }
     }
   }
 
   @EventHandler
-  public void onPlayerItemDamageEvent (
+  public void onPlayerItemDamageEvent(
       PlayerItemDamageEvent event
   ) {
-    event.setCancelled(true);
+    event.setCancelled( true );
   }
 
   @EventHandler
-  public boolean onPlayerCommandPreprocessEvent (
+  public boolean onPlayerCommandPreprocessEvent(
       PlayerCommandPreprocessEvent event
   ) {
     Player player = event.getPlayer();
 
     List<String> args = new LinkedList<>();
-    Collections.addAll(args, event.getMessage().split(" "));
-    String cmd = args.get(0).replace("/", "");
-    args.remove(0);
+    Collections.addAll( args, event.getMessage().split( " " ) );
+    String cmd = args.get( 0 ).replace( "/", "" );
+    args.remove( 0 );
 
-    String userPrefix = PlayerUtils.getPlayerPrefix(event.getPlayer());
+    String userPrefix = PlayerUtils.getPlayerPrefix( event.getPlayer() );
 
     switch ( cmd ) {
       case "ooc": {
-        ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(),
-                                        ChatUtils.OOCPrefix + " " + player.getName() + ": `(" + String.join(" ", args)
-                                                                                                      .replaceAll("`",
-                                                                                                                  "") + ")`");
+        ChatUtils.cacheMessageForBotLog( BotChannels.ChatLogId.toString(), ChatUtils.OOCPrefix + " "
+            + player.getName() + ": `(" + String.join( " ", args ).replaceAll( "`", "" ) + ")`" );
         break;
       }
 
       case "me":
       case "k": {
-        ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(),
-                                        ChatUtils.LocalPrefix + " [" + userPrefix + "] " + player.getName() + ": `*" + String.join(
-                                            " ", args).replaceAll("`", "") + "*`");
+        ChatUtils.cacheMessageForBotLog( BotChannels.ChatLogId.toString(), ChatUtils.LocalPrefix
+            + " [" + userPrefix + "] " + player.getName() + ": `*"
+            + String.join( " ", args ).replaceAll( "`", "" ) + "*`" );
         break;
       }
 
       case "do": {
-        ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(),
-                                        ChatUtils.LocalPrefix + " [" + userPrefix + "] " + player.getName() + ": `**" + String.join(
-                                            " ", args).replaceAll("`", "") + "**`");
+        ChatUtils.cacheMessageForBotLog( BotChannels.ChatLogId.toString(), ChatUtils.LocalPrefix
+            + " [" + userPrefix + "] " + player.getName() + ": `**"
+            + String.join( " ", args ).replaceAll( "`", "" ) + "**`" );
         break;
       }
 
       case "s": {
-        ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(),
-                                        ChatUtils.WhisperPrefix + " [" + userPrefix + "] " + player.getName() + ": `" + String.join(
-                                            " ", args).replaceAll("`", "") + "`");
+        ChatUtils.cacheMessageForBotLog( BotChannels.ChatLogId.toString(), ChatUtils.WhisperPrefix
+            + " [" + userPrefix + "] " + player.getName() + ": `"
+            + String.join( " ", args ).replaceAll( "`", "" ) + "`" );
         break;
       }
 
       case "globalnar": {
-        ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(),
-                                        ChatUtils.GlobalPrefix + " [" + player.getName() + "] `" + String.join(" ",
-                                                                                                               args)
-                                                                                                         .replaceAll(
-                                                                                                             "`",
-                                                                                                             "") + "`");
+        ChatUtils
+            .cacheMessageForBotLog( BotChannels.ChatLogId.toString(), ChatUtils.GlobalPrefix + " ["
+                + player.getName() + "] `" + String.join( " ", args ).replaceAll( "`", "" ) + "`" );
         break;
       }
 
       case "midnar":
       case "localnar": {
         Location loc = player.getLocation();
-        ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(),
-                                        ChatUtils.LocalPrefix + " {" + loc.getBlockX() + " " + loc.getBlockY() + " " + loc.getBlockZ() + "} " + " [" + player.getName() + "] `" + String.join(
-                                            " ", args).replaceAll("`", "") + "`");
+        ChatUtils.cacheMessageForBotLog( BotChannels.ChatLogId.toString(), ChatUtils.LocalPrefix
+            + " {" + loc.getBlockX() + " " + loc.getBlockY() + " " + loc.getBlockZ() + "} " + " ["
+            + player.getName() + "] `" + String.join( " ", args ).replaceAll( "`", "" ) + "`" );
         break;
       }
 
       case "privnar": {
-        String narrated = args.get(0);
-        args.remove(0);
+        String narrated = args.get( 0 );
+        args.remove( 0 );
 
-        ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(),
-                                        "**[PRIVNAR]** " + "[" + player.getName() + " -> " + narrated + "] `" + String.join(
-                                            " ", args).replaceAll("`", "") + "`");
+        ChatUtils.cacheMessageForBotLog( BotChannels.ChatLogId.toString(), "**[PRIVNAR]** " + "["
+            + player.getName() + " -> " + narrated + "] `"
+            + String.join( " ", args ).replaceAll( "`", "" ) + "`" );
         break;
       }
 
       case "helpop": {
         String hourFormat = StringUtils.getHourMinutes();
 
-        this.plugin.bot.sendLog(String.format("%s `%s`: `%s`", hourFormat, player.getName(),
-                                              StringUtils.synthesizeForDc(String.join(" ", args))),
-                                BotChannels.HelpopLogId.toString());
+        this.plugin.bot
+            .sendLog( String.format( "%s `%s`: `%s`", hourFormat, player.getName(), StringUtils
+                .synthesizeForDc( String.join( " ", args ) ) ), BotChannels.HelpopLogId
+                    .toString() );
 
         break;
       }
@@ -232,7 +228,7 @@ public class BellaEvents implements Listener {
   }
 
   @EventHandler
-  public void onPlayerToggleFlight (
+  public void onPlayerToggleFlight(
       final PlayerToggleFlightEvent event
   ) {
     final Player player = event.getPlayer();
@@ -240,38 +236,43 @@ public class BellaEvents implements Listener {
       return;
     }
 
-    if ( !PlayerUtils.playerArmourHasEffect(player, "doublejump") ) return;
+    if ( !PlayerUtils.playerArmourHasEffect( player, "doublejump" ) )
+      return;
 
     Location playerLocation = player.getLocation();
 
-    if ( player.getWorld().getBlockAt(playerLocation).getType() == Material.WATER ) return;
+    if ( player.getWorld().getBlockAt( playerLocation ).getType() == Material.WATER )
+      return;
 
-    this.onPlayerDoubleJump(player);
-    event.setCancelled(true);
-    player.setAllowFlight(false);
-    player.setFlying(false);
-    player.setVelocity(player.getLocation().getDirection().multiply(1.35).setY(1));
+    this.onPlayerDoubleJump( player );
+    event.setCancelled( true );
+    player.setAllowFlight( false );
+    player.setFlying( false );
+    player.setVelocity( player.getLocation().getDirection().multiply( 1.35 ).setY( 1 ) );
   }
 
   @EventHandler
-  public void onPlayerMove (
+  public void onPlayerMove(
       final PlayerMoveEvent event
   ) {
     final Player player = event.getPlayer();
 
-    if ( PlayerUtils.playerArmourHasEffect(player, "doublejump") ) {
-      Material blockMaterial = player.getLocation().subtract(0.0, 1.0, 0.0).getBlock().getType();
+    if ( PlayerUtils.playerArmourHasEffect( player, "doublejump" ) ) {
+      Material blockMaterial = player.getLocation().subtract( 0.0, 1.0, 0.0 ).getBlock().getType();
 
-      if ( player.getGameMode() != GameMode.CREATIVE && blockMaterial != Material.AIR && blockMaterial != Material.WATER && blockMaterial != Material.STATIONARY_WATER && !player.isFlying() ) {
-        player.setAllowFlight(true);
+      if (
+        player.getGameMode() != GameMode.CREATIVE && blockMaterial != Material.AIR
+            && blockMaterial != Material.WATER && !player.isFlying()
+      ) {
+        player.setAllowFlight( true );
       }
     }
   }
 
-  public void onPlayerDoubleJump (
+  public void onPlayerDoubleJump(
       final Player p
   ) {
-    p.playEffect(p.getLocation(), Effect.MOBSPAWNER_FLAMES, null);
-    p.playSound(p.getLocation(), Sound.ENTITY_RABBIT_JUMP, 1.3f, 1.0f);
+    p.playEffect( p.getLocation(), Effect.MOBSPAWNER_FLAMES, null );
+    p.playSound( p.getLocation(), Sound.ENTITY_RABBIT_JUMP, 1.3f, 1.0f );
   }
 }

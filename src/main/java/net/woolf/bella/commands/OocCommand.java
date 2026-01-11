@@ -16,38 +16,40 @@ public class OocCommand implements CommandExecutor {
 
   private final Main plugin;
 
-  public OocCommand (
+  public OocCommand(
       Main main
   ) {
     this.plugin = main;
-    plugin.getCommand("o").setExecutor(this);
+    plugin.getCommand( "o" ).setExecutor( this );
   }
 
   @Override
-  public boolean onCommand (
-      CommandSender sender, Command cmd, String label, String[] args
+  public boolean onCommand(
+      CommandSender sender,
+      Command cmd,
+      String label,
+      String[] args
   ) {
     if ( sender instanceof Player ) {
-      if ( args.length == 0 ) return true;
+      if ( args.length == 0 )
+        return true;
 
       Player player = (Player) sender;
 
-      List<Player> nearbyPlayers = plugin.utils.getNearbyPlayers(player, 15);
-      String msg =
-          ChatColor.WHITE + "[" + ChatColor.RED + "OOC" + ChatColor.WHITE + "] " + ChatColor.GRAY + player.getName() + ": (" + String.join(
-          " ", args) + ")";
+      List<Player> nearbyPlayers = plugin.utils.getNearbyPlayers( player, 15 );
+      String msg = ChatColor.WHITE + "[" + ChatColor.RED + "OOC" + ChatColor.WHITE + "] "
+          + ChatColor.GRAY + player.getName() + ": (" + String.join( " ", args ) + ")";
 
-      String logMsg = ChatUtils.OOCPrefix + " " + player.getName() + ": `(" + String.join(" ", args)
-                                                                                    .replaceAll("`", "") + ")`";
+      String logMsg = ChatUtils.OOCPrefix + " " + player.getName() + ": `("
+          + String.join( " ", args ).replaceAll( "`", "" ) + ")`";
 
-      player.sendMessage(msg);
+      player.sendMessage( msg );
       for ( Player target : nearbyPlayers )
-        target.sendMessage(msg);
+        target.sendMessage( msg );
 
-      ChatUtils.cacheMessageForBotLog(BotChannels.ChatLogId.toString(), logMsg);
-    }
-    else {
-      sender.sendMessage("Komenda tylko dla graczy!");
+      ChatUtils.cacheMessageForBotLog( BotChannels.ChatLogId.toString(), logMsg );
+    } else {
+      sender.sendMessage( "Komenda tylko dla graczy!" );
     }
     return true;
   }
