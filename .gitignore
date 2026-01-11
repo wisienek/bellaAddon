@@ -20,3 +20,4 @@ build/
 .env.test
 .env.production
 docs/javadoc/
+gradle-local.properties
