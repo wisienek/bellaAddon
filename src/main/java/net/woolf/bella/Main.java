@@ -83,7 +83,9 @@ public class Main extends JavaPlugin {
   @Override
   public void onDisable() {
     this.effectManager.dispose();
-    this.bot.api.shutdownNow();
+    if ( this.bot.api != null ) {
+      this.bot.api.shutdownNow();
+    }
   }
 
   public static Main getInstance() {

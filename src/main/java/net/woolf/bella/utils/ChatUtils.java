@@ -19,11 +19,15 @@ public class ChatUtils {
   public static final String GlobalPrefix = "**[G]**";
   public static final String OOCPrefix = "**[OOC]**";
   public static final String WhisperPrefix = "**[S]**";
+  public static final String ShoutPrefix = "**[K]**";
+  public static final String PrivateMessagePrefix = "**[PM]**";
+  public static final String DicePrefix = "**[DICE]**";
   public static final String DCNarrationPrefix = "**[DC]**";
 
-  private static final Map<String, String> cachedMessages = new HashMap<>();
-
+  private static final Map<String, StringBuilder> cachedMessages = new HashMap<>();
   private static final Map<String, Timer> timerMap = new HashMap<>();
+  private static final int DISCORD_MAX_LENGTH = 2000;
+  private static final int SAFE_SPLIT_LENGTH = 1900;
   public static final Long PullTime = 100L;
 
   private static Main plugin;
@@ -113,45 +117,57 @@ public class ChatUtils {
     return sb.toString();
   }
 
-  public static void cacheMessageForBotLog(
+  public static synchronized void cacheMessageForBotLog(
       @Nonnull String channel,
       @Nonnull String cacheKey,
       @Nullable String message,
       Boolean sendFirst
   ) {
     if ( sendFirst )
-      ChatUtils.sendCachedMessage( channel, cacheKey );
+      ChatUtils.flushCache( channel, cacheKey );
 
-    if ( message != null ) {
-      String hourFormat = StringUtils.getHourMinutes();
+    if ( message == null )
+      return;
 
-      message = StringUtils.synthesizeForDc( message );
+    String hourFormat = StringUtils.getHourMinutes();
+    String sanitized = StringUtils.synthesizeForDc( message );
+    String line = hourFormat + sanitized;
 
-      String cachedMessage = ChatUtils.cachedMessages.getOrDefault( cacheKey, "" );
+    if ( line.length() > DISCORD_MAX_LENGTH )
+      line = line.substring( 0, DISCORD_MAX_LENGTH - 3 ) + "...";
 
-      String newMsg = cachedMessage
-          .concat( ( cachedMessage.length() > 0 ? "\n" : "" ) + hourFormat + message );
+    StringBuilder cache = ChatUtils.cachedMessages
+        .computeIfAbsent( cacheKey, k -> new StringBuilder() );
 
-      if ( newMsg.length() >= 2000 )
-        ChatUtils.sendCachedMessage( channel, cacheKey );
+    int newLength = cache.length() + ( cache.length() > 0 ? 1 : 0 ) + line.length();
+    if ( newLength > SAFE_SPLIT_LENGTH && cache.length() > 0 )
+      ChatUtils.flushCache( channel, cacheKey );
 
-      ChatUtils.cachedMessages.put( cacheKey, newMsg );
+    if ( cache.length() > 0 )
+      cache.append( "\n" );
+    cache.append( line );
 
-      if ( ChatUtils.timerMap.get( cacheKey ) == null ) {
-        Timer newTimer = new Timer();
-        newTimer.schedule( new TimerTask() {
+    scheduleFlush( channel, cacheKey );
+  }
 
-          @Override
-          public void run() {
-            ChatUtils.timerMap.remove( cacheKey );
+  private static void scheduleFlush(
+      @Nonnull String channel,
+      @Nonnull String cacheKey
+  ) {
+    if ( ChatUtils.timerMap.containsKey( cacheKey ) )
+      return;
 
-            ChatUtils.sendCachedMessage( channel, cacheKey );
-          }
-        }, ChatUtils.PullTime * 1000L );
+    Timer timer = new Timer();
+    timer.schedule( new TimerTask() {
 
-        ChatUtils.timerMap.put( cacheKey, newTimer );
+      @Override
+      public void run() {
+        ChatUtils.timerMap.remove( cacheKey );
+        ChatUtils.flushCache( channel, cacheKey );
       }
-    }
+    }, ChatUtils.PullTime * 1000L );
+
+    ChatUtils.timerMap.put( cacheKey, timer );
   }
 
   public static String formatEmojis(
@@ -182,24 +198,32 @@ public class ChatUtils {
     return inputString;
   }
 
-  private static void sendCachedMessage(
+  private static synchronized void flushCache(
       @Nonnull String channel,
-      String cacheKey
+      @Nonnull String cacheKey
   ) {
-    String cachedMessage = ChatUtils.cachedMessages.get( cacheKey );
-    int length = cachedMessage.length();
+    StringBuilder cache = ChatUtils.cachedMessages.get( cacheKey );
+    if ( cache == null || cache.length() == 0 )
+      return;
 
-    if ( length > 0 ) {
-      do {
-        String partial = cachedMessage.substring( 0, Math.min( 2000, cachedMessage.length() ) );
+    String content = cache.toString();
+    cache.setLength( 0 );
 
-        ChatUtils.plugin.bot.sendLog( partial, channel );
+    while ( content.length() > 0 ) {
+      if ( content.length() <= DISCORD_MAX_LENGTH ) {
+        ChatUtils.plugin.bot.sendLog( content, channel );
+        break;
+      }
 
-        cachedMessage = cachedMessage.replace( partial, "" );
-
-      } while ( cachedMessage.length() >= 2000 );
-
-      ChatUtils.cachedMessages.put( cacheKey, "" );
+      int splitAt = content.lastIndexOf( '\n', DISCORD_MAX_LENGTH );
+      if ( splitAt <= 0 ) {
+        ChatUtils.plugin.bot
+            .sendLog( content.substring( 0, DISCORD_MAX_LENGTH - 3 ) + "...", channel );
+        content = content.substring( DISCORD_MAX_LENGTH - 3 );
+      } else {
+        ChatUtils.plugin.bot.sendLog( content.substring( 0, splitAt ), channel );
+        content = content.substring( splitAt + 1 );
+      }
     }
   }
 

@@ -6,6 +6,7 @@ import java.io.IOException;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 
 import Types.Permissions;
@@ -23,7 +24,12 @@ public class AtpCommand implements CommandExecutor {
       Main plugin
   ) {
     this.plugin = plugin;
-    plugin.getCommand( "atp" ).setExecutor( this );
+    PluginCommand command = plugin.getCommand( "atp" );
+    if ( command != null ) {
+      command.setExecutor( this );
+    } else {
+      plugin.getLogger().severe( "Could not register /atp command! Is it defined in plugin.yml?" );
+    }
   }
 
   public String getUsage() {
@@ -49,15 +55,18 @@ public class AtpCommand implements CommandExecutor {
       !( sender instanceof Player ) || sender.hasPermission( Permissions.ATP_ADMIN.toString() )
     ) {
 
-      if ( args.length < 2 ) {
+      if ( args.length < 1 ) {
         sender.sendMessage( getUsage() );
         return true;
       }
 
-      String level = args[1];
-
       switch ( args[0] ) {
-        case "edit":
+        case "edit": {
+          if ( args.length < 4 ) {
+            sender.sendMessage( getUsage() );
+            return true;
+          }
+          String level = args[1];
           String opt = args[2];
           String val = args[3];
 
@@ -101,8 +110,14 @@ public class AtpCommand implements CommandExecutor {
           sender.sendMessage( Main.prefixInfo + "Zmieniono " + opt + " dla lvl " + level + " na "
               + val );
           return true;
+        }
 
         case "set": {
+          if ( args.length < 3 ) {
+            sender.sendMessage( getUsage() );
+            return true;
+          }
+          String level = args[1];
           String pname = args[2];
           int ilvl = Integer.parseInt( level );
 
@@ -120,7 +135,12 @@ public class AtpCommand implements CommandExecutor {
           return true;
         }
 
-        case "info":
+        case "info": {
+          if ( args.length < 2 ) {
+            sender.sendMessage( getUsage() );
+            return true;
+          }
+          String level = args[1];
           String cld = (String) plugin.configManager.config.get( "tp-level-" + level + "-cld" );
           String radius = (String) plugin.configManager.config
               .get( "tp-level-" + level + "-radius" );
@@ -139,25 +159,40 @@ public class AtpCommand implements CommandExecutor {
 
           sender.sendMessage( os );
           return true;
+        }
 
         case "player": {
+          if ( args.length < 2 ) {
+            sender.sendMessage( getUsage() );
+            return true;
+          }
           String pname = args[1];
           Player target = sender.getServer().getPlayer( pname );
           if ( target != null ) {
             String lvl = plugin.teleportUtils.getLevel( target );
 
             sender.sendMessage( Main.prefixInfo + "Level gracza " + pname + " to: " + lvl );
+            return true;
+          } else {
+            sender.sendMessage( Main.prefixError + "Gracz " + pname + " nie jest online!" );
+            return true;
           }
-          break;
         }
 
         case "seteffect": {
-          if ( args.length < 3 )
+          if ( args.length < 3 ) {
             sender.sendMessage( getUsage() );
+            return true;
+          }
 
           String pname = args[1];
           String effect = args[2];
           Player target = sender.getServer().getPlayer( pname );
+
+          if ( target == null ) {
+            sender.sendMessage( Main.prefixError + "Gracz " + pname + " nie jest online!" );
+            return true;
+          }
 
           net.woolf.bella.types.EffectType effectType = net.woolf.bella.types.EffectType
               .fromString( effect );
@@ -170,14 +205,11 @@ public class AtpCommand implements CommandExecutor {
             return true;
           }
 
-          if ( target != null ) {
-            plugin.teleportUtils.setType( target, effect );
+          plugin.teleportUtils.setType( target, effect );
 
-            sender.sendMessage( Main.prefixInfo + "Ustawiono efekt gracza " + ChatColor.GREEN
-                + pname + ChatColor.WHITE + " na: " + ChatColor.AQUA + effect );
-            return true;
-          }
-          break;
+          sender.sendMessage( Main.prefixInfo + "Ustawiono efekt gracza " + ChatColor.GREEN + pname
+              + ChatColor.WHITE + " na: " + ChatColor.AQUA + effect );
+          return true;
         }
 
         default:
@@ -189,8 +221,6 @@ public class AtpCommand implements CommandExecutor {
           + "Potrzebujesz permissi atp.admin aby używać tej komendy" );
       return true;
     }
-
-    return false;
   }
 
 }

@@ -145,13 +145,18 @@ public class Bot {
   public void updatePresence(
       @Nonnull String msg
   ) {
-    api.getPresence().setActivity( net.dv8tion.jda.api.entities.Activity.watching( msg ) );
+    if ( api != null ) {
+      api.getPresence().setActivity( net.dv8tion.jda.api.entities.Activity.watching( msg ) );
+    }
   }
 
   public void sendLog(
       @Nonnull final String msg,
       @Nonnull final String logsID
   ) {
+    if ( api == null ) {
+      return;
+    }
     try {
       TextChannel channel = api.getTextChannelById( logsID );
       if ( channel == null ) {
@@ -168,6 +173,9 @@ public class Bot {
       @Nonnull final String userId,
       @Nonnull final String msg
   ) {
+    if ( api == null ) {
+      return;
+    }
     User user = api.retrieveUserById( userId ).complete();
 
     if ( user == null ) {

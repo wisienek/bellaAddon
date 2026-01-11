@@ -11,6 +11,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import net.woolf.bella.Main;
 
 public class ConfigManager {
+
   private final Main plugin;
   private final Logger logger;
 
@@ -27,7 +28,9 @@ public class ConfigManager {
   public final FileConfiguration config;
   public final YamlConfiguration playerConfig;
 
-  public ConfigManager( Main plugin ) {
+  public ConfigManager(
+      Main plugin
+  ) {
     this.plugin = plugin;
     this.logger = plugin.getLogger();
 
@@ -46,6 +49,10 @@ public class ConfigManager {
   }
 
   public void initializeConfigs() {
+    if ( !plugin.getDataFolder().exists() ) {
+      plugin.getDataFolder().mkdirs();
+    }
+
     config.addDefault( "OTP-command-delay", true );
     config.addDefault( "setOTP-command-delay", true );
     config.addDefault( "OTP-time-delay", 30 );
@@ -57,20 +64,19 @@ public class ConfigManager {
       config.addDefault( "tp-level-" + i + "-cld", String.valueOf( 30 / ( i + 1 ) ) );
       config.addDefault( "tp-level-" + i + "-radius", String.valueOf( i * 400 ) );
       config.addDefault( "tp-level-" + i + "-maxp", String.valueOf( i ) );
-      config.addDefault( "tp-level-" + i + "-maxpoints",
-          String.valueOf( (int) ( 0 + Math.floor( ( 3 * i ) / ( i * 0.5 ) ) ) ) );
+      config.addDefault( "tp-level-" + i + "-maxpoints", String
+          .valueOf( (int) ( 0 + Math.floor( ( 3 * i ) / ( i * 0.5 ) ) ) ) );
       config.addDefault( "tp-level-" + i + "-setmaxuse", String.valueOf( i * 15 ) );
     }
 
-    plugin.saveDefaultConfig();
     config.options().copyDefaults( true );
 
     try {
-      File cfile = new File( plugin.getDataFolder() + File.separator + "config.yml" );
-      if ( !cfile.exists() )
+      File cfile = new File( plugin.getDataFolder(), "config.yml" );
+      if ( !cfile.exists() ) {
         cfile.createNewFile();
-
-      config.save( plugin.getDataFolder() + File.separator + "config.yml" );
+      }
+      config.save( cfile );
     } catch ( IOException e ) {
       logger.severe( "Could not save config.yml" );
       e.printStackTrace();

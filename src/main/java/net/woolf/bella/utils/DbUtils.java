@@ -58,6 +58,13 @@ public class DbUtils {
   }
 
   public void initConnection() throws SQLException, IOException {
+    try {
+      Class.forName( "com.mysql.cj.jdbc.Driver" );
+    } catch ( ClassNotFoundException e ) {
+      this.logger.severe( "MySQL driver not found! Make sure mysql-connector-j is shaded." );
+      throw new SQLException( "MySQL driver not found", e );
+    }
+
     Map<String, String> config = FileReader.getDBConfig();
     String baseURL = config.get( "BaseURL" );
     String host = config.get( "Host" );
@@ -66,28 +73,28 @@ public class DbUtils {
     String user = config.get( "User" );
     String password = config.get( "Password" );
 
-    if ( baseURL == null || baseURL.length() == 0 ) {
+    if ( baseURL == null || baseURL.isEmpty() ) {
       this.logger.info( "No BaseURL for connection!" );
       return;
     }
-    if ( host == null || host.length() == 0 ) {
+    if ( host == null || host.isEmpty() ) {
       this.logger.info( "No Host for connection!" );
       return;
     }
-    if ( port == null || port.length() == 0 ) {
+    if ( port == null || port.isEmpty() ) {
       this.logger.info( "No Port for connection!" );
       return;
     }
-    if ( database == null || database.length() == 0 ) {
+    if ( database == null || database.isEmpty() ) {
       this.logger.info( "No Database for connection!" );
       return;
     }
-    if ( user == null || user.length() == 0 ) {
+    if ( user == null || user.isEmpty() ) {
       this.logger.info( "No User for connection!" );
       return;
     }
-    if ( password == null || password.length() == 0 ) {
-      this.logger.info( "No User for connection!" );
+    if ( password == null || password.isEmpty() ) {
+      this.logger.info( "No Password for connection!" );
       return;
     }
 
