@@ -1,0 +1,12 @@
+classes
+net.woolf.bella
+net.woolf.bella.bot
+net.woolf.bella.bot.commands
+net.woolf.bella.commands
+net.woolf.bella.configs
+net.woolf.bella.events
+net.woolf.bella.models
+net.woolf.bella.repositories
+net.woolf.bella.types
+net.woolf.bella.utils
+Types
