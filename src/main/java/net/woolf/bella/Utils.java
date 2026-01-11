@@ -40,9 +40,9 @@ public class Utils {
   private final Main plugin;
 
   public static final Set<String> types = new HashSet<>(
-      Arrays.asList("ignis", "aqua", "geo", "electro", "aeter", "caligo", "lux"));
+      Arrays.asList( "ignis", "aqua", "geo", "electro", "aeter", "caligo", "lux" ) );
 
-  public Utils (
+  public Utils(
       Main main
   ) {
     this.plugin = main;
@@ -54,297 +54,335 @@ public class Utils {
     cooldownTaskSetOTP = new HashMap<>();
   }
 
-  public List<Player> getNearbyPlayers (
-      Player player, int len
+  public List<Player> getNearbyPlayers(
+      Player player,
+      int len
   ) {
-    Collection<Entity> nearbyPlayers = player.getWorld().getNearbyEntities(player.getLocation(), len, len, len);
+    Collection<Entity> nearbyPlayers = player.getWorld()
+        .getNearbyEntities( player.getLocation(), len, len, len );
 
     return nearbyPlayers.stream()
-                        .filter(e -> e instanceof Player && !e.getName().equals(player.getName()))
-                        .map(Player.class::cast)
-                        .collect(Collectors.toList());
+        .filter( e -> e instanceof Player && !e.getName().equals( player.getName() ) )
+        .map( Player.class::cast )
+        .collect( Collectors.toList() );
   }
 
-  public List<Player> getNearbyPlayers (
-      Location loc, int len
+  public List<Player> getNearbyPlayers(
+      Location loc,
+      int len
   ) {
-    Collection<Entity> nearbyPlayers = loc.getWorld().getNearbyEntities(loc, len, len, len);
+    Collection<Entity> nearbyPlayers = loc.getWorld().getNearbyEntities( loc, len, len, len );
 
-    return nearbyPlayers.stream().filter(Player.class::isInstance).map(Player.class::cast).collect(Collectors.toList());
+    return nearbyPlayers.stream()
+        .filter( Player.class::isInstance )
+        .map( Player.class::cast )
+        .collect( Collectors.toList() );
   }
 
-  public Boolean isWithinReach (
-      Player player, Player target, Long len
+  public Boolean isWithinReach(
+      Player player,
+      Player target,
+      Long len
   ) {
-    return player.getLocation().distance(target.getLocation()) < len;
+    return player.getLocation().distance( target.getLocation() ) < len;
   }
 
-  public Boolean isWithinReach (
-      Player player, String target, Long len
+  public Boolean isWithinReach(
+      Player player,
+      String target,
+      Long len
   ) {
     List<Player> playerList = player.getWorld().getPlayers();
     Player ptarget = null;
 
     for ( Player p : playerList )
-      if ( p.getName().equals(target) ) ptarget = p;
+      if ( p.getName().equals( target ) )
+        ptarget = p;
 
-    return ptarget != null && player.getLocation().distance(ptarget.getLocation()) < len;
+    return ptarget != null && player.getLocation().distance( ptarget.getLocation() ) < len;
   }
 
-  public void setTPL (
-      Player player, String level
+  public void setTPL(
+      Player player,
+      String level
   ) {
-    plugin.tpl.set(player.getUniqueId().toString() + ".level", level);
+    plugin.tpl.set( player.getUniqueId().toString() + ".level", level );
     plugin.saveTPLFile();
   }
 
-  public String getLevel (
+  public String getLevel(
       Player player
   ) {
     String level = "0";
 
-    if ( plugin.tpl.contains(player.getUniqueId().toString() + ".level") ) {
-      level = (String) plugin.tpl.get(player.getUniqueId().toString() + ".level");
-    }
-    else {
-      setTPL(player, level);
+    if ( plugin.tpl.contains( player.getUniqueId().toString() + ".level" ) ) {
+      level = (String) plugin.tpl.get( player.getUniqueId().toString() + ".level" );
+    } else {
+      setTPL( player, level );
     }
 
     return level;
   }
 
-  public void setOTP (
-      Player player, String name
+  public void setOTP(
+      Player player,
+      String name
   ) {
-    plugin.tps.set("tps." + player.getUniqueId().toString() + "." + name + ".X", player.getLocation().getX());
-    plugin.tps.set("tps." + player.getUniqueId().toString() + "." + name + ".Y", player.getLocation().getY());
-    plugin.tps.set("tps." + player.getUniqueId().toString() + "." + name + ".Z", player.getLocation().getZ());
-    plugin.tps.set("tps." + player.getUniqueId().toString() + "." + name + ".Yaw", player.getLocation().getYaw());
-    plugin.tps.set("tps." + player.getUniqueId().toString() + "." + name + ".Pitch", player.getLocation().getPitch());
-    plugin.tps.set("tps." + player.getUniqueId().toString() + "." + name + ".World",
-                   player.getLocation().getWorld().getName());
+    plugin.tps.set( "tps." + player.getUniqueId().toString() + "." + name
+        + ".X", player.getLocation().getX() );
+    plugin.tps.set( "tps." + player.getUniqueId().toString() + "." + name
+        + ".Y", player.getLocation().getY() );
+    plugin.tps.set( "tps." + player.getUniqueId().toString() + "." + name
+        + ".Z", player.getLocation().getZ() );
+    plugin.tps.set( "tps." + player.getUniqueId().toString() + "." + name
+        + ".Yaw", player.getLocation().getYaw() );
+    plugin.tps.set( "tps." + player.getUniqueId().toString() + "." + name
+        + ".Pitch", player.getLocation().getPitch() );
+    plugin.tps.set( "tps." + player.getUniqueId().toString() + "." + name
+        + ".World", player.getLocation().getWorld().getName() );
     plugin.saveOTPFile();
   }
 
-  public Map<String, Object> getOTP (
+  public Map<String, Object> getOTP(
       Player player
   ) {
-    if ( plugin.tps.getConfigurationSection("tps." + player.getUniqueId().toString()) == null ) return new HashMap<>();
+    if ( plugin.tps.getConfigurationSection( "tps." + player.getUniqueId().toString() ) == null )
+      return new HashMap<>();
 
-    return plugin.tps.getConfigurationSection("tps." + player.getUniqueId().toString()).getValues(false);
+    return plugin.tps.getConfigurationSection( "tps." + player.getUniqueId().toString() )
+        .getValues( false );
   }
 
-  public Boolean setType (
-      Player player, String type
+  public Boolean setType(
+      Player player,
+      String type
   ) {
-    if ( !types.contains(type) ) return false;
+    if ( !types.contains( type ) )
+      return false;
 
-    plugin.tpl.set(player.getUniqueId().toString() + ".type", type);
+    plugin.tpl.set( player.getUniqueId().toString() + ".type", type );
     plugin.saveTPLFile();
 
     return true;
   }
 
-  public String getType (
+  public String getType(
       Player player
   ) {
     String type = "";
-    if ( plugin.tpl.contains(player.getUniqueId().toString() + ".type") )
-      type = plugin.tpl.getString(player.getUniqueId().toString() + ".type");
+    if ( plugin.tpl.contains( player.getUniqueId().toString() + ".type" ) )
+      type = plugin.tpl.getString( player.getUniqueId().toString() + ".type" );
     return type;
   }
 
-  public void sendOTP (
-      Player player, String name
+  public void sendOTP(
+      Player player,
+      String name
   ) {
     World world = player.getWorld();
-    Location tpLoc = getOTPLocation(player, name);
+    Location tpLoc = getOTPLocation( player, name );
 
-    world.playSound(tpLoc, Sound.ENTITY_ENDERMEN_TELEPORT, 1, 1);
+    world.playSound( tpLoc, Sound.BLOCK_PORTAL_TRAVEL, 1, 1 );
 
-    List<Player> sendTo = getNearbyPlayers(tpLoc, 15);
+    List<Player> sendTo = getNearbyPlayers( tpLoc, 15 );
     for ( Player sender : sendTo )
-      sender.sendMessage(ChatColor.DARK_GRAY + "[L]" + ChatColor.GOLD + " [Niedaleko słychać odgłos teleportacji]");
+      sender.sendMessage( ChatColor.DARK_GRAY + "[L]" + ChatColor.GOLD
+          + " [Niedaleko słychać odgłos teleportacji]" );
 
-    player.teleport(tpLoc);
+    player.teleport( tpLoc );
   }
 
-  public void sendOTP (
-      Player player, String name, Player target
+  public void sendOTP(
+      Player player,
+      String name,
+      Player target
   ) {
     World world = player.getWorld();
-    Location tpLoc = getOTPLocation(player, name);
+    Location tpLoc = getOTPLocation( player, name );
 
-    world.playSound(tpLoc, Sound.ENTITY_ENDERMEN_TELEPORT, 1, 1);
-    List<Player> sendTo = getNearbyPlayers(tpLoc, 15);
+    world.playSound( tpLoc, Sound.BLOCK_PORTAL_TRAVEL, 1, 1 );
+    List<Player> sendTo = getNearbyPlayers( tpLoc, 15 );
     for ( Player sender : sendTo )
-      sender.sendMessage(ChatColor.DARK_GRAY + "[L]" + ChatColor.GOLD + " [Niedaleko słychać odgłos teleportacji]");
+      sender.sendMessage( ChatColor.DARK_GRAY + "[L]" + ChatColor.GOLD
+          + " [Niedaleko słychać odgłos teleportacji]" );
 
-    target.teleport(tpLoc);
+    target.teleport( tpLoc );
   }
 
-  public void sendOTP (
-      Player player, Location loc
+  public void sendOTP(
+      Player player,
+      Location loc
   ) {
     World world = player.getWorld();
 
-    world.playSound(loc, Sound.ENTITY_ENDERMEN_TELEPORT, 1, 1);
+    world.playSound( loc, Sound.BLOCK_PORTAL_TRAVEL, 1, 1 );
 
-    List<Player> sendTo = getNearbyPlayers(loc, 15);
+    List<Player> sendTo = getNearbyPlayers( loc, 15 );
     for ( Player sender : sendTo )
-      sender.sendMessage(ChatColor.DARK_GRAY + "[L]" + ChatColor.GOLD + " [Niedaleko słychać odgłos teleportacji]");
+      sender.sendMessage( ChatColor.DARK_GRAY + "[L]" + ChatColor.GOLD
+          + " [Niedaleko słychać odgłos teleportacji]" );
 
-    player.teleport(loc);
+    player.teleport( loc );
   }
 
-  public Location getOTPLocation (
-      Player player, String name
+  public Location getOTPLocation(
+      Player player,
+      String name
   ) {
     return new Location(
-        Bukkit.getWorld(plugin.tps.getString("tps." + player.getUniqueId().toString() + "." + name + ".World")),
-        plugin.tps.getDouble("tps." + player.getUniqueId().toString() + "." + name + ".X"),
-        plugin.tps.getDouble("tps." + player.getUniqueId().toString() + "." + name + ".Y"),
-        plugin.tps.getDouble("tps." + player.getUniqueId().toString() + "." + name + ".Z"),
-        plugin.tps.getLong("tps." + player.getUniqueId().toString() + "." + name + ".Yaw"),
-        plugin.tps.getLong("tps." + player.getUniqueId().toString() + "." + name + ".Pitch"));
+        Bukkit.getWorld( plugin.tps
+            .getString( "tps." + player.getUniqueId().toString() + "." + name + ".World" ) ),
+        plugin.tps.getDouble( "tps." + player.getUniqueId().toString() + "." + name + ".X" ),
+        plugin.tps.getDouble( "tps." + player.getUniqueId().toString() + "." + name + ".Y" ),
+        plugin.tps.getDouble( "tps." + player.getUniqueId().toString() + "." + name + ".Z" ),
+        plugin.tps.getLong( "tps." + player.getUniqueId().toString() + "." + name + ".Yaw" ),
+        plugin.tps.getLong( "tps." + player.getUniqueId().toString() + "." + name + ".Pitch" ) );
   }
 
-  public void deleteOTP (
-      Player player, String name
+  public void deleteOTP(
+      Player player,
+      String name
   ) {
-    plugin.tps.set("tps." + player.getUniqueId().toString() + "." + name, null);
+    plugin.tps.set( "tps." + player.getUniqueId().toString() + "." + name, null );
     plugin.saveOTPFile();
   }
 
-  public boolean tpsIsNull (
-      Player player, String name
+  public boolean tpsIsNull(
+      Player player,
+      String name
   ) {
-    return plugin.tps.getString("tps." + player.getUniqueId() + "." + name) == null;
+    return plugin.tps.getString( "tps." + player.getUniqueId() + "." + name ) == null;
   }
 
-  public List<Player> getPlayers () {
-    return plugin.server.getWorlds().get(0).getPlayers();
+  public List<Player> getPlayers() {
+    return plugin.server.getWorlds().get( 0 ).getPlayers();
   }
 
-  public void tpEffect (
-      Player player, String locName, Player target
+  public void tpEffect(
+      Player player,
+      String locName,
+      Player target
   ) {
-    executeTP(player, locName, target);
+    executeTP( player, locName, target );
   }
 
-  public void tpEffect (
-      Player player, String locName
+  public void tpEffect(
+      Player player,
+      String locName
   ) {
-    executeTP(player, locName, null);
+    executeTP( player, locName, null );
   }
 
-  public void tpEffect (
-      Player player, Location loc
+  public void tpEffect(
+      Player player,
+      Location loc
   ) {
-    executeTP(player, loc);
+    executeTP( player, loc );
   }
 
-  void executeTP (
-      Player player, String locName, Player target
+  void executeTP(
+      Player player,
+      String locName,
+      Player target
   ) {
     Player tpd = target != null ? target : player;
 
-    Effect tpParticles = getPlayerEffect(tpd);
+    Effect tpParticles = getPlayerEffect( tpd );
     tpParticles.duration = 4 * 20;
     tpParticles.callback = () -> {
       if ( locName != null && !locName.isEmpty() ) {
         if ( target != null ) {
-          sendOTP(player, locName, target);
-          tpEffect(player, null, target);
-        }
-        else {
-          sendOTP(player, locName);
-          tpEffect(player, null, null);
+          sendOTP( player, locName, target );
+          tpEffect( player, null, target );
+        } else {
+          sendOTP( player, locName );
+          tpEffect( player, null, null );
         }
       }
     };
-    player.getWorld().playSound(tpd.getLocation(), Sound.ENTITY_ENDERMEN_TELEPORT, 1, 1);
+    player.getWorld().playSound( tpd.getLocation(), Sound.BLOCK_PORTAL_TRAVEL, 1, 1 );
 
     tpParticles.start();
   }
 
-  void executeTP (
-      Player player, Location loc
+  void executeTP(
+      Player player,
+      Location loc
   ) {
-    Effect tpParticles = getPlayerEffect(player);
+    Effect tpParticles = getPlayerEffect( player );
     tpParticles.duration = 4 * 20;
     tpParticles.callback = () -> {
-      sendOTP(player, loc);
-      tpEffect(player, null, null);
+      sendOTP( player, loc );
+      tpEffect( player, null, null );
     };
-    player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDERMEN_TELEPORT, 1, 1);
+    player.getWorld().playSound( player.getLocation(), Sound.BLOCK_PORTAL_TRAVEL, 1, 1 );
 
     tpParticles.start();
   }
 
-  public boolean hasTpCooldown (
+  public boolean hasTpCooldown(
       Player player
   ) {
-    return cooldownTimeOTP.containsKey(player);
+    return cooldownTimeOTP.containsKey( player );
   }
 
-  public Boolean itemTP (
-      Player player, NBTCompound comp
+  public Boolean itemTP(
+      Player player,
+      NBTCompound comp
   ) {
     // String enchanter = comp.getString("enchanter");
-    int maxLen = comp.getInteger("maxLength");
-    int enchCld = comp.getInteger("cld");
-    int maxUse = comp.hasKey("maxUse") ? comp.getInteger("maxUse") : Integer.MAX_VALUE;
-    int used = comp.hasKey("used") ? comp.getInteger("used") : 0;
+    int maxLen = comp.getInteger( "maxLength" );
+    int enchCld = comp.getInteger( "cld" );
+    int maxUse = comp.hasKey( "maxUse" ) ? comp.getInteger( "maxUse" ) : Integer.MAX_VALUE;
+    int used = comp.hasKey( "used" ) ? comp.getInteger( "used" ) : 0;
     // location
-    double x = comp.getDouble("x");
-    double y = comp.getDouble("y");
-    double z = comp.getDouble("z");
-    float yaw = comp.getFloat("yaw");
-    float pitch = comp.getFloat("pitch");
+    double x = comp.getDouble( "x" );
+    double y = comp.getDouble( "y" );
+    double z = comp.getDouble( "z" );
+    float yaw = comp.getFloat( "yaw" );
+    float pitch = comp.getFloat( "pitch" );
 
-    Location loc = new Location(player.getWorld(), x, y, z, yaw, pitch);
+    Location loc = new Location( player.getWorld(), x, y, z, yaw, pitch );
 
     if ( used >= maxUse ) {
-      player.sendMessage(Main.prefixError + "Nie można już użyć przedmiotu!");
+      player.sendMessage( Main.prefixError + "Nie można już użyć przedmiotu!" );
       return false;
     }
 
-    if ( player.getLocation().distance(loc) > maxLen ) {
-      player.sendMessage(Main.prefixError + "Nie można użyć przedmiotu, za daleko!");
+    if ( player.getLocation().distance( loc ) > maxLen ) {
+      player.sendMessage( Main.prefixError + "Nie można użyć przedmiotu, za daleko!" );
       return false;
     }
 
-    if ( hasTpCooldown(player) ) {
-      player.sendMessage(Main.prefixError + "Musisz odpocząć " + ChatColor.RED + cooldownTimeOTP.get(
-          player) + ChatColor.GRAY + " sekund.");
+    if ( hasTpCooldown( player ) ) {
+      player.sendMessage( Main.prefixError + "Musisz odpocząć " + ChatColor.RED
+          + cooldownTimeOTP.get( player ) + ChatColor.GRAY + " sekund." );
 
       return false;
-    }
-    else {
-      if ( comp.hasKey("maxUse") ) {
+    } else {
+      if ( comp.hasKey( "maxUse" ) ) {
         used++;
-        comp.setInteger("used", used);
+        comp.setInteger( "used", used );
       }
 
-      tpEffect(player, loc);
-      setCoolDownTimeOTP(player, enchCld, false);
-      player.sendMessage(Main.prefixInfo + "Teleportowano do punktu z przedmiotu!");
+      tpEffect( player, loc );
+      setCoolDownTimeOTP( player, enchCld, false );
+      player.sendMessage( Main.prefixInfo + "Teleportowano do punktu z przedmiotu!" );
 
       return true;
     }
   }
 
-  public Effect getPlayerEffect (
+  public Effect getPlayerEffect(
       Player player
   ) {
     Effect ef;
-    String type = getType(player);
+    String type = getType( player );
 
     switch ( type ) {
       case "ignis": {
-        TornadoEffect tpParticles = new TornadoEffect(plugin.effectManager);
-        tpParticles.setEntity(player);
+        TornadoEffect tpParticles = new TornadoEffect( plugin.effectManager );
+        tpParticles.setEntity( player );
         tpParticles.tornadoHeight = (float) 2.4;
         tpParticles.maxTornadoRadius = (float) 1.5;
         tpParticles.yOffset = -2;
@@ -352,9 +390,10 @@ public class Utils {
 
         return tpParticles;
       }
+
       case "caligo": {
-        VortexEffect tpParticles = new VortexEffect(plugin.effectManager);
-        tpParticles.setEntity(player);
+        VortexEffect tpParticles = new VortexEffect( plugin.effectManager );
+        tpParticles.setEntity( player );
         tpParticles.particle = Particle.SMOKE_LARGE;
         tpParticles.radius = (float) 1.5;
         tpParticles.radials = 30;
@@ -363,17 +402,19 @@ public class Utils {
 
         return tpParticles;
       }
+
       case "lux": {
-        DonutEffect tpParticles = new DonutEffect(plugin.effectManager);
-        tpParticles.setEntity(player);
+        DonutEffect tpParticles = new DonutEffect( plugin.effectManager );
+        tpParticles.setEntity( player );
         tpParticles.radiusDonut = (float) 1.8;
         tpParticles.particle = Particle.TOTEM;
 
         return tpParticles;
       }
+
       case "aeter": {
-        TornadoEffect tpParticles = new TornadoEffect(plugin.effectManager);
-        tpParticles.setEntity(player);
+        TornadoEffect tpParticles = new TornadoEffect( plugin.effectManager );
+        tpParticles.setEntity( player );
         tpParticles.tornadoHeight = (float) 2.4;
         tpParticles.maxTornadoRadius = (float) 1.5;
         tpParticles.yOffset = -1;
@@ -381,9 +422,10 @@ public class Utils {
 
         return tpParticles;
       }
+
       case "aqua": {
-        FountainEffect tpParticles = new FountainEffect(plugin.effectManager);
-        tpParticles.setEntity(player);
+        FountainEffect tpParticles = new FountainEffect( plugin.effectManager );
+        tpParticles.setEntity( player );
         tpParticles.radius = 2;
         tpParticles.height = 2;
         tpParticles.radiusSpout = 1;
@@ -391,16 +433,18 @@ public class Utils {
 
         return tpParticles;
       }
+
       case "geo": {
-        EarthEffect tpParticles = new EarthEffect(plugin.effectManager);
-        tpParticles.setEntity(player);
+        EarthEffect tpParticles = new EarthEffect( plugin.effectManager );
+        tpParticles.setEntity( player );
         tpParticles.radius = (float) 1.5;
 
         return tpParticles;
       }
+
       case "electro": {
-        StarEffect tpParticles = new StarEffect(plugin.effectManager);
-        tpParticles.setEntity(player);
+        StarEffect tpParticles = new StarEffect( plugin.effectManager );
+        tpParticles.setEntity( player );
         tpParticles.innerRadius = (float) 0.5;
         tpParticles.spikeHeight = (float) 2;
         tpParticles.particle = Particle.SPELL_WITCH;
@@ -408,9 +452,10 @@ public class Utils {
 
         return tpParticles;
       }
+
       default: {
-        TornadoEffect tpParticles = new TornadoEffect(plugin.effectManager);
-        tpParticles.setEntity(player);
+        TornadoEffect tpParticles = new TornadoEffect( plugin.effectManager );
+        tpParticles.setEntity( player );
         tpParticles.tornadoHeight = (float) 2.4;
         tpParticles.maxTornadoRadius = (float) 1.5;
         tpParticles.yOffset = -2;
@@ -424,28 +469,31 @@ public class Utils {
     return ef;
   }
 
-  public void setCoolDownTimeOTP (
-      Player player, int coolDown, Boolean setter
+  public void setCoolDownTimeOTP(
+      Player player,
+      int coolDown,
+      Boolean setter
   ) {
     HashMap<Player, Integer> time = ( setter ? cooldownTimeSetOTP : cooldownTimeOTP );
     HashMap<Player, BukkitRunnable> task = ( setter ? cooldownTaskSetOTP : cooldownTaskOTP );
 
-    time.put(player, coolDown);
-    task.put(player, new BukkitRunnable() {
-      public void run () {
-        if ( !time.containsKey(player) && !task.containsKey(player) ) {
+    time.put( player, coolDown );
+    task.put( player, new BukkitRunnable() {
+
+      public void run() {
+        if ( !time.containsKey( player ) && !task.containsKey( player ) ) {
           cancel();
         }
 
-        time.put(player, time.get(player) - 1);
-        if ( time.get(player) == 0 ) {
-          time.remove(player);
-          task.remove(player);
+        time.put( player, time.get( player ) - 1 );
+        if ( time.get( player ) == 0 ) {
+          time.remove( player );
+          task.remove( player );
           cancel();
         }
       }
-    });
+    } );
 
-    task.get(player).runTaskTimer(plugin, 20, 20);
+    task.get( player ).runTaskTimer( plugin, 20, 20 );
   }
 }

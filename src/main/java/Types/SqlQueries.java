@@ -9,18 +9,19 @@ public enum SqlQueries {
   GET_BACKPACK("SELECT * FROM backpack WHERE uuid=?;"),
   UPDATE_BACKPACK_ITEMS("UPDATE backpack SET itemData=? WHERE uuid=?;"),
   CREATE_BACKPACK("INSERT INTO backpack(uuid, `inventoryName`) VALUES(UUID(), ?);"),
-  SELECT_BACKPACK_BYNAME_LAST("SELECT * FROM backpack WHERE inventoryName=? ORDER BY createdAt DESC LIMIT 1;");
+  SELECT_BACKPACK_BYNAME_LAST(
+      "SELECT * FROM backpack WHERE inventoryName=? ORDER BY createdAt DESC LIMIT 1;");
 
   private final String text;
 
-  SqlQueries (
+  SqlQueries(
       final String text
   ) {
     this.text = text;
   }
 
   @Override
-  public String toString () {
+  public String toString() {
     return text;
   }
 }

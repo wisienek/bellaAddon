@@ -1,0 +1,156 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'idea'
+}
+
+group = 'net.woolf.belladdon'
+version = '1.2.9'
+archivesBaseName = 'belladdon'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        name = 'spigotmc-repo'
+        url = 'https://hub.spigotmc.org/nexus/content/groups/public/'
+    }
+    maven {
+        name = 'sonatype'
+        url = 'https://oss.sonatype.org/content/groups/public/'
+    }
+    maven {
+        name = 'codemc-repo'
+        url = 'https://repo.codemc.org/repository/maven-public/'
+    }
+    maven {
+        name = 'dv8tion'
+        url = 'https://m2.dv8tion.net/releases'
+    }
+    maven {
+        name = 'luckperms'
+        url = 'https://repo.lucko.me/'
+    }
+    maven {
+        name = 'magma'
+        url = 'https://magmafoundation.org/maven/'
+    }
+    maven {
+        name = 'jitpack'
+        url = 'https://jitpack.io'
+    }
+}
+
+
+configurations {
+    // Make compileOnly dependencies available to testCompileOnly for IDE support
+    testCompileOnly.extendsFrom compileOnly
+}
+
+dependencies {
+    // Spigot API for 1.20.1 (includes Bukkit and BungeeCord APIs)
+    // Magma extends Spigot, so this works for both Spigot and Magma servers
+    compileOnly 'org.spigotmc:spigot-api:1.20.1-R0.1-SNAPSHOT'
+    
+    // Magma API for 1.20.1 (optional, for Magma-specific features)
+    // Note: Magma extends Spigot, so Spigot API is sufficient for most cases
+    // Uncomment if you need Magma-specific APIs:
+    // compileOnly 'org.magmafoundation:magma-api:1.20.1-R0.1-SNAPSHOT'
+    
+    // NBT API for 1.20.1
+    compileOnly 'de.tr7zw:item-nbt-api-plugin:2.12.2'
+    
+    // LuckPerms API
+    compileOnly 'net.luckperms:api:5.4'
+    
+    // EffectLib - available on Maven Central
+    // Repository: https://github.com/elBukkit/EffectLib
+    // Using version 10.2 (latest), which is compatible with 1.20.1
+    compileOnly 'com.elmakers.mine.bukkit:EffectLib:10.2'
+    
+    // JDA Discord API
+    implementation 'net.dv8tion:JDA:5.1.0'
+    
+    // JSON
+    implementation 'org.json:json:20231013'
+    
+    // JSON Simple (for org.json.simple package)
+    implementation 'com.googlecode.json-simple:json-simple:1.1.1'
+    
+    // Jackson Core
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.15.2'
+    
+    // JSR305
+    implementation 'com.google.code.findbugs:jsr305:3.0.2'
+    
+    // Note: ArmorEquipEvent is implemented in the codebase at
+    // src/main/java/net/woolf/bella/events/ArmorEquipEvent.java
+    // The local JAR dependency has been removed as it's redundant
+}
+
+processResources {
+    def props = [version: version]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching('plugin.yml') {
+        expand props
+    }
+}
+
+shadowJar {
+    archiveClassifier.set('')
+    minimize()
+    
+    // Exclude signature files
+    exclude 'META-INF/*.SF'
+    exclude 'META-INF/*.DSA'
+    exclude 'META-INF/*.RSA'
+    
+    // Note: Not relocating JDA as it uses reflection and may break
+    // If conflicts occur, consider using a different approach
+    
+    // Include plugin.yml
+    from('src/main/resources') {
+        include 'plugin.yml'
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    // Enable annotation processing and better error reporting
+    options.compilerArgs += ['-parameters']
+    options.incremental = true
+}
+
+// Configure IDE to use sources and javadoc
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
+}
+
+// Task to download all dependencies with sources and javadoc
+tasks.register('downloadDependencies') {
+    description = 'Download all dependencies with sources and javadoc for IDE support'
+    doLast {
+        // Resolve all configurations to ensure dependencies are downloaded
+        configurations.compileClasspath.files
+        configurations.runtimeClasspath.files
+        configurations.testCompileClasspath.files
+        configurations.testRuntimeClasspath.files
+        
+        println "Dependencies downloaded successfully!"
+        println "For VSCode: Run 'Java: Clean Java Language Server Workspace' command to refresh"
+    }
+}
+
+build {
+    dependsOn shadowJar
+}
+
