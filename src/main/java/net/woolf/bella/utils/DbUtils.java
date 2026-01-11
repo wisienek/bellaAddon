@@ -18,6 +18,8 @@ import org.json.simple.parser.ParseException;
 import Types.SqlQueries;
 import classes.Backpack;
 import net.woolf.bella.Main;
+import net.woolf.bella.repositories.AccountLinkRepository;
+import net.woolf.bella.repositories.BackpackRepository;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -33,11 +35,16 @@ public class DbUtils {
 
   public Connection connection;
 
-  private final Logger logger = Main.getInstance().logger;
-  private final Boolean isTest = Main.getInstance().isTest();
+  public final Logger logger = Main.getInstance().logger;
+  public final Boolean isTest = Main.getInstance().isTest();
+
+  public final BackpackRepository backpackRepository;
+  public final AccountLinkRepository accountLinkRepository;
 
   private DbUtils() {
     this.connection = null;
+    this.backpackRepository = new net.woolf.bella.repositories.BackpackRepository( this );
+    this.accountLinkRepository = new net.woolf.bella.repositories.AccountLinkRepository( this );
   }
 
   public static DbUtils getInstance() throws SQLException, IOException {
@@ -51,6 +58,13 @@ public class DbUtils {
   }
 
   public void initConnection() throws SQLException, IOException {
+    try {
+      Class.forName( "com.mysql.cj.jdbc.Driver" );
+    } catch ( ClassNotFoundException e ) {
+      this.logger.severe( "MySQL driver not found! Make sure mysql-connector-j is shaded." );
+      throw new SQLException( "MySQL driver not found", e );
+    }
+
     Map<String, String> config = FileReader.getDBConfig();
     String baseURL = config.get( "BaseURL" );
     String host = config.get( "Host" );
@@ -59,28 +73,28 @@ public class DbUtils {
     String user = config.get( "User" );
     String password = config.get( "Password" );
 
-    if ( baseURL == null || baseURL.length() == 0 ) {
+    if ( baseURL == null || baseURL.isEmpty() ) {
       this.logger.info( "No BaseURL for connection!" );
       return;
     }
-    if ( host == null || host.length() == 0 ) {
+    if ( host == null || host.isEmpty() ) {
       this.logger.info( "No Host for connection!" );
       return;
     }
-    if ( port == null || port.length() == 0 ) {
+    if ( port == null || port.isEmpty() ) {
       this.logger.info( "No Port for connection!" );
       return;
     }
-    if ( database == null || database.length() == 0 ) {
+    if ( database == null || database.isEmpty() ) {
       this.logger.info( "No Database for connection!" );
       return;
     }
-    if ( user == null || user.length() == 0 ) {
+    if ( user == null || user.isEmpty() ) {
       this.logger.info( "No User for connection!" );
       return;
     }
-    if ( password == null || password.length() == 0 ) {
-      this.logger.info( "No User for connection!" );
+    if ( password == null || password.isEmpty() ) {
+      this.logger.info( "No Password for connection!" );
       return;
     }
 
@@ -109,8 +123,8 @@ public class DbUtils {
         PreparedStatement st = this.connection
             .prepareStatement( SqlQueries.DELETE_ACCOUNT_CONNECTION.toString() )
     ) {
-      st.setString( 0, uuid );
-      st.setString( 1, check.get( uuid )[1] );
+      st.setString( 1, uuid );
+      st.setString( 2, check.get( uuid )[1] );
 
       int rs = st.executeUpdate();
 
@@ -177,12 +191,6 @@ public class DbUtils {
       e.printStackTrace();
 
       return "ERROR z query do bazy danych!";
-    } finally {
-      try {
-        assert st != null;
-        st.close();
-      } catch ( Exception ignored ) {
-      }
     }
   }
 
@@ -286,22 +294,35 @@ public class DbUtils {
   public String createBackpack(
       @NotNull String name
   ) {
-
     try (
-        PreparedStatement st = this.connection
-            .prepareStatement( SqlQueries.CREATE_BACKPACK.toString(), Statement.NO_GENERATED_KEYS )
+        PreparedStatement st = this.connection.prepareStatement( SqlQueries.CREATE_BACKPACK
+            .toString(), Statement.RETURN_GENERATED_KEYS )
     ) {
       st.setString( 1, name );
 
-      st.executeUpdate();
+      int affectedRows = st.executeUpdate();
 
-      String uuid = getBackpackUUIDByName( name );
-
-      if ( this.isTest )
+      if ( affectedRows == 0 ) {
         this.logger.info( String
-            .format( "%s Retrieved inserted backpack by name: %s, uuid: %s", BackPackPrefix, name, uuid ) );
+            .format( "%s Error: No rows affected when creating backpack!", BackPackPrefix ) );
+        return null;
+      }
 
-      return uuid;
+      try ( ResultSet generatedKeys = st.getGeneratedKeys() ) {
+        if ( generatedKeys.next() ) {
+          String uuid = generatedKeys.getString( 1 );
+          if ( this.isTest )
+            this.logger.info( String
+                .format( "%s Created backpack by name: %s, uuid: %s", BackPackPrefix, name, uuid ) );
+          return uuid;
+        } else {
+          String uuid = getBackpackUUIDByName( name );
+          if ( this.isTest )
+            this.logger.info( String
+                .format( "%s Retrieved inserted backpack by name: %s, uuid: %s", BackPackPrefix, name, uuid ) );
+          return uuid;
+        }
+      }
     } catch ( SQLException e ) {
       this.logger.info( String.format( "%s Error przy zapisywaniu plecaka!", BackPackPrefix ) );
       e.printStackTrace();

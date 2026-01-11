@@ -1,5 +1,7 @@
 package net.woolf.bella.events;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -56,18 +58,22 @@ public class BellaEvents implements Listener {
 
     event.setMessage( actionsFormatted );
 
-    String userPrefix = PlayerUtils.getPlayerPrefix( event.getPlayer() );
+    String userPrefix = PlayerUtils.getPlayerPrefix( event.getPlayer() )
+        .replaceAll( "(§.)|(&.)", "" );
+    String playerName = StringUtils.escapeDiscordMarkdown( event.getPlayer().getName() );
+    String messageContent = StringUtils
+        .escapeDiscordMarkdown( actionsFormatted.replaceAll( "§.", "" ) );
 
     ChatUtils.cacheMessageForBotLog( BotChannels.ChatLogId.toString(), ChatUtils.LocalPrefix + " "
-        + userPrefix.replaceAll( "(§.)|(&.)|(`)", "" ) + " " + event.getPlayer().getName() + ": "
-        + "`" + actionsFormatted.replaceAll( "(§.)|(`)", "" ) + "`" );
+        + userPrefix + " " + playerName + ": `" + messageContent + "`" );
   }
 
   @EventHandler
   public void onPlayerJoin(
       PlayerJoinEvent event
   ) {
-    List<Player> online = plugin.utils.getPlayers();
+    Collection<? extends Player> onlineCollection = plugin.server.getOnlinePlayers();
+    List<Player> online = new ArrayList<>( onlineCollection );
     plugin.bot.updatePresence( "Graczy online: " + ( online.size() + 1 ) );
   }
 
@@ -75,7 +81,8 @@ public class BellaEvents implements Listener {
   public void onPlayerQuit(
       PlayerQuitEvent event
   ) {
-    List<Player> online = plugin.utils.getPlayers();
+    Collection<? extends Player> onlineCollection = plugin.server.getOnlinePlayers();
+    List<Player> online = new ArrayList<>( onlineCollection );
     int size = online.size() - 1;
 
     plugin.bot.updatePresence( size > 0 ? "Graczy online: " + size : "Czekam na graczy..." );
@@ -125,7 +132,7 @@ public class BellaEvents implements Listener {
     if ( clicked instanceof Player ) {
       Player target = (Player) clicked;
 
-      boolean canBeRidden = plugin.playerConfig
+      boolean canBeRidden = plugin.configManager.playerConfig
           .getBoolean( target.getUniqueId().toString() + ".canBeRidden" );
 
       if ( canBeRidden ) {
@@ -157,69 +164,126 @@ public class BellaEvents implements Listener {
 
     String userPrefix = PlayerUtils.getPlayerPrefix( event.getPlayer() );
 
+    String playerName = StringUtils.escapeDiscordMarkdown( player.getName() );
+    String cleanPrefix = userPrefix.replaceAll( "(§.)|(&.)", "" );
+
     switch ( cmd ) {
-      case "ooc": {
+      case "ooc":
+      case "o": {
+        String content = StringUtils.escapeDiscordMarkdown( String.join( " ", args ) );
         ChatUtils.cacheMessageForBotLog( BotChannels.ChatLogId.toString(), ChatUtils.OOCPrefix + " "
-            + player.getName() + ": `(" + String.join( " ", args ).replaceAll( "`", "" ) + ")`" );
+            + playerName + ": `(" + content + ")`" );
         break;
       }
 
-      case "me":
-      case "k": {
+      case "me": {
+        String content = StringUtils.escapeDiscordMarkdown( String.join( " ", args ) );
         ChatUtils.cacheMessageForBotLog( BotChannels.ChatLogId.toString(), ChatUtils.LocalPrefix
-            + " [" + userPrefix + "] " + player.getName() + ": `*"
-            + String.join( " ", args ).replaceAll( "`", "" ) + "*`" );
+            + " " + cleanPrefix + " " + playerName + ": `*" + content + "*`" );
+        break;
+      }
+
+      case "k": {
+        String content = StringUtils.escapeDiscordMarkdown( String.join( " ", args ) );
+        ChatUtils.cacheMessageForBotLog( BotChannels.ChatLogId.toString(), ChatUtils.ShoutPrefix
+            + " " + cleanPrefix + " " + playerName + ": `" + content + "`" );
         break;
       }
 
       case "do": {
+        String content = StringUtils.escapeDiscordMarkdown( String.join( " ", args ) );
         ChatUtils.cacheMessageForBotLog( BotChannels.ChatLogId.toString(), ChatUtils.LocalPrefix
-            + " [" + userPrefix + "] " + player.getName() + ": `**"
-            + String.join( " ", args ).replaceAll( "`", "" ) + "**`" );
+            + " " + cleanPrefix + " " + playerName + ": `**" + content + "**`" );
         break;
       }
 
       case "s": {
+        String content = StringUtils.escapeDiscordMarkdown( String.join( " ", args ) );
         ChatUtils.cacheMessageForBotLog( BotChannels.ChatLogId.toString(), ChatUtils.WhisperPrefix
-            + " [" + userPrefix + "] " + player.getName() + ": `"
-            + String.join( " ", args ).replaceAll( "`", "" ) + "`" );
+            + " " + cleanPrefix + " " + playerName + ": `" + content + "`" );
+        break;
+      }
+
+      case "msg":
+      case "tell":
+      case "whisper":
+      case "w":
+      case "m": {
+        if ( args.isEmpty() )
+          break;
+        String target = StringUtils.escapeDiscordMarkdown( args.get( 0 ) );
+        args.remove( 0 );
+        String content = StringUtils.escapeDiscordMarkdown( String.join( " ", args ) );
+        ChatUtils
+            .cacheMessageForBotLog( BotChannels.ChatLogId.toString(), ChatUtils.PrivateMessagePrefix
+                + " " + playerName + " -> " + target + ": `" + content + "`" );
+        break;
+      }
+
+      case "r":
+      case "reply": {
+        String content = StringUtils.escapeDiscordMarkdown( String.join( " ", args ) );
+        ChatUtils
+            .cacheMessageForBotLog( BotChannels.ChatLogId.toString(), ChatUtils.PrivateMessagePrefix
+                + " " + playerName + " -> [reply]: `" + content + "`" );
+        break;
+      }
+
+      case "dice": {
+        if ( args.isEmpty() )
+          break;
+        try {
+          int sides = Integer.parseInt( args.get( 0 ) );
+          if ( sides == 2 ) {
+            int result = (int) ( Math.random() * 2 );
+            String outcome = result == 0 ? "orzeł" : "reszka";
+            ChatUtils.cacheMessageForBotLog( BotChannels.ChatLogId.toString(), ChatUtils.DicePrefix
+                + " " + cleanPrefix + " " + playerName + ": `Rzut monetą - " + outcome + "`" );
+          } else if ( sides >= 4 && sides <= 100 ) {
+            int result = (int) ( Math.random() * sides ) + 1;
+            ChatUtils.cacheMessageForBotLog( BotChannels.ChatLogId.toString(), ChatUtils.DicePrefix
+                + " " + cleanPrefix + " " + playerName + ": `Rzut k" + sides + " - wypadło "
+                + result + "`" );
+          }
+        } catch ( NumberFormatException ignored ) {
+        }
         break;
       }
 
       case "globalnar": {
-        ChatUtils
-            .cacheMessageForBotLog( BotChannels.ChatLogId.toString(), ChatUtils.GlobalPrefix + " ["
-                + player.getName() + "] `" + String.join( " ", args ).replaceAll( "`", "" ) + "`" );
+        String content = StringUtils.escapeDiscordMarkdown( String.join( " ", args ) );
+        ChatUtils.cacheMessageForBotLog( BotChannels.ChatLogId.toString(), ChatUtils.GlobalPrefix
+            + " " + playerName + ": `" + content + "`" );
         break;
       }
 
       case "midnar":
       case "localnar": {
         Location loc = player.getLocation();
+        String content = StringUtils.escapeDiscordMarkdown( String.join( " ", args ) );
         ChatUtils.cacheMessageForBotLog( BotChannels.ChatLogId.toString(), ChatUtils.LocalPrefix
-            + " {" + loc.getBlockX() + " " + loc.getBlockY() + " " + loc.getBlockZ() + "} " + " ["
-            + player.getName() + "] `" + String.join( " ", args ).replaceAll( "`", "" ) + "`" );
+            + " {" + loc.getBlockX() + " " + loc.getBlockY() + " " + loc.getBlockZ() + "} "
+            + playerName + ": `" + content + "`" );
         break;
       }
 
       case "privnar": {
-        String narrated = args.get( 0 );
+        if ( args.isEmpty() )
+          break;
+        String narrated = StringUtils.escapeDiscordMarkdown( args.get( 0 ) );
         args.remove( 0 );
-
-        ChatUtils.cacheMessageForBotLog( BotChannels.ChatLogId.toString(), "**[PRIVNAR]** " + "["
-            + player.getName() + " -> " + narrated + "] `"
-            + String.join( " ", args ).replaceAll( "`", "" ) + "`" );
+        String content = StringUtils.escapeDiscordMarkdown( String.join( " ", args ) );
+        ChatUtils.cacheMessageForBotLog( BotChannels.ChatLogId.toString(), "**[PRIVNAR]** "
+            + playerName + " -> " + narrated + ": `" + content + "`" );
         break;
       }
 
       case "helpop": {
         String hourFormat = StringUtils.getHourMinutes();
-
-        this.plugin.bot
-            .sendLog( String.format( "%s `%s`: `%s`", hourFormat, player.getName(), StringUtils
-                .synthesizeForDc( String.join( " ", args ) ) ), BotChannels.HelpopLogId
-                    .toString() );
-
+        String content = StringUtils.escapeDiscordMarkdown( String.join( " ", args ) );
+        this.plugin.bot.sendLog( String
+            .format( "%s `%s`: `%s`", hourFormat, playerName, content ), BotChannels.HelpopLogId
+                .toString() );
         break;
       }
     }

@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import net.md_5.bungee.api.ChatColor;
 import net.woolf.bella.Main;
 import net.woolf.bella.utils.ChatUtils;
+import net.woolf.bella.utils.LocationUtils;
 
 public class OocCommand implements CommandExecutor {
 
@@ -36,7 +37,7 @@ public class OocCommand implements CommandExecutor {
 
       Player player = (Player) sender;
 
-      List<Player> nearbyPlayers = plugin.utils.getNearbyPlayers( player, 15 );
+      List<Player> nearbyPlayers = LocationUtils.getNearbyPlayers( player, 15 );
       String msg = ChatColor.WHITE + "[" + ChatColor.RED + "OOC" + ChatColor.WHITE + "] "
           + ChatColor.GRAY + player.getName() + ": (" + String.join( " ", args ) + ")";
 

@@ -29,7 +29,6 @@ public class PlayerUtils {
     this.plugin = main;
   }
 
-  @SuppressWarnings("deprecation")
   public String resolvePlayerToUUID(
       @Nonnull final String player
   ) {
@@ -39,6 +38,7 @@ public class PlayerUtils {
     if ( target != null ) {
       uuid = target.getUniqueId().toString();
     } else {
+      @SuppressWarnings("deprecation")
       OfflinePlayer target1 = plugin.server.getOfflinePlayer( player );
       if ( target1 != null )
         uuid = target1.getUniqueId().toString();
@@ -66,7 +66,8 @@ public class PlayerUtils {
   public static OfflinePlayer getOfflinePlayer(
       @NotNull String uuid
   ) {
-    return Main.getInstance().server.getOfflinePlayer( uuid );
+    OfflinePlayer player = Main.getInstance().server.getOfflinePlayer( uuid );
+    return player;
   }
 
   public void toggleJazda(
@@ -75,10 +76,10 @@ public class PlayerUtils {
   ) {
     String uuid = player.getUniqueId().toString();
 
-    boolean check = plugin.playerConfig.getBoolean( uuid + ".canBeRidden" );
+    boolean check = plugin.configManager.playerConfig.getBoolean( uuid + ".canBeRidden" );
     if ( check != change ) {
-      plugin.playerConfig.set( uuid + ".canBeRidden", change );
-      plugin.savePlayerConfig();
+      plugin.configManager.playerConfig.set( uuid + ".canBeRidden", change );
+      plugin.configManager.savePlayerConfig();
     }
 
   }

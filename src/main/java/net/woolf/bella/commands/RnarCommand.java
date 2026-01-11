@@ -4,6 +4,7 @@ import Types.BotChannels;
 import net.md_5.bungee.api.ChatColor;
 import net.woolf.bella.Main;
 import net.woolf.bella.utils.ChatUtils;
+import net.woolf.bella.utils.LocationUtils;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -62,7 +63,7 @@ public class RnarCommand implements CommandExecutor {
         List<String> _msg = new LinkedList<>( Arrays.asList( args ) );
         _msg.remove( 0 );
 
-        List<Player> nearbyPlayers = plugin.utils.getNearbyPlayers( player, radius );
+        List<Player> nearbyPlayers = LocationUtils.getNearbyPlayers( player, radius );
 
         String msg = String.join( " ", _msg ).replaceAll( "`", "" );
         String formatedMsg = ChatColor.DARK_RED + "[R] " + ChatColor.YELLOW + "[" + msg + "]";

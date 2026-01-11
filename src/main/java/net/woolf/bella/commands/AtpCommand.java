@@ -6,6 +6,7 @@ import java.io.IOException;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 
 import Types.Permissions;
@@ -23,7 +24,12 @@ public class AtpCommand implements CommandExecutor {
       Main plugin
   ) {
     this.plugin = plugin;
-    plugin.getCommand( "atp" ).setExecutor( this );
+    PluginCommand command = plugin.getCommand( "atp" );
+    if ( command != null ) {
+      command.setExecutor( this );
+    } else {
+      plugin.getLogger().severe( "Could not register /atp command! Is it defined in plugin.yml?" );
+    }
   }
 
   public String getUsage() {
@@ -49,15 +55,18 @@ public class AtpCommand implements CommandExecutor {
       !( sender instanceof Player ) || sender.hasPermission( Permissions.ATP_ADMIN.toString() )
     ) {
 
-      if ( args.length < 2 ) {
+      if ( args.length < 1 ) {
         sender.sendMessage( getUsage() );
         return true;
       }
 
-      String level = args[1];
-
       switch ( args[0] ) {
-        case "edit":
+        case "edit": {
+          if ( args.length < 4 ) {
+            sender.sendMessage( getUsage() );
+            return true;
+          }
+          String level = args[1];
           String opt = args[2];
           String val = args[3];
 
@@ -66,31 +75,32 @@ public class AtpCommand implements CommandExecutor {
 
           switch ( opt ) {
             case "cld": {
-              plugin.config.set( "tp-level-" + level + "-cld", val );
+              plugin.configManager.config.set( "tp-level-" + level + "-cld", val );
               break;
             }
 
             case "radius": {
-              plugin.config.set( "tp-level-" + level + "-radius", val );
+              plugin.configManager.config.set( "tp-level-" + level + "-radius", val );
               break;
             }
 
             case "maxp": {
-              plugin.config.set( "tp-level-" + level + "-maxp", val );
+              plugin.configManager.config.set( "tp-level-" + level + "-maxp", val );
               break;
             }
 
             case "maxpts": {
-              plugin.config.set( "tp-level-" + level + "-maxpoints", val );
+              plugin.configManager.config.set( "tp-level-" + level + "-maxpoints", val );
             }
 
             case "maxuse": {
-              plugin.config.set( "tp-level-" + level + "-setmaxuse", val );
+              plugin.configManager.config.set( "tp-level-" + level + "-setmaxuse", val );
             }
           }
 
           try {
-            plugin.config.save( plugin.getDataFolder() + File.separator + "config.yml" );
+            plugin.configManager.config
+                .save( plugin.getDataFolder() + File.separator + "config.yml" );
           } catch ( IOException e ) {
             e.printStackTrace();
           }
@@ -100,8 +110,14 @@ public class AtpCommand implements CommandExecutor {
           sender.sendMessage( Main.prefixInfo + "Zmieniono " + opt + " dla lvl " + level + " na "
               + val );
           return true;
+        }
 
         case "set": {
+          if ( args.length < 3 ) {
+            sender.sendMessage( getUsage() );
+            return true;
+          }
+          String level = args[1];
           String pname = args[2];
           int ilvl = Integer.parseInt( level );
 
@@ -112,18 +128,25 @@ public class AtpCommand implements CommandExecutor {
           }
           Player target = sender.getServer().getPlayer( pname );
 
-          plugin.utils.setTPL( target, level );
+          plugin.teleportUtils.setTPL( target, level );
 
           sender.sendMessage( Main.prefixInfo + "Zmieniono level dla " + pname + " na " + level );
 
           return true;
         }
 
-        case "info":
-          String cld = (String) plugin.config.get( "tp-level-" + level + "-cld" );
-          String radius = (String) plugin.config.get( "tp-level-" + level + "-radius" );
-          String maxp = (String) plugin.config.get( "tp-level-" + level + "-maxp" );
-          String maxpts = (String) plugin.config.get( "tp-level-" + level + "-maxpoints" );
+        case "info": {
+          if ( args.length < 2 ) {
+            sender.sendMessage( getUsage() );
+            return true;
+          }
+          String level = args[1];
+          String cld = (String) plugin.configManager.config.get( "tp-level-" + level + "-cld" );
+          String radius = (String) plugin.configManager.config
+              .get( "tp-level-" + level + "-radius" );
+          String maxp = (String) plugin.configManager.config.get( "tp-level-" + level + "-maxp" );
+          String maxpts = (String) plugin.configManager.config
+              .get( "tp-level-" + level + "-maxpoints" );
 
           // plugin.logger.info(" cld " + cld + " r " + radius + " mxp " + maxp + ",
           // maxpts: "+ maxpts);
@@ -136,40 +159,57 @@ public class AtpCommand implements CommandExecutor {
 
           sender.sendMessage( os );
           return true;
+        }
 
         case "player": {
+          if ( args.length < 2 ) {
+            sender.sendMessage( getUsage() );
+            return true;
+          }
           String pname = args[1];
           Player target = sender.getServer().getPlayer( pname );
           if ( target != null ) {
-            String lvl = plugin.utils.getLevel( target );
+            String lvl = plugin.teleportUtils.getLevel( target );
 
             sender.sendMessage( Main.prefixInfo + "Level gracza " + pname + " to: " + lvl );
+            return true;
+          } else {
+            sender.sendMessage( Main.prefixError + "Gracz " + pname + " nie jest online!" );
+            return true;
           }
-          break;
         }
 
         case "seteffect": {
-          if ( args.length < 3 )
+          if ( args.length < 3 ) {
             sender.sendMessage( getUsage() );
+            return true;
+          }
 
           String pname = args[1];
           String effect = args[2];
           Player target = sender.getServer().getPlayer( pname );
 
-          if ( effect == null || effect.isEmpty() || !Utils.types.contains( effect ) ) {
+          if ( target == null ) {
+            sender.sendMessage( Main.prefixError + "Gracz " + pname + " nie jest online!" );
+            return true;
+          }
+
+          net.woolf.bella.types.EffectType effectType = net.woolf.bella.types.EffectType
+              .fromString( effect );
+          if (
+            effectType == net.woolf.bella.types.EffectType.IGNIS
+                && !effect.equalsIgnoreCase( "ignis" )
+          ) {
             sender.sendMessage( Main.prefixError + "Efekt nie znajduje się na liście: "
-                + ChatColor.YELLOW + String.join( ", ", Utils.types ) );
+                + ChatColor.YELLOW + "ignis, aqua, geo, electro, aeter, caligo, lux" );
             return true;
           }
 
-          if ( target != null ) {
-            plugin.utils.setType( target, effect );
+          plugin.teleportUtils.setType( target, effect );
 
-            sender.sendMessage( Main.prefixInfo + "Ustawiono efekt gracza " + ChatColor.GREEN
-                + pname + ChatColor.WHITE + " na: " + ChatColor.AQUA + effect );
-            return true;
-          }
-          break;
+          sender.sendMessage( Main.prefixInfo + "Ustawiono efekt gracza " + ChatColor.GREEN + pname
+              + ChatColor.WHITE + " na: " + ChatColor.AQUA + effect );
+          return true;
         }
 
         default:
@@ -181,8 +221,6 @@ public class AtpCommand implements CommandExecutor {
           + "Potrzebujesz permissi atp.admin aby używać tej komendy" );
       return true;
     }
-
-    return false;
   }
 
 }
