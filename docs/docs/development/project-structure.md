@@ -10,5 +10,6 @@
   - `types` — enums/constants
 - `src/main/resources/plugin.yml` — Bukkit plugin descriptor and command map
 - `build.gradle` — Gradle build and shading
-- `docs/` — MkDocs sources
+- `docs/` — Docusaurus site (configuration, build, deployment)
+- `docs/docs/` — documentation pages
 - `.github/workflows/` — CI/CD pipelines

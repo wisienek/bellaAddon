@@ -30,6 +30,13 @@ Docs
 ----
 Full documentation (setup, commands, API, config, features, JavaDoc): https://wisienek.github.io/bellaAddon/
 
+To build docs locally (Docusaurus):
+```bash
+cd docs
+npm install
+npm run start
+```
+
 Contributing
 ------------
 - Use Java 17, run `./gradlew build shadowJar`.  

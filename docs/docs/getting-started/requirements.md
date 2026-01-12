@@ -9,4 +9,4 @@
 
 Optional:
 - Git + Gradle (wrapper included) for building from source
-- MkDocs + Material theme for docs development
+- Node 18+ with npm and Docusaurus (for docs development)
