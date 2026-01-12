@@ -1,5 +1,5 @@
 name: BellaAddon
-version: 1.3.0
+version: ${version}
 author: Woolf
 main: net.woolf.bella.Main
 description: Plugin pomocniczy Dla BelorisRP

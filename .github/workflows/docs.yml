@@ -1,50 +1,45 @@
 name: Docs
 
 on:
-  push:
-    branches: [master]
-    paths:
-      - 'docs/**'
-      - 'mkdocs.yml'
   workflow_dispatch:
+  push:
+    branches:
+      - master
+      - main
+    paths:
+      - "docs/**"
+
+permissions:
+  contents: write
 
 jobs:
-  docs:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          fetch-depth: 0
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: docs/package.json
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
+      - name: Install dependencies
+        working-directory: docs
+        run: npm install
 
-      - name: Install MkDocs
-        run: pip install mkdocs mkdocs-material
-
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-          cache: gradle
-
-      - name: Make Gradle executable
-        run: chmod +x ./gradlew
-
-      - name: Generate JavaDoc
-        run: ./gradlew javadoc
-
-      - name: Copy JavaDoc into docs
-        run: |
-          rm -rf docs/javadoc
-          mkdir -p docs/javadoc
-          cp -r build/docs/javadoc/* docs/javadoc/
+      - name: Build
+        working-directory: docs
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+        run: npm run build
 
       - name: Deploy to GitHub Pages
-        run: mkdocs gh-deploy --force
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/build
+          publish_branch: gh-pages

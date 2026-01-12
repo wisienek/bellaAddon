@@ -1,0 +1,191 @@
+name: Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish if version is newer
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Extract version from build.gradle
+        id: version
+        run: |
+          VERSION=$(grep "^version\s*=" build.gradle | head -n1 | sed -E "s/.*'(.*)'.*/\1/")
+          if [ -z "$VERSION" ]; then
+            echo "Version not found in build.gradle" >&2
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "📦 Extracted version: $VERSION"
+
+      - name: Check if release needed
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          TAG_EXISTS="false"
+          if git ls-remote --tags origin | grep -q "refs/tags/v${VERSION}$"; then
+            TAG_EXISTS="true"
+            echo "⚠️  Tag v${VERSION} already exists on GitHub"
+          fi
+
+          LATEST_GH=$(curl -s -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/latest" | jq -r '.tag_name // ""')
+
+          export TAG_EXISTS LATEST_GH
+
+          python3 - <<'PY'
+          import os, re
+
+          def normalize(v: str):
+              v = v.lstrip("vV")
+              parts = re.findall(r"\d+", v)
+              return [int(p) for p in parts] if parts else []
+
+          version = os.environ["VERSION"]
+          latest_gh = os.environ.get("LATEST_GH", "")
+          tag_exists = os.environ.get("TAG_EXISTS", "false") == "true"
+
+          cv = normalize(version)
+          lv = normalize(latest_gh) if latest_gh else []
+
+          should_release = not tag_exists and (not lv or cv > lv)
+
+          print(f"📊 Current version: {version} (normalized: {cv})")
+          print(f"📊 Latest GitHub release: {latest_gh or 'none'} (normalized: {lv})")
+          print(f"📊 Tag exists: {tag_exists}")
+          print(f"{'✅' if should_release else '⏭️'} Should release: {should_release}")
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
+              f.write(f"latest_gh={latest_gh}\n")
+              f.write(f"should_release={str(should_release).lower()}\n")
+          PY
+
+      - name: Skip if version not newer
+        if: steps.check.outputs.should_release != 'true'
+        run: |
+          echo "⏭️ Version ${{ steps.version.outputs.version }} already released or not newer. Skipping."
+
+      - name: Build with Gradle
+        if: steps.check.outputs.should_release == 'true'
+        run: |
+          chmod +x ./gradlew
+          ./gradlew clean shadowJar --stacktrace
+          echo "✅ Build completed"
+
+      - name: Verify build artifacts
+        if: steps.check.outputs.should_release == 'true'
+        id: artifacts
+        run: |
+          echo "📁 Checking build output..."
+          ls -la build/libs/
+
+          JAR_FILE=$(find build/libs/ -name "*.jar" -type f ! -name "*-sources.jar" ! -name "*-javadoc.jar" | head -n1)
+          if [ -z "$JAR_FILE" ]; then
+            echo "❌ No JAR file found in build/libs/" >&2
+            exit 1
+          fi
+
+          FILE_SIZE=$(stat -c%s "$JAR_FILE" 2>/dev/null || stat -f%z "$JAR_FILE" 2>/dev/null)
+          if [ "$FILE_SIZE" -lt 1024 ]; then
+            echo "❌ JAR file is suspiciously small ($FILE_SIZE bytes)" >&2
+            exit 1
+          fi
+
+          echo "jar_path=$JAR_FILE" >> "$GITHUB_OUTPUT"
+          echo "✅ Found JAR: $JAR_FILE ($(numfmt --to=iec-i --suffix=B $FILE_SIZE 2>/dev/null || echo ${FILE_SIZE}B))"
+
+      - name: Generate changelog
+        if: steps.check.outputs.should_release == 'true'
+        id: changelog
+        run: |
+          LATEST="${{ steps.check.outputs.latest_gh }}"
+          if [ -n "$LATEST" ]; then
+            CHANGELOG=$(git log ${LATEST}..HEAD --pretty=format:"- %s" --no-merges 2>/dev/null || echo "")
+          fi
+          if [ -z "$CHANGELOG" ]; then
+            CHANGELOG="- Release ${{ steps.version.outputs.version }}"
+          fi
+
+          echo "changelog<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$CHANGELOG" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+          echo "📝 Changelog generated"
+
+      - name: Publish to GitHub & CurseForge
+        if: steps.check.outputs.should_release == 'true'
+        uses: Kir-Antipov/mc-publish@v3
+        with:
+          # GitHub Release
+          github-token: ${{ github.token }}
+          github-tag: v${{ steps.version.outputs.version }}
+          github-generate-changelog: true
+          github-draft: false
+          github-prerelease: false
+
+          # CurseForge Release (optional - only if secrets are set)
+          curseforge-id: ${{ secrets.CURSEFORGE_PROJECT_ID }}
+          curseforge-token: ${{ secrets.CURSEFORGE_API_KEY }}
+
+          # Common settings
+          files: ${{ steps.artifacts.outputs.jar_path }}
+          name: BellaAddon ${{ steps.version.outputs.version }}
+          version: ${{ steps.version.outputs.version }}
+          version-type: release
+          changelog: |
+            ${{ steps.changelog.outputs.changelog }}
+
+            ---
+            📖 [Full Documentation](https://wisienek.github.io/bellaAddon/)
+            🐛 [Report Issues](https://github.com/wisienek/bellaAddon/issues)
+
+          # Minecraft/Java compatibility
+          loaders: |
+            bukkit
+            spigot
+          game-versions: |
+            1.20.1
+          java: |
+            17
+
+          # Resilience settings
+          retry-attempts: 3
+          retry-delay: 5000
+          fail-mode: skip
+
+      - name: Release summary
+        if: steps.check.outputs.should_release == 'true'
+        run: |
+          echo "## 🎉 Release Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Tag:** v${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Platforms" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ GitHub Release" >> $GITHUB_STEP_SUMMARY
+          echo "- 🔶 CurseForge (if configured)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Changelog" >> $GITHUB_STEP_SUMMARY
+          echo '${{ steps.changelog.outputs.changelog }}' >> $GITHUB_STEP_SUMMARY

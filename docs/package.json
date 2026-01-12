@@ -1,0 +1,21 @@
+{
+  "name": "bellaaddon-docs",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "docusaurus start",
+    "build": "docusaurus build",
+    "serve": "docusaurus serve",
+    "deploy": "docusaurus deploy",
+    "clear": "docusaurus clear",
+    "lint": "docusaurus lint"
+  },
+  "dependencies": {
+    "@docusaurus/core": "^3.5.2",
+    "@docusaurus/preset-classic": "^3.5.2",
+    "@docusaurus/theme-classic": "^3.5.2",
+    "@easyops-cn/docusaurus-search-local": "^0.52.2",
+    "clsx": "^2.1.0",
+    "prism-react-renderer": "^2.3.1"
+  }
+}

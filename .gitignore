@@ -21,3 +21,19 @@ build/
 .env.production
 docs/javadoc/
 gradle-local.properties
+
+# Docusaurus
+**/node_modules/
+docs/.docusaurus/
+docs/build/
+docs/.cache-loader/
+docs/package-lock.json
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+Thumbs.db
