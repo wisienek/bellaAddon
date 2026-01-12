@@ -14,7 +14,7 @@
     "@docusaurus/core": "^3.5.2",
     "@docusaurus/preset-classic": "^3.5.2",
     "@docusaurus/theme-classic": "^3.5.2",
-    "@easyops-cn/docusaurus-search-local": "^0.43.3",
+    "@easyops-cn/docusaurus-search-local": "^0.52.2",
     "clsx": "^2.1.0",
     "prism-react-renderer": "^2.3.1"
   }
