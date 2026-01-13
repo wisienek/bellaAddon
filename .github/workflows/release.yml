@@ -6,6 +6,10 @@ on:
     branches:
       - master
       - main
+  pull_request:
+    branches:
+      - master
+      - main
 
 permissions:
   contents: write
@@ -135,7 +139,7 @@ jobs:
           echo "📝 Changelog generated"
 
       - name: Publish to GitHub & CurseForge
-        if: steps.check.outputs.should_release == 'true'
+        if: steps.check.outputs.should_release == 'true' && github.event_name != 'pull_request'
         uses: Kir-Antipov/mc-publish@v3
         with:
           # GitHub Release
@@ -175,8 +179,19 @@ jobs:
           retry-delay: 5000
           fail-mode: skip
 
+      - name: PR Build Summary
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "## 🔍 PR Build Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Build:** ✅ Successful" >> $GITHUB_STEP_SUMMARY
+          echo "**JAR:** ${{ steps.artifacts.outputs.jar_path }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⚠️ *Publishing skipped on PR - will release on merge to main/master*" >> $GITHUB_STEP_SUMMARY
+
       - name: Release summary
-        if: steps.check.outputs.should_release == 'true'
+        if: steps.check.outputs.should_release == 'true' && github.event_name != 'pull_request'
         run: |
           echo "## 🎉 Release Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
