@@ -27,7 +27,8 @@ gradle-local.properties
 docs/.docusaurus/
 docs/build/
 docs/.cache-loader/
-docs/package-lock.json
+# Keep package-lock.json for reproducible builds
+# docs/package-lock.json
 
 # Logs
 *.log
