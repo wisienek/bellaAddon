@@ -16,14 +16,6 @@ on:
     paths:
       - "docs/**"
       - ".github/workflows/docs.yml"
-      - ".github/workflows/docs.yml"
-  pull_request:
-    branches:
-      - master
-      - main
-    paths:
-      - "docs/**"
-      - ".github/workflows/docs.yml"
 
 permissions:
   contents: read
