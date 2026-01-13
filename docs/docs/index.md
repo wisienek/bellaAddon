@@ -14,7 +14,7 @@ BellaAddon is a helper plugin for BelorisRP servers (Spigot/Magma 1.20.1). It pr
 - Configuration: [Config files](configuration/config-files.md)
 - Commands: [Command reference](commands/overview.md)
 - Features: [Backpack](features/backpack.md), [Teleportation](features/teleportation.md), [Money/Bank](features/money.md), [Discord bot](features/discord-bot.md), [Item enchanting](features/item-enchanting.md)
-- API: [Overview](api/overview.md) and [JavaDoc](javadoc/index.html)
+- API: [Overview](api/overview.md)
 
 ## Key Features
 - OTP/ATP teleportation with cooldowns and visual effects

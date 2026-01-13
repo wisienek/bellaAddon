@@ -61,11 +61,6 @@ const sidebars = {
         'development/testing',
       ],
     },
-    {
-      type: 'link',
-      label: 'JavaDoc',
-      href: 'javadoc/index.html',
-    },
   ],
 };
 
