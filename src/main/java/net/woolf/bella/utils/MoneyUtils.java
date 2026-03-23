@@ -15,13 +15,12 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import net.woolf.bella.Main;
-import net.woolf.bella.types.MoneyType;
 
 public class MoneyUtils {
 
   @Deprecated
   public static final Set<String> moneyTypes = new HashSet<>(
-      Arrays.asList( "miedziak", "srebrnik", "złotnik" ) );
+      Arrays.asList( "koga", "loren", "auren" ) );
   private final Main plugin;
 
   public MoneyUtils(
@@ -88,7 +87,6 @@ public class MoneyUtils {
           + bank.getZ() );
 
     plugin.configManager.moneyConfig.set( "banks", locs );
-
     plugin.configManager.saveMoneyConfig();
     return true;
   }
@@ -123,7 +121,6 @@ public class MoneyUtils {
 
     plugin.configManager.moneyConfig.set( "banks", locs );
     plugin.configManager.saveMoneyConfig();
-
     return deleted;
   }
 
@@ -163,15 +160,13 @@ public class MoneyUtils {
     }
 
     Map<String, Long> money = new HashMap<>();
+    Long koga = plugin.configManager.moneyConfig.getLong( "personal." + uuid + ".koga" );
+    Long loren = plugin.configManager.moneyConfig.getLong( "personal." + uuid + ".loren" );
+    Long auren = plugin.configManager.moneyConfig.getLong( "personal." + uuid + ".auren" );
 
-    Long miedziak = plugin.configManager.moneyConfig.getLong( "personal." + uuid + ".miedziak" );
-    Long srebrnik = plugin.configManager.moneyConfig.getLong( "personal." + uuid + ".srebrnik" );
-    Long zlotnik = plugin.configManager.moneyConfig.getLong( "personal." + uuid + ".złotnik" );
-
-    money.put( "miedziak", miedziak );
-    money.put( "srebrnik", srebrnik );
-    money.put( "złotnik", zlotnik );
-
+    money.put( "koga", koga );
+    money.put( "loren", loren );
+    money.put( "auren", auren );
     return money;
   }
 
@@ -182,14 +177,13 @@ public class MoneyUtils {
         : ( (Player) player ).getUniqueId().toString();
     Map<String, Long> money = new HashMap<>();
 
-    Long miedziak = plugin.configManager.moneyConfig.getLong( "bank." + uuid + ".miedziak" );
-    Long srebrnik = plugin.configManager.moneyConfig.getLong( "bank." + uuid + ".srebrnik" );
-    Long zlotnik = plugin.configManager.moneyConfig.getLong( "bank." + uuid + ".złotnik" );
+    Long koga = plugin.configManager.moneyConfig.getLong( "bank." + uuid + ".koga" );
+    Long loren = plugin.configManager.moneyConfig.getLong( "bank." + uuid + ".loren" );
+    Long auren = plugin.configManager.moneyConfig.getLong( "bank." + uuid + ".auren" );
 
-    money.put( "miedziak", miedziak );
-    money.put( "srebrnik", srebrnik );
-    money.put( "złotnik", zlotnik );
-
+    money.put( "koga", koga );
+    money.put( "loren", loren );
+    money.put( "auren", auren );
     return money;
   }
 
@@ -200,10 +194,8 @@ public class MoneyUtils {
   ) {
     if ( uuid == null || !moneyTypes.contains( type ) || ammount == null )
       return false;
-
     plugin.configManager.moneyConfig.set( "personal." + uuid + "." + type, ammount );
     plugin.configManager.saveMoneyConfig();
-
     return true;
   }
 
@@ -214,10 +206,8 @@ public class MoneyUtils {
   ) {
     if ( uuid == null || !moneyTypes.contains( type ) || ammount == null )
       return false;
-
     plugin.configManager.moneyConfig.set( "bank." + uuid + "." + type, ammount );
     plugin.configManager.saveMoneyConfig();
-
     return true;
   }
 
@@ -296,10 +286,6 @@ public class MoneyUtils {
     plugin.configManager.moneyConfig
         .set( "personal." + uuid2 + "." + type, targetmoney.get( type ) + ammount );
     plugin.configManager.saveMoneyConfig();
-
-    // updateMoneyScore(uuid1);
-    // updateMoneyScore(uuid2);
-
     return true;
   }
 
@@ -330,7 +316,6 @@ public class MoneyUtils {
     plugin.configManager.moneyConfig
         .set( "bank." + uuid2 + "." + type, targetmoney.get( type ) + ammount );
     plugin.configManager.saveMoneyConfig();
-
     return true;
   }
 
@@ -350,11 +335,9 @@ public class MoneyUtils {
       return false;
 
     Double converted = 1.0 / conv;
-
     plugin.configManager.moneyConfig.set( "conversion." + from + "." + to, conv );
     plugin.configManager.moneyConfig.set( "conversion." + to + "." + from, converted );
     plugin.configManager.saveMoneyConfig();
-
     return true;
   }
 
@@ -364,9 +347,9 @@ public class MoneyUtils {
       Integer amount
   ) {
     Map<String, Long> targetMoney = this.getMoney( uuid );
-
-    Long hasAmount = targetMoney.get( type );
-
+    if ( targetMoney == null )
+      return false;
+    long hasAmount = targetMoney.getOrDefault( type, 0L );
     return hasAmount - amount >= 0;
   }
 
@@ -376,11 +359,11 @@ public class MoneyUtils {
       Integer amount
   ) {
     Map<String, Long> targetMoney = this.getMoney( uuid );
-
-    Long hasAmount = targetMoney.get( type );
-    Long after = hasAmount - amount;
+    if ( targetMoney == null )
+      return 0L;
+    long hasAmount = targetMoney.getOrDefault( type, 0L );
+    long after = hasAmount - amount;
     this.plugin.mutils.setMoney( uuid, type, after );
-
     return after;
   }
 
@@ -390,11 +373,69 @@ public class MoneyUtils {
       Integer amount
   ) {
     Map<String, Long> targetMoney = this.getMoney( uuid );
-
-    Long hasAmount = targetMoney.get( type );
-    Long after = hasAmount + amount;
+    if ( targetMoney == null )
+      return (long) amount;
+    long hasAmount = targetMoney.getOrDefault( type, 0L );
+    long after = hasAmount + amount;
     this.plugin.mutils.setMoney( uuid, type, after );
-
     return after;
+  }
+
+  public boolean trySpendWithConversion(
+      String uuid,
+      String type,
+      long amount
+  ) {
+    if ( amount <= 0 )
+      return true;
+
+    Map<String, Long> purse = getMoney( uuid );
+    long direct = purse.getOrDefault( type, 0L );
+
+    if ( direct >= amount ) {
+      setMoney( uuid, type, direct - amount );
+      return true;
+    }
+
+    Map<String, Long> working = new HashMap<>();
+    for ( String t : moneyTypes )
+      working.put( t, purse.getOrDefault( t, 0L ) );
+
+    long deficit = amount - working.getOrDefault( type, 0L );
+    working.put( type, 0L );
+
+    String[] spendOrder = { "auren", "loren", "koga" };
+    for ( String other : spendOrder ) {
+      if ( other.equals( type ) || deficit <= 0 )
+        continue;
+
+      Double convRate = getConversion( other, type );
+      if ( convRate == null || convRate <= 0 )
+        continue;
+
+      long haveOther = working.getOrDefault( other, 0L );
+      if ( haveOther <= 0 )
+        continue;
+
+      long canGet = (long) ( haveOther / convRate );
+      if ( canGet <= 0 )
+        continue;
+
+      long toGet = Math.min( canGet, deficit );
+      long toSpend = (long) Math.ceil( toGet * convRate );
+      toSpend = Math.min( toSpend, haveOther );
+      long actualGet = (long) ( toSpend / convRate );
+
+      working.put( other, haveOther - toSpend );
+      deficit -= actualGet;
+    }
+
+    if ( deficit > 0 )
+      return false;
+
+    for ( Map.Entry<String, Long> e : working.entrySet() )
+      setMoney( uuid, e.getKey(), e.getValue() );
+
+    return true;
   }
 }

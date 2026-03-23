@@ -2,7 +2,7 @@ package net.woolf.bella.types;
 
 public enum MoneyType {
 
-  MIEDZIAK("miedziak"), SREBRNIK("srebrnik"), ZLOTNIK("złotnik");
+  KOGA("koga"), LOREN("loren"), AUREN("auren");
 
   private final String name;
 

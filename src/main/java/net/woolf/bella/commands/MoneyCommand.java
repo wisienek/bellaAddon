@@ -55,9 +55,9 @@ public class MoneyCommand implements CommandExecutor {
 
       if ( args.length == 0 ) {
         player.sendMessage( Main.prefixInfo + "Twoje pieniążki w portfelu: \n" + ChatColor.RED
-            + "Miedziaki : " + money.get( "miedziak" ) + "\n" + ChatColor.GRAY + "Srebrniki : "
-            + money.get( "srebrnik" ) + "\n" + ChatColor.YELLOW + "Złotniki : "
-            + money.get( "złotnik" ) );
+            + "Koga : " + money.get( "koga" ) + "\n" + ChatColor.GRAY + "Loren : "
+            + money.get( "loren" ) + "\n" + ChatColor.YELLOW + "Auren : "
+            + money.get( "auren" ) );
         return true;
       }
 
@@ -107,17 +107,17 @@ public class MoneyCommand implements CommandExecutor {
           Map<String, Long> targetMoney = plugin.mutils.getMoney( uuid );
 
           player.sendMessage( Main.prefixInfo + "Pieniążki gracza" + to + ": \n" + ChatColor.RED
-              + "Miedziaki : " + targetMoney.get( "miedziak" ) + "\n" + ChatColor.GRAY
-              + "Srebrniki : " + targetMoney.get( "srebrnik" ) + "\n" + ChatColor.YELLOW
-              + "Złotniki : " + targetMoney.get( "złotnik" ) );
+              + "Koga : " + targetMoney.get( "koga" ) + "\n" + ChatColor.GRAY
+              + "Loren : " + targetMoney.get( "loren" ) + "\n" + ChatColor.YELLOW
+              + "Auren : " + targetMoney.get( "auren" ) );
           return true;
         }
 
         case "pokaz": {
           target.sendMessage( Main.prefixInfo + "Pieniążki " + ChatColor.GREEN + player.getName()
-              + " : \n" + ChatColor.WHITE + "Miedziaki : " + money.get( "miedziak" ) + "\n"
-              + ChatColor.GRAY + "Srebrniki : " + money.get( "srebrnik" ) + "\n" + ChatColor.YELLOW
-              + "Złotniki : " + money.get( "złotnik" ) );
+              + " : \n" + ChatColor.WHITE + "Koga : " + money.get( "koga" ) + "\n"
+              + ChatColor.GRAY + "Loren : " + money.get( "loren" ) + "\n" + ChatColor.YELLOW
+              + "Auren : " + money.get( "auren" ) );
 
           player.sendMessage( Main.prefixInfo + "Pokazano portfel dla gracza " + ChatColor.GREEN
               + target.getName() );

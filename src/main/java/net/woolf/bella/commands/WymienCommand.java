@@ -32,7 +32,7 @@ public class WymienCommand implements CommandExecutor {
 
   public String getUsage() {
     return Main.prefixInfo + "Użycie komendy: /wymien <typ> <ilość>\n"
-        + "Typ - miedziak | złotnik | srebrnik\n" + "Ilość - Liczba naturalna";
+        + "Typ - koga | auren | loren\n" + "Ilość - Liczba naturalna";
   }
 
   @Override
@@ -115,13 +115,13 @@ public class WymienCommand implements CommandExecutor {
       String type
   ) {
     switch ( type ) {
-      case "złotnik":
+      case "auren":
         return 6571;
 
-      case "srebrnik":
+      case "loren":
         return 6570;
 
-      case "miedziak":
+      case "koga":
         return 6569;
     }
 
@@ -132,14 +132,14 @@ public class WymienCommand implements CommandExecutor {
       String type
   ) {
     switch ( type ) {
-      case "złotnik":
-        return ChatColor.YELLOW + "Złotnik";
+      case "auren":
+        return ChatColor.YELLOW + "Auren";
 
-      case "srebrnik":
-        return ChatColor.BLUE + "Srebrnik";
+      case "loren":
+        return ChatColor.BLUE + "Loren";
 
-      case "miedziak":
-        return ChatColor.GOLD + "Miedziak";
+      case "koga":
+        return ChatColor.GOLD + "Koga";
     }
 
     return "NIEPOPRAWNY TYP";
@@ -149,7 +149,7 @@ public class WymienCommand implements CommandExecutor {
       String type
   ) {
     switch ( type ) {
-      case "złotnik":
+      case "auren":
         return Arrays.asList( ChatColor.YELLOW + "[Wizualia:]", ChatColor.DARK_GRAY
             + "Moneta będąca aktualną walutą najwyższej wartości na Koris. Wykonana została z "
             + "nieznanego złotawego stopu metali o kolorze blado-złotym. Moneta nie ulega korozji. Jej średnica to "
@@ -158,7 +158,7 @@ public class WymienCommand implements CommandExecutor {
                     + "[Jakość:] Bardzo dobra [5/5]", ChatColor.YELLOW + "[Narrator wydający:] "
                         + ChatColor.RED + "Konsola" );
 
-      case "srebrnik":
+      case "loren":
         return Arrays.asList( ChatColor.BLUE + "[Wizualia:]", ChatColor.DARK_GRAY
             + "Moneta będąca aktualną walutą średniej wartości na Koris. Wykonana została z "
             + "nieznanego srebrzystego stopu metali o kolorze blado-srebrnym. Moneta nie ulega korozji. Jej "
@@ -167,7 +167,7 @@ public class WymienCommand implements CommandExecutor {
                     + "[Jakość:] Bardzo dobra [5/5]", ChatColor.BLUE + "[Narrator wydający:] "
                         + ChatColor.RED + "Konsola" );
 
-      case "miedziak":
+      case "koga":
         return Arrays.asList( ChatColor.GOLD + "[Wizualia:]", ChatColor.DARK_GRAY
             + "Moneta będąca aktualną walutą najniższej wartości na Koris. Wykonana została z "
             + "nieznanego stopu o kolorze miedzianym, który z czasem pokrywa się patyną. Jej średnica to 16,5 mm i "

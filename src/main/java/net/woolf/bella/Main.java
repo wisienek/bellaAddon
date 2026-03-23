@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.logging.Logger;
 
 import net.luckperms.api.LuckPerms;
+import net.woolf.bella.bridge.BridgeRegistrar;
 import net.woolf.bella.events.ArmorListener;
 import net.woolf.bella.events.ArmourEquipEventListener;
 import org.bukkit.Bukkit;
@@ -71,6 +72,8 @@ public class Main extends JavaPlugin {
     } else {
       this.logger.info( "No LP API!" );
     }
+
+    BridgeRegistrar.register( this );
 
     try {
       DbUtils.getInstance();

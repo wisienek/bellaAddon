@@ -69,9 +69,9 @@ public class BankCommand implements DiscordCommand {
             case "sprawdz":
                 event.reply( "Gracz " + playerName + " " + "Ma w "
                         + ( isBank ? "banku" : "portfelu" ) + ": \n" + "- **"
-                        + money.get( "miedziak" ) + "** Miedziaków \n" + "- **"
-                        + money.get( "srebrnik" ) + "** Srebrników \n" + "- **"
-                        + money.get( "złotnik" ) + "** Złotników \n" ).queue();
+                        + money.get( "koga" ) + "** Koga \n" + "- **"
+                        + money.get( "loren" ) + "** Loren \n" + "- **"
+                        + money.get( "auren" ) + "** Auren \n" ).queue();
                 return;
 
             case "dodaj": {
