@@ -89,8 +89,8 @@ public class Bot {
     ArrayList<OptionData> moneyInfo = new ArrayList<>();
     moneyInfo.add( new OptionData( OptionType.INTEGER, "ile", "Ile kasy dodać graczowi", true ) );
     moneyInfo.add( new OptionData( OptionType.STRING, "typ", "Typ pieniążka", true )
-        .addChoices( new Choice( "Miedziak", "miedziak" ), new Choice( "Srebrnik",
-            "srebrnik" ), new Choice( "Złotnik", "złotnik" ) ) );
+        .addChoices( new Choice( "Koga", "koga" ), new Choice( "Loren",
+            "loren" ), new Choice( "Auren", "auren" ) ) );
 
     OptionData narrText = new OptionData( OptionType.STRING, "text", "Text narracji", true );
 

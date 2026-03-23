@@ -73,9 +73,9 @@ public class BankCommand implements CommandExecutor {
 
       if ( args.length == 0 ) {
         player.sendMessage( Main.prefixInfo + "Twoje pieniążki w banku: \n" + ChatColor.WHITE
-            + "Miedziaki : " + bankMoney.get( "miedziak" ) + "\n" + ChatColor.GRAY + "Srebrniki : "
-            + bankMoney.get( "srebrnik" ) + "\n" + ChatColor.YELLOW + "Złotniki : "
-            + bankMoney.get( "złotnik" ) );
+            + "Koga : " + bankMoney.get( "koga" ) + "\n" + ChatColor.GRAY + "Loren : "
+            + bankMoney.get( "loren" ) + "\n" + ChatColor.YELLOW + "Auren : "
+            + bankMoney.get( "auren" ) );
         return true;
       }
 
@@ -92,9 +92,9 @@ public class BankCommand implements CommandExecutor {
 
           Map<String, Long> targetBankMoney = plugin.mutils.getBankMoney( uuid );
           player.sendMessage( Main.prefixInfo + "Stan banku dla gracza " + type + ": \n"
-              + ChatColor.WHITE + "Miedziaki : " + targetBankMoney.get( "miedziak" ) + "\n"
-              + ChatColor.GRAY + "Srebrniki : " + targetBankMoney.get( "srebrnik" ) + "\n"
-              + ChatColor.YELLOW + "Złotniki : " + targetBankMoney.get( "złotnik" ) );
+              + ChatColor.WHITE + "Koga : " + targetBankMoney.get( "koga" ) + "\n"
+              + ChatColor.GRAY + "Loren : " + targetBankMoney.get( "loren" ) + "\n"
+              + ChatColor.YELLOW + "Auren : " + targetBankMoney.get( "auren" ) );
           return true;
         }
 

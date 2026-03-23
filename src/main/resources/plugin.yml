@@ -60,6 +60,9 @@ commands:
   slap:
     description: Daje slapa wymienionej osobie
     usage: /slap <playerName>
+  bridge:
+    description: Test bridge status (mod–plugin)
+    usage: /bridge
 
 permissions:
   beloris.bank.admin:

@@ -38,5 +38,6 @@ public final class CommandManager {
     new ListCommand();
     new WymienCommand();
     new SlapCommand();
+    new BridgeCommand( instance );
   }
 }
