@@ -5,9 +5,15 @@ import java.util.UUID;
 
 public interface IPermissionBridge {
 
-    boolean hasPermission(UUID playerUuid, String permission);
+    default boolean hasPermission(UUID playerUuid, String permission) {
+        throw new UnsupportedOperationException("Permission bridge method hasPermission is not implemented.");
+    }
 
-    String getPrimaryGroup(UUID playerUuid);
+    default String getPrimaryGroup(UUID playerUuid) {
+        throw new UnsupportedOperationException("Permission bridge method getPrimaryGroup is not implemented.");
+    }
 
-    List<String> getGroups(UUID playerUuid);
+    default List<String> getGroups(UUID playerUuid) {
+        throw new UnsupportedOperationException("Permission bridge method getGroups is not implemented.");
+    }
 }
