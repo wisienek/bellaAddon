@@ -4,15 +4,27 @@ import java.util.UUID;
 
 public interface IEconomyBridge {
 
-    double getBalance(UUID playerUuid, String currencyType);
+    default double getBalance(UUID playerUuid, String currencyType) {
+        throw new UnsupportedOperationException("Economy bridge method getBalance is not implemented.");
+    }
 
-    boolean withdraw(UUID playerUuid, String currencyType, double amount);
+    default boolean withdraw(UUID playerUuid, String currencyType, double amount) {
+        throw new UnsupportedOperationException("Economy bridge method withdraw is not implemented.");
+    }
 
-    boolean deposit(UUID playerUuid, String currencyType, double amount);
+    default boolean deposit(UUID playerUuid, String currencyType, double amount) {
+        throw new UnsupportedOperationException("Economy bridge method deposit is not implemented.");
+    }
 
-    boolean has(UUID playerUuid, String currencyType, double amount);
+    default boolean has(UUID playerUuid, String currencyType, double amount) {
+        throw new UnsupportedOperationException("Economy bridge method has is not implemented.");
+    }
 
-    double getConversion(String fromCurrency, String toCurrency);
+    default double getConversion(String fromCurrency, String toCurrency) {
+        throw new UnsupportedOperationException("Economy conversion bridge is not implemented.");
+    }
 
-    String getCurrencyName(String currencyType);
+    default String getCurrencyName(String currencyType) {
+        throw new UnsupportedOperationException("Economy bridge method getCurrencyName is not implemented.");
+    }
 }

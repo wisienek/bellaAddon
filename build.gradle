@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'net.woolf.belladdon'
-version = '1.3.5'
+version = '1.3.6'
 base.archivesName = 'belladdon'
 
 java {
@@ -173,5 +173,37 @@ tasks.register('downloadDependencies') {
 build {
     dependsOn shadowJar
     dependsOn javadoc
+}
+
+def runningOnCi = System.getenv('CI')?.toBoolean() ?: false
+def isWindows = System.getProperty('os.name').toLowerCase().contains('windows')
+def serverDirPath = (findProperty('localServerDir') ?: (isWindows ? "C:/Users/x/Desktop/bv2" : null))
+def serverPluginsDirPath = serverDirPath ? "${serverDirPath}/plugins" : null
+
+tasks.register('copyToServerPlugins') {
+    dependsOn shadowJar
+    doLast {
+        if (!serverPluginsDirPath) {
+            println "Skipping copyToServerPlugins: local server path is not configured for this environment."
+            return
+        }
+
+        def jarFile = file("${buildDir}/libs/${base.archivesName.get()}-${version}.jar")
+        if (!jarFile.exists()) {
+            println "Warning: JAR file not found at ${jarFile}"
+            return
+        }
+
+        def serverPluginsDir = file(serverPluginsDirPath)
+        serverPluginsDir.mkdirs()
+        copy { from jarFile; into serverPluginsDir }
+        println "Copied ${jarFile.name} to server plugins"
+    }
+}
+
+if (!runningOnCi && serverPluginsDirPath) {
+    tasks.named('build').configure {
+        finalizedBy 'copyToServerPlugins'
+    }
 }
 
